@@ -4,7 +4,7 @@
 
 <p align="center">
   <strong>Wireframes your coding agent can actually build.</strong><br>
-  Plain HTML + Pico + Alpine prototypes — no build step, no framework, deployable to GitHub Pages.
+  Plain HTML + Pico + Alpine single-screen wireframes or linked prototypes — no build step, no framework, deployable to GitHub Pages.
 </p>
 
 <p align="center">
@@ -13,7 +13,7 @@
 
 ---
 
-Hand a coding agent a vague "make me a billing dashboard" and it tends to reach for React, a bundler, and an afternoon of setup. Draftpine removes that temptation. It's a small, opinionated workspace that gives the agent strict rules, reusable screen patterns, finished examples, and a checker that tells it exactly what to fix — so you get a throwaway prototype in one pass, not a half-built app.
+Hand a coding agent a vague "make me a billing dashboard" and it tends to reach for React, a bundler, and an afternoon of setup. Draftpine removes that temptation. It's a small, opinionated workspace that gives the agent strict rules, reusable screen patterns, finished examples, and a checker that tells it exactly what to fix — so you get a throwaway wireframe or browsable static prototype in one pass, not a half-built app.
 
 You bring the product idea. Draftpine handles the guardrails.
 
@@ -44,7 +44,7 @@ Interactions:  tabs, modal, filter invoices
 Skip:          auth, backend calls, real chart library
 ```
 
-The agent assembles a screen-specific pattern recipe, edits the four root files, and loops on the checker until it passes. Refine, add screens, or ask it to deploy when you're happy.
+The agent assembles a screen-specific pattern recipe, chooses single-screen or browsable mode, edits the static files, and loops on the checker until it passes. Refine, add screens, or ask it to deploy when you're happy.
 
 ## How it works
 
@@ -52,14 +52,15 @@ The agent assembles a screen-specific pattern recipe, edits the four root files,
 your prompt
   → agent reads AGENTS.md            (the rules)
   → agent chooses patterns/          (a screen-specific recipe)
+  → agent chooses prototype mode     (single-screen or browsable)
   → agent may inspect examples/      (finished reference screens)
-  → agent edits index.html, styles.css, app.js, draftpine.config.json
+  → agent edits static HTML/CSS/JS plus draftpine.config.json
   → python3 scripts/check.py --json  (structured pass/fail + fixes)
   → agent loops until status: pass
   → deploy to GitHub Pages           (only when you ask)
 ```
 
-Only `index.html`, `styles.css`, `app.js`, and `draftpine.config.json` change per screen. Everything else is the kit.
+For single-screen exploration, only `index.html`, `styles.css`, `app.js`, and `draftpine.config.json` change. For browsable prototypes, `/` stays the homepage and additional pages live in route folders such as `pricing/index.html` or `compare/steel-vs-browserbase/index.html`.
 
 ## Preview locally
 
@@ -109,7 +110,7 @@ Ask the agent to deploy, and it runs:
 python3 scripts/deploy_pages.py --branch main --path /
 ```
 
-The script refuses to publish unless `git`, `gh`, GitHub auth, an `origin` remote, and a passing check are all in place, then enables or updates Pages and prints the live URL. If the working tree is dirty, it only auto-commits the root wireframe files (`index.html`, `styles.css`, `app.js`, and `draftpine.config.json`) and asks you to handle unrelated files first.
+The script refuses to publish unless `git`, `gh`, GitHub auth, an `origin` remote, and a passing check are all in place, then enables or updates Pages and prints the live URL. If the working tree is dirty, it only auto-commits the root wireframe files plus configured route HTML and JSON content files from `draftpine.config.json`, and asks you to handle unrelated files first.
 
 ## Stack rules
 
@@ -131,6 +132,58 @@ Lightweight `data-draftpine-*` attributes let the checker judge intent without p
 ```
 
 Which states and interactions are required is declared in `draftpine.config.json`.
+
+## Single-Screen Or Browsable
+
+Draftpine supports two prototype modes:
+
+| Mode | Use it when | File behavior |
+| --- | --- | --- |
+| `single-screen` | You are exploring one disposable screen. | The root files hold the current screen. |
+| `browsable` | You are building a website, app flow, IA, or multiple connected screens. | Keep `/` as home, add route folders, and wire real links. |
+
+Browsable prototypes declare routes in `draftpine.config.json`:
+
+```json
+{
+  "prototypeMode": "browsable",
+  "routes": [
+    { "path": "/", "title": "Home", "file": "index.html" },
+    { "path": "/compare/steel-vs-browserbase/", "title": "Steel vs Browserbase", "file": "compare/steel-vs-browserbase/index.html" }
+  ]
+}
+```
+
+The checker verifies that route files exist and that non-home routes are linked from the configured pages.
+
+## JSON Content Mode
+
+Draftpine can keep layout and copy separate. Use `contentMode: "json"` when a prototype has real IA copy, repeated pages, comparison data, pricing tables, or content that should be reviewed without touching markup.
+
+```json
+{
+  "contentMode": "json",
+  "contentFiles": [
+    "content/site.json",
+    "content/pages/home.json",
+    "content/pages/compare-steel-browserbase.json"
+  ]
+}
+```
+
+Layouts can load those files with literal local static fetches:
+
+```js
+async function loadHomeContent() {
+  const response = await fetch("./content/pages/home.json");
+  if (!response.ok) throw new Error("Missing content: ./content/pages/home.json");
+  return response.json();
+}
+```
+
+GitHub Pages serves JSON files normally, and `python3 -m http.server 5173` does too. Directly opening `index.html` from the filesystem may not load JSON because browsers block local file fetches.
+
+The checker allows local `.json` fetches and still blocks remote/backend fetches.
 
 ## Patterns And Examples
 
@@ -161,6 +214,7 @@ The old full-screen starters live in `examples/`. They are reference screens, no
 ```text
 AGENTS.md            agent contract (read first); CLAUDE.md mirrors it for Claude Code
 index.html · styles.css · app.js · draftpine.config.json   the wireframe you edit
+route folders        optional browsable pages, e.g. compare/steel-vs-browserbase/index.html
 scripts/             check.py (the checker) · deploy_pages.py (Pages publish)
 tests/               stdlib unit tests for the checker
 patterns/            reusable screen patterns agents compose from

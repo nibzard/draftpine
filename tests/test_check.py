@@ -175,6 +175,191 @@ class ConfigValidationTests(unittest.TestCase):
         self.assertEqual(result["status"], "pass")
         self.assertIn("config.deprecated-template", rules_for(result, "config.deprecated-template"))
 
+    def test_browsable_mode_requires_routes(self) -> None:
+        scaffold_project(self.tmp)
+        (self.tmp / "draftpine.config.json").write_text(
+            """{
+  "screen": "Test",
+  "audience": "tester",
+  "userGoal": "verify",
+  "primaryAction": "Go",
+  "prototypeMode": "browsable",
+  "requiredStates": [],
+  "requiredInteractions": []
+}
+""",
+            encoding="utf-8",
+        )
+        result = check.check_project()
+        self.assertEqual(result["status"], "fail")
+        self.assertIn("config.routes-required", rules_for(result, "config.routes-required"))
+
+    def test_configured_route_file_must_exist(self) -> None:
+        scaffold_project(self.tmp)
+        (self.tmp / "draftpine.config.json").write_text(
+            """{
+  "screen": "Test",
+  "audience": "tester",
+  "userGoal": "verify",
+  "primaryAction": "Go",
+  "prototypeMode": "browsable",
+  "requiredStates": [],
+  "requiredInteractions": [],
+  "routes": [
+    { "path": "/", "title": "Home", "file": "index.html" },
+    { "path": "/pricing/", "title": "Pricing", "file": "pricing/index.html" }
+  ]
+}
+""",
+            encoding="utf-8",
+        )
+        result = check.check_project()
+        self.assertEqual(result["status"], "fail")
+        self.assertIn("route.file-missing./pricing/", rules_for(result, "route.file-missing"))
+
+    def test_configured_route_must_be_linked(self) -> None:
+        scaffold_project(self.tmp)
+        route_dir = self.tmp / "pricing"
+        route_dir.mkdir()
+        (route_dir / "index.html").write_text("<main><a href=\"../\">Home</a></main>", encoding="utf-8")
+        (self.tmp / "draftpine.config.json").write_text(
+            """{
+  "screen": "Test",
+  "audience": "tester",
+  "userGoal": "verify",
+  "primaryAction": "Go",
+  "prototypeMode": "browsable",
+  "requiredStates": [],
+  "requiredInteractions": [],
+  "routes": [
+    { "path": "/", "title": "Home", "file": "index.html" },
+    { "path": "/pricing/", "title": "Pricing", "file": "pricing/index.html" }
+  ]
+}
+""",
+            encoding="utf-8",
+        )
+        result = check.check_project()
+        self.assertEqual(result["status"], "fail")
+        self.assertIn("route.linked./pricing/", rules_for(result, "route.linked"))
+
+    def test_linked_browsable_route_passes(self) -> None:
+        scaffold_project(self.tmp)
+        html_path = self.tmp / "index.html"
+        html_path.write_text(
+            html_path.read_text(encoding="utf-8").replace(
+                "</main>",
+                '<a href="./pricing/">Pricing</a></main>',
+            ),
+            encoding="utf-8",
+        )
+        route_dir = self.tmp / "pricing"
+        route_dir.mkdir()
+        (route_dir / "index.html").write_text("<main><a href=\"../\">Home</a></main>", encoding="utf-8")
+        (self.tmp / "draftpine.config.json").write_text(
+            """{
+  "screen": "Test",
+  "audience": "tester",
+  "userGoal": "verify",
+  "primaryAction": "Go",
+  "prototypeMode": "browsable",
+  "requiredStates": [],
+  "requiredInteractions": [],
+  "routes": [
+    { "path": "/", "title": "Home", "file": "index.html" },
+    { "path": "/pricing/", "title": "Pricing", "file": "pricing/index.html" }
+  ]
+}
+""",
+            encoding="utf-8",
+        )
+        result = check.check_project()
+        self.assertEqual(result["status"], "pass", result["next_actions"])
+
+    def test_json_content_mode_requires_declared_content_files(self) -> None:
+        scaffold_project(self.tmp)
+        (self.tmp / "draftpine.config.json").write_text(
+            """{
+  "screen": "Test",
+  "audience": "tester",
+  "userGoal": "verify",
+  "primaryAction": "Go",
+  "contentMode": "json",
+  "requiredStates": [],
+  "requiredInteractions": []
+}
+""",
+            encoding="utf-8",
+        )
+        result = check.check_project()
+        self.assertEqual(result["status"], "fail")
+        self.assertIn("config.field.contentFiles", rules_for(result, "config.field.contentFiles"))
+
+    def test_json_content_file_must_exist(self) -> None:
+        scaffold_project(self.tmp)
+        (self.tmp / "draftpine.config.json").write_text(
+            """{
+  "screen": "Test",
+  "audience": "tester",
+  "userGoal": "verify",
+  "primaryAction": "Go",
+  "contentMode": "json",
+  "contentFiles": ["content/pages/home.json"],
+  "requiredStates": [],
+  "requiredInteractions": []
+}
+""",
+            encoding="utf-8",
+        )
+        result = check.check_project()
+        self.assertEqual(result["status"], "fail")
+        self.assertIn("content.file-missing.content/pages/home.json", rules_for(result, "content.file-missing"))
+
+    def test_json_content_file_must_be_valid_json(self) -> None:
+        scaffold_project(self.tmp)
+        content_dir = self.tmp / "content" / "pages"
+        content_dir.mkdir(parents=True)
+        (content_dir / "home.json").write_text("{ nope", encoding="utf-8")
+        (self.tmp / "draftpine.config.json").write_text(
+            """{
+  "screen": "Test",
+  "audience": "tester",
+  "userGoal": "verify",
+  "primaryAction": "Go",
+  "contentMode": "json",
+  "contentFiles": ["content/pages/home.json"],
+  "requiredStates": [],
+  "requiredInteractions": []
+}
+""",
+            encoding="utf-8",
+        )
+        result = check.check_project()
+        self.assertEqual(result["status"], "fail")
+        self.assertIn("content.valid-json.content/pages/home.json", rules_for(result, "content.valid-json"))
+
+    def test_json_content_file_passes_when_present_and_valid(self) -> None:
+        scaffold_project(self.tmp)
+        content_dir = self.tmp / "content" / "pages"
+        content_dir.mkdir(parents=True)
+        (content_dir / "home.json").write_text('{"title": "Home"}', encoding="utf-8")
+        (self.tmp / "draftpine.config.json").write_text(
+            """{
+  "screen": "Test",
+  "audience": "tester",
+  "userGoal": "verify",
+  "primaryAction": "Go",
+  "contentMode": "json",
+  "contentFiles": ["content/pages/home.json"],
+  "requiredStates": [],
+  "requiredInteractions": []
+}
+""",
+            encoding="utf-8",
+        )
+        result = check.check_project()
+        self.assertEqual(result["status"], "pass", result["next_actions"])
+
 
 class CdnValidationTests(unittest.TestCase):
     def setUp(self) -> None:
@@ -205,6 +390,57 @@ class CdnValidationTests(unittest.TestCase):
         self.assertEqual(result["status"], "fail")
         self.assertIn("pico.required", rules_for(result, "pico.required"))
         self.assertIn("alpine.required", rules_for(result, "alpine.required"))
+
+
+class FetchValidationTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self._saved_root = check.ROOT
+        self._tmpdir = tempfile.TemporaryDirectory()
+        self.tmp = Path(self._tmpdir.name)
+        check.ROOT = self.tmp
+
+    def tearDown(self) -> None:
+        check.ROOT = self._saved_root
+        self._tmpdir.cleanup()
+
+    def test_local_static_json_fetch_is_allowed(self) -> None:
+        scaffold_project(self.tmp)
+        (self.tmp / "app.js").write_text(
+            'async function app() { return fetch("./content/pages/home.json"); }\n',
+            encoding="utf-8",
+        )
+        result = check.check_project()
+        self.assertEqual(result["status"], "pass", result["next_actions"])
+
+    def test_remote_fetch_is_blocked(self) -> None:
+        scaffold_project(self.tmp)
+        (self.tmp / "app.js").write_text(
+            'async function app() { return fetch("https://example.com/content.json"); }\n',
+            encoding="utf-8",
+        )
+        result = check.check_project()
+        self.assertEqual(result["status"], "fail")
+        self.assertIn("runtime.no-backend-calls.fetch", rules_for(result, "runtime.no-backend-calls.fetch"))
+
+    def test_non_json_fetch_is_blocked(self) -> None:
+        scaffold_project(self.tmp)
+        (self.tmp / "app.js").write_text(
+            'async function app() { return fetch("./api/users"); }\n',
+            encoding="utf-8",
+        )
+        result = check.check_project()
+        self.assertEqual(result["status"], "fail")
+        self.assertIn("runtime.no-backend-calls.fetch", rules_for(result, "runtime.no-backend-calls.fetch"))
+
+    def test_dynamic_fetch_is_blocked(self) -> None:
+        scaffold_project(self.tmp)
+        (self.tmp / "app.js").write_text(
+            'async function app(path) { return fetch(path); }\n',
+            encoding="utf-8",
+        )
+        result = check.check_project()
+        self.assertEqual(result["status"], "fail")
+        self.assertIn("runtime.no-backend-calls.fetch", rules_for(result, "runtime.no-backend-calls.fetch"))
 
 
 class AccessibilityParsingTests(unittest.TestCase):

@@ -175,7 +175,7 @@ When the user gives an informal prompt, internally normalize it to:
 
 A Draftpine wireframe is acceptable when:
 
-- `index.html` opens directly or through `python3 -m http.server 5173`.
+- `index.html` opens directly for inline content mode, or through `python3 -m http.server 5173` for JSON content mode.
 - The screen has a clear title, target user context, and primary action.
 - Fake data is realistic enough to support product thinking.
 - Empty, error, warning, and success states exist when they change the flow.

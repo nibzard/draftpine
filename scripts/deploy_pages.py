@@ -8,6 +8,7 @@ import json
 import shutil
 import subprocess
 import sys
+from pathlib import Path
 
 
 DEPLOY_FILES = ["index.html", "styles.css", "app.js", "draftpine.config.json"]
@@ -38,10 +39,52 @@ def parse_status_paths(status: str) -> list[str]:
     return paths
 
 
-def split_deploy_status(paths: list[str]) -> tuple[list[str], list[str]]:
-    deploy_files = [path for path in paths if path in DEPLOY_FILES]
-    other_files = [path for path in paths if path not in DEPLOY_FILES]
-    return deploy_files, other_files
+def load_deploy_files(root: Path = Path(".")) -> list[str]:
+    deploy_files = list(DEPLOY_FILES)
+    config_path = root / "draftpine.config.json"
+    if not config_path.exists():
+        return deploy_files
+
+    try:
+        config = json.loads(config_path.read_text(encoding="utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return deploy_files
+
+    routes = config.get("routes")
+    if isinstance(routes, list):
+        for route in routes:
+            if not isinstance(route, dict):
+                continue
+            file = route.get("file")
+            if (
+                isinstance(file, str)
+                and file.endswith(".html")
+                and not file.startswith("/")
+                and ".." not in Path(file).parts
+                and file not in deploy_files
+            ):
+                deploy_files.append(file)
+
+    content_files = config.get("contentFiles")
+    if isinstance(content_files, list):
+        for file in content_files:
+            if (
+                isinstance(file, str)
+                and file.endswith(".json")
+                and not file.startswith("/")
+                and ".." not in Path(file).parts
+                and file not in deploy_files
+            ):
+                deploy_files.append(file)
+
+    return deploy_files
+
+
+def split_deploy_status(paths: list[str], deploy_files: list[str] | None = None) -> tuple[list[str], list[str]]:
+    allowed = set(deploy_files or DEPLOY_FILES)
+    deploy_files_found = [path for path in paths if path in allowed]
+    other_files = [path for path in paths if path not in allowed]
+    return deploy_files_found, other_files
 
 
 def main() -> int:
@@ -107,13 +150,13 @@ def main() -> int:
     committed_files: list[str] = []
     if status:
         paths = parse_status_paths(status)
-        committed_files, other_files = split_deploy_status(paths)
+        committed_files, other_files = split_deploy_status(paths, load_deploy_files())
         if other_files:
             print(json.dumps({
                 "status": "fail",
                 "message": "Refusing to deploy with unrelated dirty files.",
                 "dirty_files": other_files,
-                "suggested_fix": "Commit, stash, or remove unrelated files before deploying. The deploy script only auto-commits Draftpine root wireframe files."
+                "suggested_fix": "Commit, stash, or remove unrelated files before deploying. The deploy script only auto-commits Draftpine root wireframe files, configured route HTML files, and configured JSON content files."
             }, indent=2))
             return 1
         run(["git", "add", "--", *committed_files])

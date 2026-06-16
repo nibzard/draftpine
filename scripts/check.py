@@ -30,7 +30,8 @@ FORBIDDEN_PATTERNS = {
     "stack.no-frameworks.vue": re.compile(r"\bvue\b|createApp", re.I),
     "stack.no-frameworks.svelte": re.compile(r"\bsvelte\b", re.I),
     "stack.no-tailwind": re.compile(r"\btailwind\b", re.I),
-    "runtime.no-backend-calls": re.compile(r"\bfetch\s*\(|XMLHttpRequest|https?://api\.", re.I),
+    "runtime.no-xhr": re.compile(r"\bXMLHttpRequest\b", re.I),
+    "runtime.no-remote-api-url": re.compile(r"https?://api\.", re.I),
 }
 CONFIG_STRING_FIELDS = ["screen", "audience", "userGoal", "primaryAction"]
 CONFIG_ARRAY_FIELDS = ["requiredStates", "requiredInteractions"]
@@ -45,6 +46,7 @@ class DraftpineHTMLParser(HTMLParser):
         self.tags: set[str] = set()
         self.links: list[str] = []
         self.scripts: list[str] = []
+        self.anchors: list[str] = []
         self.states: set[str] = set()
         self.interactions: set[str] = set()
         self.actions: set[str] = set()
@@ -61,6 +63,8 @@ class DraftpineHTMLParser(HTMLParser):
             self.links.append(attr["href"])
         if tag == "script" and attr.get("src"):
             self.scripts.append(attr["src"])
+        if tag == "a" and attr.get("href"):
+            self.anchors.append(attr["href"])
         if "data-draftpine-state" in attr:
             self.states.add(attr["data-draftpine-state"])
         if "data-draftpine-interaction" in attr:
@@ -165,6 +169,243 @@ def is_alpine_v3_cdn(src: str) -> bool:
     )
 
 
+def is_safe_route_file(value: str) -> bool:
+    path = Path(value)
+    return (
+        value.endswith(".html")
+        and not value.startswith("/")
+        and ".." not in path.parts
+    )
+
+
+def normalize_route_path(value: str) -> str:
+    if not value:
+        return "/"
+    path = value.split("#", 1)[0].split("?", 1)[0].strip()
+    if not path:
+        return "/"
+    if path.endswith("/index.html"):
+        path = path[:-10]
+    if path == "index.html":
+        return "/"
+    if path.startswith("./"):
+        path = path[2:]
+    if not path.startswith("/"):
+        path = f"/{path}"
+    if path != "/" and not path.endswith("/") and "." not in Path(path).name:
+        path = f"{path}/"
+    return path
+
+
+def is_local_anchor(href: str) -> bool:
+    parsed = urlparse(href)
+    if parsed.scheme or parsed.netloc:
+        return False
+    return not href.startswith(("mailto:", "tel:", "javascript:"))
+
+
+def is_safe_content_file(value: str) -> bool:
+    path = Path(value)
+    return (
+        value.endswith(".json")
+        and not value.startswith("/")
+        and ".." not in path.parts
+    )
+
+
+FETCH_CALL_RE = re.compile(r"\bfetch\s*\(\s*([\"'`])([^\"'`]+)\1", re.I)
+FETCH_ANY_RE = re.compile(r"\bfetch\s*\(", re.I)
+
+
+def is_allowed_static_json_fetch(target: str) -> bool:
+    parsed = urlparse(target)
+    if parsed.scheme or parsed.netloc:
+        return False
+    path = parsed.path
+    return (
+        path.endswith(".json")
+        and not path.startswith("//")
+        and ".." not in Path(path).parts
+    )
+
+
+def validate_fetch_calls(source: str, findings: list[dict[str, object]]) -> None:
+    literal_starts = {match.start() for match in FETCH_CALL_RE.finditer(source)}
+    for match in FETCH_ANY_RE.finditer(source):
+        if match.start() not in literal_starts:
+            findings.append(finding(
+                "error",
+                "runtime.no-backend-calls.fetch",
+                "index.html/app.js/styles.css",
+                "Dynamic fetch calls are not allowed.",
+                "Use a literal local static JSON path such as fetch('./content/pages/home.json') so the checker can verify it is GitHub Pages compatible.",
+                evidence=match.group(0),
+            ))
+
+    for match in FETCH_CALL_RE.finditer(source):
+        target = match.group(2)
+        if is_allowed_static_json_fetch(target):
+            continue
+        findings.append(finding(
+            "error",
+            "runtime.no-backend-calls.fetch",
+            "index.html/app.js/styles.css",
+            f"Forbidden fetch target detected: {target}.",
+            "Only fetch local static JSON files such as './content/pages/home.json'. Do not call remote APIs or dynamic backends.",
+            evidence=match.group(0),
+        ))
+
+
+def validate_content_files(config: dict[str, object], findings: list[dict[str, object]], passes: list[dict[str, object]]) -> None:
+    content_mode = config.get("contentMode")
+    if content_mode is None:
+        return
+
+    if content_mode not in {"inline", "json"}:
+        findings.append(finding(
+            "error",
+            "config.field.contentMode",
+            "draftpine.config.json",
+            "Config field 'contentMode' must be 'inline' or 'json' when present.",
+            "Use 'inline' for copy in markup/app.js or 'json' for static content files."
+        ))
+        return
+
+    if content_mode == "inline":
+        return
+
+    content_files = config.get("contentFiles")
+    if not isinstance(content_files, list) or any(not isinstance(item, str) or not is_safe_content_file(item) for item in content_files):
+        findings.append(finding(
+            "error",
+            "config.field.contentFiles",
+            "draftpine.config.json",
+            "JSON content mode requires 'contentFiles' to be an array of safe relative .json files.",
+            "Add files like 'content/site.json' and 'content/pages/home.json'."
+        ))
+        return
+
+    for content_file in content_files:
+        path = ROOT / content_file
+        if not path.exists():
+            findings.append(finding(
+                "error",
+                f"content.file-missing.{content_file}",
+                content_file,
+                f"Configured content file '{content_file}' is missing.",
+                f"Create {content_file}, or remove it from draftpine.config.json contentFiles."
+            ))
+            continue
+        try:
+            json.loads(read_text(path))
+        except json.JSONDecodeError as exc:
+            findings.append(finding(
+                "error",
+                f"content.valid-json.{content_file}",
+                content_file,
+                f"Content file '{content_file}' is invalid JSON: {exc.msg}.",
+                "Fix the JSON syntax so the prototype can load the content.",
+                exc.lineno,
+            ))
+            continue
+        passes.append({"rule": f"content.file.{content_file}", "file": content_file})
+
+
+def validate_routes(config: dict[str, object], findings: list[dict[str, object]], passes: list[dict[str, object]]) -> None:
+    routes = config.get("routes")
+    if routes is None:
+        return
+
+    if not isinstance(routes, list) or any(not isinstance(item, dict) for item in routes):
+        findings.append(finding(
+            "error",
+            "config.field.routes",
+            "draftpine.config.json",
+            "Config field 'routes' must be an array of route objects when present.",
+            "Set 'routes' to objects like {\"path\": \"/pricing/\", \"title\": \"Pricing\", \"file\": \"pricing/index.html\"}."
+        ))
+        return
+
+    route_paths: set[str] = set()
+    route_files: list[str] = []
+    anchor_paths: set[str] = set()
+
+    for index, route in enumerate(routes):
+        raw_path = route.get("path")
+        title = route.get("title")
+        file = route.get("file")
+
+        if not isinstance(raw_path, str) or not raw_path.startswith("/"):
+            findings.append(finding(
+                "error",
+                "route.field.path",
+                "draftpine.config.json",
+                f"Route #{index + 1} must include a path starting with '/'.",
+                "Use paths like '/', '/pricing/', or '/compare/steel-vs-browserbase/'."
+            ))
+            continue
+        if not isinstance(title, str) or not title.strip():
+            findings.append(finding(
+                "error",
+                "route.field.title",
+                "draftpine.config.json",
+                f"Route '{raw_path}' must include a non-empty title.",
+                "Add a concise title for the route."
+            ))
+        if not isinstance(file, str) or not is_safe_route_file(file):
+            findings.append(finding(
+                "error",
+                "route.field.file",
+                "draftpine.config.json",
+                f"Route '{raw_path}' must include a safe relative HTML file.",
+                "Use a relative HTML file like 'index.html' or 'compare/steel-vs-browserbase/index.html'."
+            ))
+            continue
+
+        path = normalize_route_path(raw_path)
+        route_paths.add(path)
+        route_files.append(file)
+
+        route_file = ROOT / file
+        if route_file.exists():
+            passes.append({"rule": f"route.file.{path}", "file": file})
+            parser = DraftpineHTMLParser()
+            parser.feed(read_text(route_file))
+            for href in parser.anchors:
+                if is_local_anchor(href):
+                    anchor_paths.add(normalize_route_path(href))
+        else:
+            findings.append(finding(
+                "error",
+                f"route.file-missing.{path}",
+                file,
+                f"Configured route '{path}' points to a missing file.",
+                f"Create {file}, or remove the route from draftpine.config.json."
+            ))
+
+    if "/" not in route_paths:
+        findings.append(finding(
+            "error",
+            "route.home-required",
+            "draftpine.config.json",
+            "A browsable prototype must declare the home route '/'.",
+            "Add {\"path\": \"/\", \"title\": \"Home\", \"file\": \"index.html\"} to routes."
+        ))
+
+    for path in sorted(route_paths):
+        if path == "/":
+            continue
+        if path in anchor_paths:
+            passes.append({"rule": f"route.linked.{path}", "file": "draftpine.config.json"})
+        else:
+            findings.append(finding(
+                "error",
+                f"route.linked.{path}",
+                "draftpine.config.json",
+                f"Configured route '{path}' is not linked from any configured page.",
+                "Add a normal <a href=\"...\"> link to this route so the prototype is browsable."
+            ))
+
 def load_config(findings: list[dict[str, object]]) -> dict[str, object]:
     config_path = ROOT / "draftpine.config.json"
     if not config_path.exists():
@@ -231,6 +472,26 @@ def load_config(findings: list[dict[str, object]]) -> dict[str, object]:
                 "Set 'patterns' to the pattern recipe used for the screen, like [\"outcome hero\", \"feature bento\", \"final CTA band\"]."
             ))
 
+    mode = config.get("prototypeMode")
+    if mode is not None and mode not in {"single-screen", "browsable"}:
+        findings.append(finding(
+            "error",
+            "config.field.prototypeMode",
+            "draftpine.config.json",
+            "Config field 'prototypeMode' must be 'single-screen' or 'browsable' when present.",
+            "Use 'single-screen' for one disposable screen or 'browsable' for linked multi-page prototypes."
+        ))
+
+    content_mode = config.get("contentMode")
+    if content_mode is not None and content_mode not in {"inline", "json"}:
+        findings.append(finding(
+            "error",
+            "config.field.contentMode",
+            "draftpine.config.json",
+            "Config field 'contentMode' must be 'inline' or 'json' when present.",
+            "Use 'inline' for copy in markup/app.js or 'json' for static content files."
+        ))
+
     if isinstance(config.get("template"), str) and config.get("template", "").strip():
         findings.append(finding(
             "warning",
@@ -238,6 +499,15 @@ def load_config(findings: list[dict[str, object]]) -> dict[str, object]:
             "draftpine.config.json",
             "Config field 'template' is deprecated.",
             "Replace 'template' with a 'patterns' array so agents compose from reusable patterns instead of force-fitting whole screens."
+        ))
+
+    if config.get("prototypeMode") == "browsable" and "routes" not in config:
+        findings.append(finding(
+            "error",
+            "config.routes-required",
+            "draftpine.config.json",
+            "Browsable prototypes must declare routes.",
+            "Add a routes array with at least {\"path\": \"/\", \"title\": \"Home\", \"file\": \"index.html\"} and each linked page."
         ))
 
     return config
@@ -293,6 +563,7 @@ def check_project(strict: bool = False) -> dict[str, object]:
                 "Remove framework, Tailwind, or backend/API code and use Pico, Alpine, and local fake data instead.",
                 evidence=match.group(0),
             ))
+    validate_fetch_calls(all_source, findings)
 
     if any(is_pico_v2_cdn(href) for href in parser.links):
         passes.append({"rule": "pico.required", "file": "index.html"})
@@ -415,6 +686,9 @@ def check_project(strict: bool = False) -> dict[str, object]:
                 f"styles.css has {css_lines} lines.",
                 "Consider simplifying custom CSS and leaning more on Pico defaults."
             ))
+
+    validate_routes(config, findings, passes)
+    validate_content_files(config, findings, passes)
 
     return build_result("draftpine-check", findings, passes)
 

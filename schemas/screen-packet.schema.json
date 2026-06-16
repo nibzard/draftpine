@@ -9,6 +9,39 @@
     "audience": { "type": "string", "minLength": 1 },
     "userGoal": { "type": "string", "minLength": 1 },
     "primaryAction": { "type": "string", "minLength": 1 },
+    "prototypeMode": {
+      "type": "string",
+      "enum": ["single-screen", "browsable"],
+      "default": "single-screen"
+    },
+    "contentMode": {
+      "type": "string",
+      "enum": ["inline", "json"],
+      "default": "inline"
+    },
+    "contentFiles": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+    "route": {
+      "type": "string",
+      "default": "/"
+    },
+    "routes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "title", "file"],
+        "properties": {
+          "path": { "type": "string" },
+          "title": { "type": "string" },
+          "file": { "type": "string" }
+        },
+        "additionalProperties": true
+      },
+      "default": []
+    },
     "patterns": {
       "type": "array",
       "items": { "type": "string" },

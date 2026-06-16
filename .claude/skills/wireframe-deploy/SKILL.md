@@ -19,4 +19,5 @@ python3 scripts/deploy_pages.py --branch main --path /
 
 If deployment fails, report the script's `message` and `suggested_fix`.
 If it refuses because unrelated files are dirty, ask the user whether to commit,
-stash, or leave those files out; only root wireframe files are auto-committed.
+stash, or leave those files out; only root wireframe files and configured route
+HTML files and configured JSON content files are auto-committed.

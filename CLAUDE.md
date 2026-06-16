@@ -4,7 +4,7 @@ Read and follow `AGENTS.md`. Draftpine's source of truth is agent-neutral; the C
 
 Useful skills:
 
-- `/wireframe` builds or revises a Pico + Alpine wireframe from a screen packet.
+- `/wireframe` builds or revises a Pico + Alpine single screen or browsable prototype from a screen packet.
 - `/wireframe-review` audits an existing wireframe against the quality bar.
 - `/wireframe-template` selects a pattern recipe and can inspect examples for reference.
 - `/wireframe-check` runs the checker and repairs errors.

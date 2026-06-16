@@ -1,0 +1,94 @@
+{
+  "screen": "Usage billing dashboard",
+  "audience": "startup founder",
+  "userGoal": "Understand current usage before upgrading",
+  "primaryAction": "Upgrade plan",
+  "brand": "Draftpine Billing",
+  "nav": {
+    "usage": "Usage",
+    "invoices": "Invoices",
+    "plans": "Plans"
+  },
+  "header": {
+    "eyebrow": "Startup founder view",
+    "title": "Usage billing dashboard",
+    "description": "Understand this month's usage, review invoice status, and choose whether to upgrade before the limit blocks growth."
+  },
+  "notice": {
+    "state": "over-limit",
+    "title": "Usage warning:",
+    "prefix": "You are at",
+    "description": "of your monthly included runs. Upgrade before automations pause."
+  },
+  "usagePercent": 92,
+  "metrics": [
+    { "label": "Runs used", "value": "92k / 100k", "note": "Near limit" },
+    { "label": "Projected bill", "value": "$428", "note": "Includes overage" },
+    { "label": "Next invoice", "value": "Jun 30", "note": "End of period" }
+  ],
+  "usageBars": [
+    { "label": "Jan", "value": 38 },
+    { "label": "Feb", "value": 46 },
+    { "label": "Mar", "value": 54 },
+    { "label": "Apr", "value": 63 },
+    { "label": "May", "value": 76 },
+    { "label": "Jun", "value": 92 }
+  ],
+  "sections": {
+    "usage": {
+      "title": "Usage trend",
+      "description": "Placeholder chart blocks keep this prototype dependency-free."
+    },
+    "invoices": {
+      "title": "Invoices",
+      "description": "Filter recent invoices and check payment state.",
+      "searchLabel": "Search invoices",
+      "searchPlaceholder": "Search by invoice or status"
+    },
+    "plans": {
+      "title": "Plan comparison",
+      "description": "Choose the plan that matches expected run volume."
+    }
+  },
+  "tabs": {
+    "invoices": "Invoices",
+    "plans": "Plans",
+    "usage": "Usage"
+  },
+  "emptyState": {
+    "title": "No invoices match this filter",
+    "description": "Clear the search to return to recent billing history.",
+    "action": "Clear search"
+  },
+  "successState": {
+    "title": "Upgrade saved.",
+    "description": "The prototype shows the confirmation state after a plan change."
+  },
+  "modal": {
+    "title": "Upgrade plan",
+    "selectedPlanLabel": "Selected plan",
+    "billingNoteLabel": "Billing note",
+    "billingNotePlaceholder": "Example: upgrade before next campaign launch",
+    "cancel": "Cancel",
+    "submit": "Save mock upgrade"
+  },
+  "invoices": [
+    { "id": "INV-1042", "date": "Jun 1", "amount": "$328", "status": "Open" },
+    { "id": "INV-1041", "date": "May 1", "amount": "$290", "status": "Paid" },
+    { "id": "INV-1040", "date": "Apr 1", "amount": "$240", "status": "Paid" }
+  ],
+  "plans": [
+    { "name": "Starter", "price": "$99/mo", "description": "For early usage and occasional automations." },
+    { "name": "Growth", "price": "$299/mo", "description": "More included runs with predictable overage." },
+    { "name": "Scale", "price": "$699/mo", "description": "Higher limits for launch weeks and busy teams." }
+  ],
+  "actions": {
+    "choose": "Choose"
+  },
+  "table": {
+    "invoice": "Invoice",
+    "date": "Date",
+    "amount": "Amount",
+    "status": "Status"
+  }
+}
