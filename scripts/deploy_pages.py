@@ -83,7 +83,9 @@ def main() -> int:
 
     status = run(["git", "status", "--porcelain"], check=False).stdout.strip()
     committed = False
+    committed_files: list[str] = []
     if status:
+        committed_files = [line[3:] for line in status.splitlines()]
         run(["git", "add", "."])
         run(["git", "commit", "-m", args.message])
         committed = True
@@ -107,6 +109,7 @@ def main() -> int:
     print(json.dumps({
         "status": "pass",
         "committed": committed,
+        "committed_files": committed_files,
         "repository": repo,
         "branch": args.branch,
         "path": args.path,

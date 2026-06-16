@@ -2,6 +2,30 @@
 
 Draftpine is an agent-first static wireframe kit. Your job is to turn a user's product prompt into a quick, disposable, consistent HTML wireframe that can be previewed locally and deployed to GitHub Pages.
 
+## First Run (New Project Onboarding)
+
+Before doing anything else, decide whether this is a fresh project. Treat it as fresh when **both** are true:
+
+- The user has not yet described a screen in this conversation (they only asked to set up or start prototyping).
+- The root wireframe is still the shipped starter — `draftpine.config.json` reads `"screen": "Usage billing dashboard"` with `"template": "billing"`, and `index.html` is the unmodified billing demo.
+
+When it is a fresh project, **do not start editing**. Onboard the user first:
+
+1. Confirm the setup is healthy: run `python3 scripts/check.py --json` and confirm `"status": "pass"`, and note that the starter previews at `python3 -m http.server 5173` → http://localhost:5173.
+2. Briefly say what Draftpine is in one sentence (a fast, disposable wireframe kit; one screen lives in the root files at a time).
+3. Ask these four questions, in plain language, and wait for answers:
+   - **What are you prototyping?** One line — the product and the first screen.
+   - **Who is the user, and what are they trying to get done?**
+   - **What is the single most important action on that screen?**
+   - **Anything to deliberately leave out?** (auth, real backends, real charts, etc.)
+4. Restate their answers as a screen packet (see "Screen Packet Shape"), confirm it, then proceed through the Happy Path to build the first screen.
+5. After the first screen passes the checker, tell them how to continue:
+   - Refine by describing changes in plain language ("make the empty state friendlier", "add a second screen for settings").
+   - Each screen replaces the root wireframe; ask before overwriting work they want to keep.
+   - Say "deploy" when they want it published to GitHub Pages.
+
+If the user already described a screen, or the root wireframe has been customized, skip onboarding and go straight to the Happy Path.
+
 ## Happy Path
 
 1. Read this file before editing.

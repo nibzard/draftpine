@@ -4,6 +4,6 @@
   "bestFor": ["crm", "pipeline", "deals", "sales", "stages", "kanban"],
   "sections": ["pipeline stages", "deal cards", "search", "add deal modal"],
   "states": ["default", "empty", "success"],
-  "interactions": ["modal", "filter", "fake-crud"]
+  "interactions": ["modal", "filter"]
 }
 

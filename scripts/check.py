@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import re
 import sys
 from html.parser import HTMLParser
@@ -26,58 +25,60 @@ FORBIDDEN_FILES = [
     "tsconfig.json",
 ]
 FORBIDDEN_PATTERNS = {
-    "stack.no-frameworks.react": re.compile(r"react|react-dom", re.I),
-    "stack.no-frameworks.vue": re.compile(r"vue(\.|\b)|createApp", re.I),
-    "stack.no-frameworks.svelte": re.compile(r"svelte", re.I),
-    "stack.no-tailwind": re.compile(r"tailwind", re.I),
+    "stack.no-frameworks.react": re.compile(r"\breact(?:-dom)?\b", re.I),
+    "stack.no-frameworks.vue": re.compile(r"\bvue\b|createApp", re.I),
+    "stack.no-frameworks.svelte": re.compile(r"\bsvelte\b", re.I),
+    "stack.no-tailwind": re.compile(r"\btailwind\b", re.I),
     "runtime.no-backend-calls": re.compile(r"\bfetch\s*\(|XMLHttpRequest|https?://api\.", re.I),
 }
+CONFIG_STRING_FIELDS = ["screen", "audience", "userGoal", "primaryAction"]
+CONFIG_ARRAY_FIELDS = ["requiredStates", "requiredInteractions"]
 
 
 class DraftpineHTMLParser(HTMLParser):
     def __init__(self) -> None:
-      super().__init__()
-      self.tags: set[str] = set()
-      self.links: list[str] = []
-      self.scripts: list[str] = []
-      self.states: set[str] = set()
-      self.interactions: set[str] = set()
-      self.actions: set[str] = set()
-      self.buttons: list[dict[str, object]] = []
-      self.inputs: list[dict[str, object]] = []
-      self.labels_for: set[str] = set()
-      self.label_depth = 0
+        super().__init__()
+        self.tags: set[str] = set()
+        self.links: list[str] = []
+        self.scripts: list[str] = []
+        self.states: set[str] = set()
+        self.interactions: set[str] = set()
+        self.actions: set[str] = set()
+        self.buttons: list[dict[str, object]] = []
+        self.inputs: list[dict[str, object]] = []
+        self.labels_for: set[str] = set()
+        self.label_depth = 0
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-      attr = {key: value or "" for key, value in attrs}
-      self.tags.add(tag)
-      if tag == "link" and attr.get("href"):
-          self.links.append(attr["href"])
-      if tag == "script" and attr.get("src"):
-          self.scripts.append(attr["src"])
-      if "data-draftpine-state" in attr:
-          self.states.add(attr["data-draftpine-state"])
-      if "data-draftpine-interaction" in attr:
-          for item in attr["data-draftpine-interaction"].split():
-              self.interactions.add(item)
-      if "data-draftpine-action" in attr:
-          self.actions.add(attr["data-draftpine-action"])
-      if tag == "label":
-          self.label_depth += 1
-          if attr.get("for"):
-              self.labels_for.add(attr["for"])
-      if tag == "button":
-          self.buttons.append({"attrs": attr, "text": "", "line": self.getpos()[0]})
-      if tag in {"input", "select", "textarea"}:
-          self.inputs.append({"tag": tag, "attrs": attr, "inside_label": self.label_depth > 0, "line": self.getpos()[0]})
+        attr = {key: value or "" for key, value in attrs}
+        self.tags.add(tag)
+        if tag == "link" and attr.get("href"):
+            self.links.append(attr["href"])
+        if tag == "script" and attr.get("src"):
+            self.scripts.append(attr["src"])
+        if "data-draftpine-state" in attr:
+            self.states.add(attr["data-draftpine-state"])
+        if "data-draftpine-interaction" in attr:
+            for item in attr["data-draftpine-interaction"].split():
+                self.interactions.add(item)
+        if "data-draftpine-action" in attr:
+            self.actions.add(attr["data-draftpine-action"])
+        if tag == "label":
+            self.label_depth += 1
+            if attr.get("for"):
+                self.labels_for.add(attr["for"])
+        if tag == "button":
+            self.buttons.append({"attrs": attr, "text": "", "line": self.getpos()[0]})
+        if tag in {"input", "select", "textarea"}:
+            self.inputs.append({"tag": tag, "attrs": attr, "inside_label": self.label_depth > 0, "line": self.getpos()[0]})
 
     def handle_endtag(self, tag: str) -> None:
-      if tag == "label" and self.label_depth:
-          self.label_depth -= 1
+        if tag == "label" and self.label_depth:
+            self.label_depth -= 1
 
     def handle_data(self, data: str) -> None:
-      if self.buttons:
-          self.buttons[-1]["text"] = str(self.buttons[-1]["text"]) + data.strip()
+        if self.buttons:
+            self.buttons[-1]["text"] = str(self.buttons[-1]["text"]) + data.strip()
 
 
 def finding(severity: str, rule: str, file: str, message: str, suggested_fix: str, line: int | None = None, evidence: str | None = None) -> dict[str, object]:
@@ -93,6 +94,35 @@ def finding(severity: str, rule: str, file: str, message: str, suggested_fix: st
     if evidence:
         item["evidence"] = evidence
     return item
+
+
+def build_result(tool: str, findings: list[dict[str, object]], passes: list[dict[str, object]]) -> dict[str, object]:
+    errors = [item for item in findings if item["severity"] == "error"]
+    warnings = [item for item in findings if item["severity"] == "warning"]
+    next_actions = [
+        {
+            "priority": index,
+            "rule": item["rule"],
+            "file": item["file"],
+            "line": item.get("line"),
+            "message": item["message"],
+            "suggested_fix": item["suggested_fix"],
+        }
+        for index, item in enumerate(errors + warnings, start=1)
+    ]
+
+    return {
+        "tool": tool,
+        "status": "fail" if errors else "pass",
+        "summary": {
+            "errors": len(errors),
+            "warnings": len(warnings),
+            "passes": len(passes),
+        },
+        "next_actions": next_actions,
+        "findings": findings,
+        "passes": passes,
+    }
 
 
 def read_text(path: Path) -> str:
@@ -114,7 +144,7 @@ def load_config(findings: list[dict[str, object]]) -> dict[str, object]:
         ))
         return {}
     try:
-        return json.loads(read_text(config_path))
+        config = json.loads(read_text(config_path))
     except json.JSONDecodeError as exc:
         findings.append(finding(
             "error",
@@ -125,6 +155,39 @@ def load_config(findings: list[dict[str, object]]) -> dict[str, object]:
             exc.lineno,
         ))
         return {}
+
+    if not isinstance(config, dict):
+        findings.append(finding(
+            "error",
+            "config.object",
+            "draftpine.config.json",
+            "draftpine.config.json must contain a JSON object.",
+            "Replace the top-level value with an object containing screen, audience, userGoal, primaryAction, requiredStates, and requiredInteractions."
+        ))
+        return {}
+
+    for field in CONFIG_STRING_FIELDS:
+        if not isinstance(config.get(field), str) or not config.get(field, "").strip():
+            findings.append(finding(
+                "error",
+                f"config.field.{field}",
+                "draftpine.config.json",
+                f"Config field '{field}' must be a non-empty string.",
+                f"Add a non-empty string value for '{field}'."
+            ))
+
+    for field in CONFIG_ARRAY_FIELDS:
+        value = config.get(field)
+        if not isinstance(value, list) or any(not isinstance(item, str) or not item.strip() for item in value):
+            findings.append(finding(
+                "error",
+                f"config.field.{field}",
+                "draftpine.config.json",
+                f"Config field '{field}' must be an array of non-empty strings.",
+                f"Set '{field}' to an array like [\"default\", \"empty\"]."
+            ))
+
+    return config
 
 
 def check_project(strict: bool = False) -> dict[str, object]:
@@ -233,7 +296,8 @@ def check_project(strict: bool = False) -> dict[str, object]:
             "Mark the main CTA with data-draftpine-action=\"primary\"."
         ))
 
-    required_states = [str(item) for item in config.get("requiredStates", [])]
+    configured_states = config.get("requiredStates", [])
+    required_states = [str(item) for item in configured_states] if isinstance(configured_states, list) else []
     for state in required_states:
         if state in parser.states:
             passes.append({"rule": f"required-state.{state}", "file": "index.html"})
@@ -246,7 +310,8 @@ def check_project(strict: bool = False) -> dict[str, object]:
                 f"Add a visible or Alpine-controlled element with data-draftpine-state=\"{state}\"."
             ))
 
-    required_interactions = [str(item) for item in config.get("requiredInteractions", [])]
+    configured_interactions = config.get("requiredInteractions", [])
+    required_interactions = [str(item) for item in configured_interactions] if isinstance(configured_interactions, list) else []
     for interaction in required_interactions:
         if interaction in parser.interactions:
             passes.append({"rule": f"required-interaction.{interaction}", "file": "index.html"})
@@ -298,32 +363,92 @@ def check_project(strict: bool = False) -> dict[str, object]:
                 "Consider simplifying custom CSS and leaning more on Pico defaults."
             ))
 
-    errors = [item for item in findings if item["severity"] == "error"]
-    warnings = [item for item in findings if item["severity"] == "warning"]
-    status = "fail" if errors else "pass"
-    next_actions = []
-    for index, item in enumerate(errors + warnings, start=1):
-        next_actions.append({
-            "priority": index,
-            "rule": item["rule"],
-            "file": item["file"],
-            "line": item.get("line"),
-            "message": item["message"],
-            "suggested_fix": item["suggested_fix"],
-        })
+    return build_result("draftpine-check", findings, passes)
 
-    return {
-        "tool": "draftpine-check",
-        "status": status,
-        "summary": {
-            "errors": len(errors),
-            "warnings": len(warnings),
-            "passes": len(passes),
-        },
-        "next_actions": next_actions,
-        "findings": findings,
-        "passes": passes,
-    }
+
+def check_template(template_dir: Path) -> list[dict[str, object]]:
+    """Validate that a template's index.html contains every state and interaction
+    its template.json advertises, so metadata can't drift from the markup."""
+    findings: list[dict[str, object]] = []
+    name = template_dir.name
+    meta_path = template_dir / "template.json"
+    html_path = template_dir / "index.html"
+
+    if not meta_path.exists():
+        findings.append(finding(
+            "error",
+            "template.metadata-required",
+            f"templates/{name}/template.json",
+            f"Template '{name}' is missing template.json.",
+            "Add template.json with name, label, bestFor, sections, states, and interactions."
+        ))
+        return findings
+
+    try:
+        meta = json.loads(read_text(meta_path))
+    except json.JSONDecodeError as exc:
+        findings.append(finding(
+            "error",
+            "template.valid-json",
+            f"templates/{name}/template.json",
+            f"template.json for '{name}' is invalid JSON: {exc.msg}.",
+            "Fix the JSON syntax so the template metadata can be validated.",
+            exc.lineno,
+        ))
+        return findings
+
+    if not html_path.exists():
+        findings.append(finding(
+            "error",
+            "template.index-required",
+            f"templates/{name}/index.html",
+            f"Template '{name}' is missing index.html.",
+            "Add an index.html that demonstrates the template's declared states and interactions."
+        ))
+        return findings
+
+    parser = DraftpineHTMLParser()
+    parser.feed(read_text(html_path))
+
+    for state in [str(item) for item in meta.get("states", [])]:
+        if state not in parser.states:
+            findings.append(finding(
+                "error",
+                f"template.state-missing.{state}",
+                f"templates/{name}/index.html",
+                f"Template '{name}' declares state '{state}' but its index.html has no matching marker.",
+                f"Add data-draftpine-state=\"{state}\" to the template, or remove '{state}' from template.json states."
+            ))
+
+    for interaction in [str(item) for item in meta.get("interactions", [])]:
+        if interaction not in parser.interactions:
+            findings.append(finding(
+                "error",
+                f"template.interaction-missing.{interaction}",
+                f"templates/{name}/index.html",
+                f"Template '{name}' declares interaction '{interaction}' but its index.html has no matching marker.",
+                f"Add data-draftpine-interaction=\"{interaction}\" to the template, or remove '{interaction}' from template.json interactions."
+            ))
+
+    return findings
+
+
+def check_templates(templates_root: Path) -> dict[str, object]:
+    findings: list[dict[str, object]] = []
+    passes: list[dict[str, str]] = []
+
+    template_dirs = (
+        sorted(p for p in templates_root.iterdir() if (p / "template.json").exists())
+        if templates_root.exists()
+        else []
+    )
+    for template_dir in template_dirs:
+        template_findings = check_template(template_dir)
+        findings.extend(template_findings)
+        if not any(item["severity"] == "error" for item in template_findings):
+            passes.append({"rule": "template.consistent", "template": template_dir.name})
+
+    return build_result("draftpine-check-templates", findings, passes)
 
 
 def main() -> int:
@@ -331,7 +456,18 @@ def main() -> int:
     parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON.")
     parser.add_argument("--human", action="store_true", help="Emit compact human-readable output.")
     parser.add_argument("--strict", action="store_true", help="Treat warnings as errors where applicable.")
+    parser.add_argument("--templates", action="store_true", help="Validate templates/ metadata against template markup.")
     args = parser.parse_args()
+
+    if args.templates:
+        template_result = check_templates(ROOT / "templates")
+        if args.json or not args.human:
+            print(json.dumps(template_result, indent=2))
+        else:
+            print(f"Draftpine template check: {template_result['status']}")
+            for action in template_result["next_actions"]:
+                print(f"- {action['rule']} {action['file']}: {action['message']}")
+        return 1 if template_result["status"] == "fail" else 0
 
     result = check_project(strict=args.strict)
     if args.json or not args.human:
@@ -346,4 +482,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
-

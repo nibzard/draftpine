@@ -11,3 +11,11 @@ The first set is intentionally narrow:
 
 Agents should prefer adapting a close template over inventing layout structure from scratch.
 
+## Keeping templates honest
+
+Every `template.json` advertises the `states` and `interactions` its `index.html` demonstrates. Those declarations must match the `data-draftpine-*` markers in the markup, otherwise the template-selection skill recommends behavior the starting code doesn't have. Validate this whenever a template changes:
+
+```bash
+python3 scripts/check.py --templates --json
+```
+

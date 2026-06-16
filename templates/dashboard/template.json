@@ -4,6 +4,6 @@
   "bestFor": ["dashboard", "overview", "metrics", "analytics", "reporting", "status"],
   "sections": ["page header", "summary cards", "trend placeholder", "activity table"],
   "states": ["default", "empty", "warning"],
-  "interactions": ["tabs", "filter"]
+  "interactions": ["filter"]
 }
 
