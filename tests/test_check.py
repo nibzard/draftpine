@@ -497,6 +497,42 @@ class AccessibilityParsingTests(unittest.TestCase):
         self.assertEqual(result["status"], "pass", result["next_actions"])
 
 
+class CssSizeTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self._saved_root = check.ROOT
+        self._tmpdir = tempfile.TemporaryDirectory()
+        self.tmp = Path(self._tmpdir.name)
+        check.ROOT = self.tmp
+
+    def tearDown(self) -> None:
+        check.ROOT = self._saved_root
+        self._tmpdir.cleanup()
+
+    def test_css_size_counts_only_screen_helpers_when_marker_exists(self) -> None:
+        scaffold_project(self.tmp)
+        base_css = "\n".join(".theme { color: black; }" for _ in range(260))
+        screen_css = "\n".join(".screen { display: block; }" for _ in range(3))
+        (self.tmp / "styles.css").write_text(
+            f"{base_css}\n{check.SCREEN_HELPERS_MARKER}\n{screen_css}\n",
+            encoding="utf-8",
+        )
+
+        result = check.check_project()
+        self.assertEqual(result["status"], "pass", result["next_actions"])
+        self.assertEqual(rules_for(result, "css.size"), [])
+
+    def test_css_size_falls_back_to_whole_file_without_marker(self) -> None:
+        scaffold_project(self.tmp)
+        (self.tmp / "styles.css").write_text(
+            "\n".join(".screen { display: block; }" for _ in range(check.SCREEN_CSS_LINE_LIMIT + 1)),
+            encoding="utf-8",
+        )
+
+        result = check.check_project()
+        self.assertEqual(result["status"], "pass")
+        self.assertIn("css.size", rules_for(result, "css.size"))
+
+
 class RuntimeSmokeTests(unittest.TestCase):
     def setUp(self) -> None:
         self._saved_root = check.ROOT

@@ -41,6 +41,8 @@ CONFIG_ARRAY_FIELDS = ["requiredStates", "requiredInteractions"]
 EXAMPLE_STRING_FIELDS = ["name", "label"]
 EXAMPLE_ARRAY_FIELDS = ["bestFor", "sections", "states", "interactions"]
 CDN_HOSTS = {"cdn.jsdelivr.net", "unpkg.com"}
+SCREEN_HELPERS_MARKER = "/* ---- Screen helpers ---- */"
+SCREEN_CSS_LINE_LIMIT = 220
 RUNTIME_ERROR_PATTERNS = [
     "Alpine Expression Error",
     "ReferenceError",
@@ -236,6 +238,14 @@ def read_text(path: Path) -> str:
         return path.read_text(encoding="utf-8")
     except UnicodeDecodeError:
         return path.read_text(errors="replace")
+
+
+def count_screen_css_lines(css: str) -> tuple[int, bool]:
+    lines = css.splitlines()
+    for index, line in enumerate(lines):
+        if line.strip() == SCREEN_HELPERS_MARKER:
+            return len(lines[index + 1:]), True
+    return len(lines), False
 
 
 def is_cdn_url(value: str) -> bool:
@@ -914,14 +924,15 @@ def check_project(strict: bool = False, runtime: bool = False) -> dict[str, obje
         ))
 
     if css_path.exists():
-        css_lines = len(css.splitlines())
-        if css_lines > 380:
+        css_lines, found_marker = count_screen_css_lines(css)
+        if css_lines > SCREEN_CSS_LINE_LIMIT:
             findings.append(finding(
                 "warning" if not strict else "error",
                 "css.size",
                 "styles.css",
-                f"styles.css has {css_lines} lines.",
-                "Consider simplifying custom CSS and leaning more on Pico defaults."
+                f"styles.css has {css_lines} screen-specific CSS lines.",
+                "Consider simplifying screen-specific CSS and leaning more on the Draftpine base theme and Pico defaults.",
+                evidence="counted after the Screen helpers marker" if found_marker else "Screen helpers marker missing; counted the whole file",
             ))
 
     validate_routes(config, findings, passes)
