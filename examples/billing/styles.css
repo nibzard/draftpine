@@ -1,6 +1,109 @@
+/* Draftpine base theme — warm-grey monochrome, editorial type, pill buttons.
+   Overrides Pico v2 design tokens so every component inherits the look. */
+:root:not([data-theme="dark"]),
+[data-theme="light"] {
+  --pico-font-family-sans-serif: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --pico-font-family: var(--pico-font-family-sans-serif);
+  --pico-line-height: 1.5;
+  --pico-border-radius: 0.625rem;
+
+  --pico-background-color: #ffffff;
+  --pico-color: #2e2b26;
+  --pico-h1-color: #2e2b26;
+  --pico-h2-color: #2e2b26;
+  --pico-h3-color: #2e2b26;
+  --pico-h4-color: #2e2b26;
+  --pico-h5-color: #2e2b26;
+  --pico-h6-color: #2e2b26;
+  --pico-muted-color: #848484;
+  --pico-muted-border-color: #e5e5e5;
+  --pico-border-color: #d6d6d6;
+
+  --pico-primary: #2e2b26;
+  --pico-primary-background: #2e2b26;
+  --pico-primary-border: #2e2b26;
+  --pico-primary-hover: #1a1916;
+  --pico-primary-hover-background: #1a1916;
+  --pico-primary-hover-border: #1a1916;
+  --pico-primary-focus: rgba(46, 43, 38, 0.25);
+  --pico-primary-inverse: #ffffff;
+  --pico-primary-underline: rgba(46, 43, 38, 0.4);
+
+  --pico-card-background-color: #ffffff;
+  --pico-card-border-color: #d6d6d6;
+  --pico-card-sectioning-background-color: #f5f5f5;
+  --pico-card-box-shadow: none;
+
+  --pico-form-element-background-color: #ffffff;
+  --pico-form-element-border-color: #d6d6d6;
+  --pico-form-element-active-border-color: #2e2b26;
+  --pico-form-element-focus-color: rgba(46, 43, 38, 0.25);
+
+  --pico-mark-background-color: #f0f0f0;
+  --pico-mark-color: #2e2b26;
+
+  --dp-ink: #2e2b26;
+  --dp-paper: #ffffff;
+  --dp-line: #d6d6d6;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+h1 {
+  letter-spacing: -0.03em;
+}
+
+article {
+  border: 1px solid var(--pico-border-color);
+  box-shadow: none;
+}
+
+button,
+[type="button"],
+[type="submit"],
+[type="reset"],
+[role="button"],
+a[role="button"] {
+  border-radius: 999px;
+  font-weight: 500;
+}
+
+button.secondary,
+[type="button"].secondary,
+[type="submit"].secondary,
+[role="button"].secondary,
+button.outline,
+[role="button"].outline {
+  background: transparent;
+  color: var(--dp-ink);
+  border-color: var(--dp-ink);
+}
+
+button.secondary:hover,
+[type="button"].secondary:hover,
+[type="submit"].secondary:hover,
+[role="button"].secondary:hover,
+button.outline:hover,
+[role="button"].outline:hover {
+  background: var(--dp-ink);
+  color: var(--dp-paper);
+  border-color: var(--dp-ink);
+}
+
+/* ---- Screen helpers ---- */
+
 body { padding-block: 1.5rem 3rem; }
 .page-header { padding-block: 2rem; }
-.eyebrow { color: var(--pico-muted-color); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
-.notice, .empty-state, .success-state { border: 1px solid var(--pico-muted-border-color); border-radius: 0.5rem; margin-block: 1rem; padding: 1rem; }
+.eyebrow { color: var(--pico-muted-color); font-size: 0.8rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; }
+.notice, .empty-state, .success-state { border: 1px solid var(--pico-border-color); border-radius: var(--pico-border-radius); background: var(--pico-card-sectioning-background-color); margin-block: 1rem; padding: 1.25rem 1.5rem; }
 .segmented { display: flex; gap: 0.5rem; margin-block: 1rem; }
-
+.segmented button { width: auto; background: transparent; color: var(--dp-ink); border-color: var(--dp-line); }
+.segmented button[aria-selected="true"] { background: var(--dp-ink); color: var(--dp-paper); border-color: var(--dp-ink); }

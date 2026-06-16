@@ -1,3 +1,115 @@
+/* Draftpine base theme — warm-grey monochrome, editorial type, pill buttons.
+   Layered on Pico v2 by overriding its design tokens, so every component
+   (buttons, cards, tables, inputs, nav) inherits the look without markup
+   changes. Keep this block when starting a new screen. */
+:root:not([data-theme="dark"]),
+[data-theme="light"] {
+  --pico-font-family-sans-serif: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --pico-font-family: var(--pico-font-family-sans-serif);
+  --pico-line-height: 1.5;
+  --pico-border-radius: 0.625rem;
+
+  --pico-background-color: #ffffff;
+  --pico-color: #2e2b26;
+  --pico-h1-color: #2e2b26;
+  --pico-h2-color: #2e2b26;
+  --pico-h3-color: #2e2b26;
+  --pico-h4-color: #2e2b26;
+  --pico-h5-color: #2e2b26;
+  --pico-h6-color: #2e2b26;
+  --pico-muted-color: #848484;
+  --pico-muted-border-color: #e5e5e5;
+  --pico-border-color: #d6d6d6;
+
+  /* Monochrome accent — primary is the same warm near-black as body text. */
+  --pico-primary: #2e2b26;
+  --pico-primary-background: #2e2b26;
+  --pico-primary-border: #2e2b26;
+  --pico-primary-hover: #1a1916;
+  --pico-primary-hover-background: #1a1916;
+  --pico-primary-hover-border: #1a1916;
+  --pico-primary-focus: rgba(46, 43, 38, 0.25);
+  --pico-primary-inverse: #ffffff;
+  --pico-primary-underline: rgba(46, 43, 38, 0.4);
+
+  --pico-card-background-color: #ffffff;
+  --pico-card-border-color: #d6d6d6;
+  --pico-card-sectioning-background-color: #f5f5f5;
+  --pico-card-box-shadow: none;
+
+  --pico-form-element-background-color: #ffffff;
+  --pico-form-element-border-color: #d6d6d6;
+  --pico-form-element-active-border-color: #2e2b26;
+  --pico-form-element-focus-color: rgba(46, 43, 38, 0.25);
+
+  --pico-mark-background-color: #f0f0f0;
+  --pico-mark-color: #2e2b26;
+
+  /* Theme tokens Pico does not shadow on buttons (it locally rewrites
+     --pico-color / --pico-background-color / --pico-border-color), so use
+     these for button colors. */
+  --dp-ink: #2e2b26;
+  --dp-paper: #ffffff;
+  --dp-line: #d6d6d6;
+}
+
+/* Editorial headings: medium weight, tight tracking. */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+h1 {
+  letter-spacing: -0.03em;
+}
+
+/* Cards as crisp bordered sections instead of shadowed panels. */
+article {
+  border: 1px solid var(--pico-border-color);
+  box-shadow: none;
+}
+
+/* Pill buttons. Primary actions fill dark; secondary/outline are outlined
+   pills that fill on hover. */
+button,
+[type="button"],
+[type="submit"],
+[type="reset"],
+[role="button"],
+a[role="button"] {
+  border-radius: 999px;
+  font-weight: 500;
+}
+
+button.secondary,
+[type="button"].secondary,
+[type="submit"].secondary,
+[role="button"].secondary,
+button.outline,
+[role="button"].outline {
+  background: transparent;
+  color: var(--dp-ink);
+  border-color: var(--dp-ink);
+}
+
+button.secondary:hover,
+[type="button"].secondary:hover,
+[type="submit"].secondary:hover,
+[role="button"].secondary:hover,
+button.outline:hover,
+[role="button"].outline:hover {
+  background: var(--dp-ink);
+  color: var(--dp-paper);
+  border-color: var(--dp-ink);
+}
+
+/* ---- Screen helpers ---- */
+
 [x-cloak] {
   display: none !important;
 }
@@ -19,29 +131,23 @@ body {
 }
 
 .eyebrow {
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.5rem;
   color: var(--pico-muted-color);
-  font-size: 0.78rem;
-  font-weight: 700;
+  font-size: 0.8rem;
+  font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
+/* State callouts as labeled monochrome panels — no red/green tints. */
 .notice,
 .success-state,
 .empty-state {
-  border: 1px solid var(--pico-muted-border-color);
-  border-radius: 0.5rem;
+  border: 1px solid var(--pico-border-color);
+  border-radius: var(--pico-border-radius);
+  background: var(--pico-card-sectioning-background-color);
   margin-block: 1rem;
-  padding: 1rem;
-}
-
-.notice {
-  background: color-mix(in srgb, var(--pico-del-color) 8%, transparent);
-}
-
-.success-state {
-  background: color-mix(in srgb, var(--pico-ins-color) 8%, transparent);
+  padding: 1.25rem 1.5rem;
 }
 
 .summary-grid h2 {
@@ -57,10 +163,15 @@ body {
 
 .segmented button {
   width: auto;
+  background: transparent;
+  color: var(--dp-ink);
+  border-color: var(--dp-line);
 }
 
 .segmented button[aria-selected="true"] {
-  border-color: var(--pico-primary);
+  background: var(--dp-ink);
+  color: var(--dp-paper);
+  border-color: var(--dp-ink);
 }
 
 .section-heading {
@@ -81,8 +192,8 @@ body {
   gap: 0.75rem;
   min-height: 16rem;
   align-items: end;
-  border: 1px solid var(--pico-muted-border-color);
-  border-radius: 0.5rem;
+  border: 1px solid var(--pico-border-color);
+  border-radius: var(--pico-border-radius);
   padding: 1rem;
 }
 
@@ -96,7 +207,7 @@ body {
 .chart-placeholder span {
   display: block;
   border-radius: 0.35rem 0.35rem 0 0;
-  background: var(--pico-primary);
+  background: var(--pico-muted-color);
 }
 
 .chart-placeholder small {
@@ -129,4 +240,3 @@ dialog article {
     padding: 0.75rem;
   }
 }
-
