@@ -739,6 +739,25 @@ class RuntimeSmokeTests(unittest.TestCase):
         result = check.check_project(runtime=True)
         self.assertEqual(result["status"], "pass", result["next_actions"])
 
+    def test_runtime_check_provides_browser_location(self) -> None:
+        scaffold_project(self.tmp)
+        html_path = self.tmp / "index.html"
+        html = html_path.read_text(encoding="utf-8").replace(
+            "<main>",
+            '<main x-data="app()">',
+        ).replace(
+            "<section></section>",
+            '<section x-text="currentPath">Fallback</section>',
+        )
+        html_path.write_text(html, encoding="utf-8")
+        (self.tmp / "app.js").write_text(
+            'function app() { return { currentPath: window.location.pathname || "/" }; }\n',
+            encoding="utf-8",
+        )
+
+        result = check.check_project(runtime=True)
+        self.assertEqual(result["status"], "pass", result["next_actions"])
+
 
 class RootProjectTests(unittest.TestCase):
     def setUp(self) -> None:

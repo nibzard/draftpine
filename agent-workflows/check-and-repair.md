@@ -19,6 +19,11 @@ missing JSON file, fix invalid JSON, or remove stale entries from
 `contentFiles`. Remote fetches and root-absolute fetches are not allowed; use
 relative local static `.json` files.
 
+Fetch paths must be literal strings directly inside `fetch(...)`. The checker
+intentionally rejects `fetch(path)`, `fetch(url)`, computed template strings,
+and helper wrappers because it cannot prove those stay static and GitHub Pages
+safe.
+
 Checker pass is the mechanical gate, not the whole quality bar. Before
 finishing, inspect the result for these common failure modes:
 

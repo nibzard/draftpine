@@ -74,7 +74,17 @@ const errors = [];
 
 const context = {
   console: { log() {}, warn() {}, error(message) { errors.push(String(message)); } },
-  document: { documentElement: { dataset: {} } },
+  location: {
+    href: "http://localhost:5173/",
+    origin: "http://localhost:5173",
+    pathname: "/",
+    search: "",
+    hash: "",
+  },
+  document: {
+    documentElement: { dataset: {} },
+    location: null,
+  },
   localStorage: {
     store: {},
     getItem(key) { return this.store[key] || null; },
@@ -87,6 +97,7 @@ const context = {
 };
 context.window = context;
 context.globalThis = context;
+context.document.location = context.location;
 context.fetch = async (target) => {
   if (typeof target !== "string") throw new Error(`Unsupported fetch target: ${String(target)}`);
   if (/^[a-z]+:\/\//i.test(target) || target.startsWith("//")) throw new Error(`Remote fetch blocked in runtime smoke: ${target}`);
@@ -476,7 +487,7 @@ def validate_fetch_calls(source: str, findings: list[dict[str, object]]) -> None
                 "runtime.no-backend-calls.fetch",
                 "index.html/app.js/styles.css",
                 "Dynamic fetch calls are not allowed.",
-                "Use a literal local static JSON path such as fetch('./content/pages/home.json') so the checker can verify it is GitHub Pages compatible.",
+                "Use a literal local static JSON path directly inside fetch(), such as fetch('./content/pages/home.json'). Do not pass variables, computed paths, or URL objects.",
                 evidence=match.group(0),
             ))
 
