@@ -86,6 +86,7 @@ The deploy script verifies `git`, `gh`, GitHub auth, a GitHub remote, and a pass
 
 ```text
 draftpine/
+├── AI_POLICY.md                      # AI-assisted contribution policy
 ├── AGENTS.md                         # generic coding-agent contract
 ├── CLAUDE.md                         # Claude Code adapter
 ├── index.html                        # browser entry point
@@ -182,4 +183,3 @@ Agents should use templates instead of inventing layouts from scratch:
 ---
 
 Draftpine is not a frontend framework. It is a constrained workspace for fast product thinking with coding agents.
-
