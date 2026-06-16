@@ -36,8 +36,8 @@ python3 -m http.server 5173
 
     <link rel="stylesheet" href="./styles.css" />
 
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script defer src="./app.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <title>Wireframe</title>
   </head>
@@ -171,7 +171,7 @@ python3 -m http.server 5173
 .eyebrow {
   margin-bottom: 0.25rem;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0;
   font-size: 0.75rem;
   opacity: 0.7;
 }
@@ -457,4 +457,3 @@ The key is to **constrain the agent hard**. Tell it: plain HTML/CSS/JS, Pico def
 [2]: https://docs.anthropic.com/en/docs/claude-code/overview "Overview - Claude Code Docs"
 [3]: https://docs.anthropic.com/en/docs/claude-code/skills "Extend Claude with skills - Claude Code Docs"
 [4]: https://docs.anthropic.com/en/docs/claude-code/common-workflows "Common workflows - Claude Code Docs"
-

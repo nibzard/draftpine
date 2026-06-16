@@ -28,6 +28,12 @@ Structure:
 - Right: response, output, table, or status.
 - Optional copy button with visible text or `aria-label`.
 
+Implementation notes:
+
+- Use framed product surfaces with clear headers and status rows, not decorative cards.
+- Include concrete fake data that proves the workflow: IDs, timings, row counts, output filenames, connection state, or validation status.
+- Keep panels dense enough for scanning, but preserve readable code and table alignment.
+
 ## IDE + Browser Mock
 
 Use for automation, testing, scraping, browser agents, or replay tools.
@@ -38,6 +44,11 @@ Structure:
 - Runtime/browser/session panel.
 - Terminal or log strip.
 - Status chips for connection and step progress.
+
+Implementation notes:
+
+- Put status chips in a marker-free flex row (`list-style: none; padding: 0`) and give chips stable min-heights.
+- The mock should show a believable active state, not just empty chrome. Add selected URL, event log, trace step, DOM/output preview, or session metadata.
 
 ## Quickstart Steps
 
@@ -58,4 +69,3 @@ Structure:
 - Full-width rows.
 - Row label, explanation, and action hint.
 - Rows should link conceptually to docs, benchmark, customers, security, pricing, or open-source proof.
-

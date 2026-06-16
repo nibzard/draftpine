@@ -12,6 +12,12 @@ Structure:
 - 6-12 customer, partner, or integration logos rendered as text placeholders or simple boxes.
 - Optional `empty` state when real customer stories are not available yet.
 
+Implementation notes:
+
+- Use a dedicated `.chip-row` or equivalent flex row with `list-style: none` and `padding: 0`; native `ul` bullets between chips are a layout bug.
+- Keep the strip close enough to the hero that it reads as continuation, not a disconnected band.
+- Use text placeholders only when the user has not provided real logos. For product/brand pages, prefer actual visible product, place, or brand evidence higher on the page.
+
 ## Metric Strip
 
 Use for scale, latency, reliability, pricing, usage, or outcome claims.
@@ -21,6 +27,11 @@ Structure:
 - 3-5 metrics.
 - Each metric has a label and a short qualifier.
 - Avoid unsourced superlatives. In a wireframe, include a source/method placeholder when the metric matters.
+
+Implementation notes:
+
+- Give each metric a stable width or grid track so number changes do not shift neighboring items.
+- Pair important metrics with a source/method note when the page asks the user to trust a performance, pricing, reliability, or scale claim.
 
 ## Customer Story Cards
 
@@ -42,4 +53,3 @@ Structure:
 - 3-4 trust badges or controls.
 - Short explanation of isolation, privacy, roles, audit logs, or compliance.
 - Status or trust-center link in the footer when relevant.
-
