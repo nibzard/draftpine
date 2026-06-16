@@ -1,6 +1,13 @@
+function getInitialDraftpineTheme() {
+  const storedTheme = localStorage.getItem("draftpine-theme");
+  if (storedTheme === "light" || storedTheme === "dark") return storedTheme;
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
 function billingExample() {
   return {
     tab: "invoices",
+    theme: "light",
     query: "",
     modalOpen: false,
     saved: false,
@@ -17,6 +24,15 @@ function billingExample() {
       { name: "Growth", price: "$299/mo" },
       { name: "Scale", price: "$699/mo" }
     ],
+    init() {
+      this.theme = getInitialDraftpineTheme();
+      document.documentElement.dataset.theme = this.theme;
+    },
+    toggleTheme() {
+      this.theme = this.theme === "dark" ? "light" : "dark";
+      document.documentElement.dataset.theme = this.theme;
+      localStorage.setItem("draftpine-theme", this.theme);
+    },
     get filteredInvoices() {
       const query = this.query.toLowerCase().trim();
       if (!query) return this.invoices;
@@ -24,4 +40,3 @@ function billingExample() {
     }
   };
 }
-

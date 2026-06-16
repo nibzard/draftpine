@@ -24,7 +24,7 @@ You bring the product idea. Draftpine handles the guardrails.
 ```text
 Clone https://github.com/nibzard/draftpine into a new subfolder named wireframe,
 remove wireframe/.git so the prototype is ordinary project files, read AGENTS.md,
-run `python3 scripts/check.py --json` to confirm the starter passes, start a local
+run `python3 scripts/check.py --runtime --json` to confirm the starter passes, start a local
 preview at http://localhost:5173, then ask the four first-run onboarding questions
 from AGENTS.md before editing anything.
 ```
@@ -56,7 +56,7 @@ your prompt
   → agent chooses prototype mode     (single-screen or browsable)
   → agent may inspect examples/      (finished reference screens)
   → agent edits static HTML/CSS/JS plus draftpine.config.json
-  → python3 scripts/check.py --json  (structured pass/fail + fixes)
+  → python3 scripts/check.py --runtime --json  (structured pass/fail + fixes)
   → agent loops until status: pass
   → deploy to GitHub Pages           (only when you ask)
 ```
@@ -75,7 +75,7 @@ python3 -m http.server 5173
 `scripts/check.py` is built for agents: it returns prioritized, machine-readable repairs instead of prose.
 
 ```bash
-python3 scripts/check.py --json
+python3 scripts/check.py --runtime --json
 ```
 
 ```json
@@ -94,7 +94,7 @@ python3 scripts/check.py --json
 }
 ```
 
-The agent works the `next_actions` list until `"status": "pass"`. The checker enforces the stack rules below, required states/interactions from `draftpine.config.json`, semantic landmarks, and basic accessibility (button and form labels).
+The agent works the `next_actions` list until `"status": "pass"`. The checker enforces the stack rules below, required states/interactions from `draftpine.config.json`, semantic landmarks, basic accessibility (button and form labels), and, with `--runtime`, a local smoke test for Alpine/data runtime errors.
 
 Extra modes:
 
@@ -221,7 +221,7 @@ tests/               stdlib unit tests for the checker
 patterns/            reusable screen patterns agents compose from
 examples/            finished reference screens
 schemas/             JSON schemas for the screen packet and config
-agent-workflows/     step-by-step playbooks; .claude/skills/ mirrors them
+agent-workflows/     shared playbooks used by .agents/skills/ and .claude/skills/
 ```
 
 ---

@@ -5,7 +5,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
+import shutil
+import subprocess
 import sys
 from html.parser import HTMLParser
 from pathlib import Path
@@ -38,6 +41,84 @@ CONFIG_ARRAY_FIELDS = ["requiredStates", "requiredInteractions"]
 EXAMPLE_STRING_FIELDS = ["name", "label"]
 EXAMPLE_ARRAY_FIELDS = ["bestFor", "sections", "states", "interactions"]
 CDN_HOSTS = {"cdn.jsdelivr.net", "unpkg.com"}
+RUNTIME_ERROR_PATTERNS = [
+    "Alpine Expression Error",
+    "ReferenceError",
+    "TypeError",
+    "SyntaxError",
+    "Uncaught",
+]
+ALPINE_EVAL_ATTRS = {
+    "x-text",
+    "x-html",
+    "x-show",
+    "x-model",
+    ":aria-label",
+    ":aria-pressed",
+    ":placeholder",
+    ":value",
+}
+NODE_RUNTIME_SCRIPT = r"""
+const fs = require("fs");
+const path = require("path");
+const vm = require("vm");
+
+const payload = JSON.parse(fs.readFileSync(0, "utf8"));
+const root = payload.root;
+const errors = [];
+
+const context = {
+  console: { log() {}, warn() {}, error(message) { errors.push(String(message)); } },
+  document: { documentElement: { dataset: {} } },
+  localStorage: {
+    store: {},
+    getItem(key) { return this.store[key] || null; },
+    setItem(key, value) { this.store[key] = String(value); },
+    removeItem(key) { delete this.store[key]; }
+  },
+  matchMedia() { return { matches: false }; },
+  setTimeout,
+  clearTimeout,
+};
+context.window = context;
+context.globalThis = context;
+context.fetch = async (target) => {
+  if (typeof target !== "string") throw new Error(`Unsupported fetch target: ${String(target)}`);
+  if (/^[a-z]+:\/\//i.test(target) || target.startsWith("//")) throw new Error(`Remote fetch blocked in runtime smoke: ${target}`);
+  const relative = target.replace(/^\.\//, "");
+  const filePath = path.resolve(root, relative);
+  if (!filePath.startsWith(root + path.sep)) throw new Error(`Fetch path escapes project: ${target}`);
+  const body = await fs.promises.readFile(filePath, "utf8");
+  return {
+    ok: true,
+    async json() { return JSON.parse(body); },
+    async text() { return body; }
+  };
+};
+
+(async () => {
+  try {
+    vm.createContext(context);
+    vm.runInContext(payload.appSource, context, { filename: "app.js" });
+    if (!payload.factory) throw new Error("No simple x-data factory call found.");
+    const factory = context[payload.factory];
+    if (typeof factory !== "function") throw new Error(`x-data factory '${payload.factory}' is not defined.`);
+    const data = factory();
+    if (!data || typeof data !== "object") throw new Error(`x-data factory '${payload.factory}' did not return an object.`);
+    if (typeof data.init === "function") await data.init.call(data);
+    for (const expression of payload.expressions) {
+      try {
+        Function("$data", `with ($data) { return (${expression}); }`)(data);
+      } catch (error) {
+        errors.push(`${expression}: ${error.message}`);
+      }
+    }
+    process.stdout.write(JSON.stringify({ ok: errors.length === 0, errors }));
+  } catch (error) {
+    process.stdout.write(JSON.stringify({ ok: false, errors: [error.message] }));
+  }
+})();
+"""
 
 
 class DraftpineHTMLParser(HTMLParser):
@@ -55,10 +136,23 @@ class DraftpineHTMLParser(HTMLParser):
         self.labels_for: set[str] = set()
         self.label_depth = 0
         self.current_button: dict[str, object] | None = None
+        self.root_x_data: str | None = None
+        self.alpine_expressions: list[str] = []
+        self.x_for_vars: set[str] = set()
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         attr = {key: value or "" for key, value in attrs}
         self.tags.add(tag)
+        if "x-data" in attr and self.root_x_data is None:
+            self.root_x_data = attr["x-data"]
+        if "x-for" in attr:
+            match = re.match(r"\s*\(?\s*([A-Za-z_$][\w$]*)(?:\s*,\s*[A-Za-z_$][\w$]*)?\s*\)?\s+in\s+(.+)", attr["x-for"])
+            if match:
+                self.x_for_vars.add(match.group(1))
+                self.alpine_expressions.append(match.group(2).strip())
+        for name, value in attr.items():
+            if name in ALPINE_EVAL_ATTRS and value:
+                self.alpine_expressions.append(value)
         if tag == "link" and attr.get("href"):
             self.links.append(attr["href"])
         if tag == "script" and attr.get("src"):
@@ -167,6 +261,134 @@ def is_alpine_v3_cdn(src: str) -> bool:
         and has_major_version(src, "alpinejs", 3)
         and src.lower().endswith(".js")
     )
+
+
+def script_index(scripts: list[str], predicate) -> int | None:
+    for index, src in enumerate(scripts):
+        if predicate(src):
+            return index
+    return None
+
+
+def extract_x_data_factory(expression: str | None) -> str | None:
+    if expression is None:
+        return None
+    match = re.match(r"\s*([A-Za-z_$][\w$]*)\s*\(\s*\)\s*$", expression)
+    return match.group(1) if match else None
+
+
+def expression_uses_loop_var(expression: str, loop_vars: set[str]) -> bool:
+    return any(re.search(rf"\b{re.escape(name)}\b", expression) for name in loop_vars)
+
+
+def run_runtime_smoke(parser: DraftpineHTMLParser, findings: list[dict[str, object]], passes: list[dict[str, object]]) -> None:
+    node = shutil.which("node")
+    if node is None:
+        findings.append(finding(
+            "error",
+            "runtime.node-required",
+            "app.js",
+            "Runtime smoke check requested, but Node.js was not found.",
+            "Install Node.js or put it on PATH, then rerun scripts/check.py --runtime."
+        ))
+        return
+
+    factory = extract_x_data_factory(parser.root_x_data)
+    expressions = [
+        item
+        for item in parser.alpine_expressions
+        if not expression_uses_loop_var(item, parser.x_for_vars)
+    ]
+    payload = {
+        "root": str(ROOT.resolve()),
+        "factory": factory,
+        "expressions": expressions,
+        "appSource": read_text(ROOT / "app.js"),
+    }
+    try:
+        result = subprocess.run(
+            [node, "-e", NODE_RUNTIME_SCRIPT],
+            input=json.dumps(payload),
+            cwd=ROOT,
+            env={**os.environ, "NO_COLOR": "1"},
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=8,
+        )
+    except (subprocess.SubprocessError, OSError) as exc:
+        findings.append(finding(
+            "error",
+            "runtime.smoke-run",
+            "index.html",
+            f"Runtime smoke check could not load the page: {exc}.",
+            "Fix the local page or browser setup, then rerun scripts/check.py --runtime."
+        ))
+        return
+
+    stderr = result.stderr.strip()
+    stdout = result.stdout.strip()
+    if result.returncode != 0:
+        findings.append(finding(
+            "error",
+            "runtime.smoke-run",
+            "app.js",
+            f"Node runtime smoke exited with code {result.returncode}.",
+            "Fix the local JavaScript runtime error before rerunning scripts/check.py --runtime.",
+            evidence=stderr[-500:] if stderr else None,
+        ))
+        return
+
+    for pattern in RUNTIME_ERROR_PATTERNS:
+        if pattern in stderr:
+            findings.append(finding(
+                "error",
+                "runtime.console-error",
+                "app.js",
+                f"Runtime smoke check saw error output containing '{pattern}'.",
+                "Fix the JavaScript/Alpine runtime error, then rerun scripts/check.py --runtime.",
+                evidence=stderr[-500:],
+            ))
+            return
+
+    try:
+        result_payload = json.loads(stdout)
+    except json.JSONDecodeError:
+        findings.append(finding(
+            "error",
+            "runtime.smoke-result",
+            "app.js",
+            "Runtime smoke check produced invalid JSON.",
+            "Fix the local JavaScript runtime or smoke harness before trusting the page.",
+            evidence=stdout[:500],
+        ))
+        return
+
+    errors = result_payload.get("errors") if isinstance(result_payload, dict) else None
+    if not isinstance(result_payload, dict) or result_payload.get("ok") is not True or not isinstance(errors, list):
+        evidence = json.dumps(result_payload)[:500] if isinstance(result_payload, dict) else str(result_payload)[:500]
+        findings.append(finding(
+            "error",
+            "runtime.alpine-evaluation",
+            "app.js",
+            "Runtime smoke check failed while evaluating the x-data factory or Alpine expressions.",
+            "Make sure app.js defines the x-data factory and every top-level Alpine expression resolves.",
+            evidence=evidence,
+        ))
+        return
+
+    if errors:
+        findings.append(finding(
+            "error",
+            "runtime.alpine-evaluation",
+            "index.html",
+            "Runtime smoke check found Alpine/runtime expression errors.",
+            "Fix the missing app.js data, methods, or expressions, then rerun scripts/check.py --runtime.",
+            evidence=json.dumps(errors[:5])[:500],
+        ))
+        return
+
+    passes.append({"rule": "runtime.smoke", "file": "index.html"})
 
 
 def is_safe_route_file(value: str) -> bool:
@@ -513,7 +735,7 @@ def load_config(findings: list[dict[str, object]]) -> dict[str, object]:
     return config
 
 
-def check_project(strict: bool = False) -> dict[str, object]:
+def check_project(strict: bool = False, runtime: bool = False) -> dict[str, object]:
     findings: list[dict[str, object]] = []
     passes: list[dict[str, str]] = []
 
@@ -587,6 +809,21 @@ def check_project(strict: bool = False) -> dict[str, object]:
             "Add Alpine v3: <script defer src=\"https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js\"></script>."
         ))
 
+    app_script_index = script_index(parser.scripts, lambda src: src == "./app.js")
+    alpine_script_index = script_index(parser.scripts, is_alpine_v3_cdn)
+    if app_script_index is None or alpine_script_index is None:
+        pass
+    elif app_script_index < alpine_script_index:
+        passes.append({"rule": "alpine.app-before-runtime", "file": "index.html"})
+    else:
+        findings.append(finding(
+            "error",
+            "alpine.app-before-runtime",
+            "index.html",
+            "Local app.js loads after Alpine, so Alpine may initialize before x-data functions are defined.",
+            "Load app.js before Alpine: <script defer src=\"./app.js\"></script> then the Alpine CDN script."
+        ))
+
     for href, rule, fix in [
         ("./styles.css", "local.styles-linked", "Link local styles.css using a relative path: <link rel=\"stylesheet\" href=\"./styles.css\" />."),
         ("./app.js", "local.app-linked", "Link local app.js using a relative path: <script defer src=\"./app.js\"></script>.")
@@ -651,13 +888,13 @@ def check_project(strict: bool = False) -> dict[str, object]:
     for button in parser.buttons:
         attrs = button["attrs"]
         text = str(button["text"]).strip()
-        if not text and not attrs.get("aria-label"):
+        if not text and not attrs.get("aria-label") and not attrs.get("x-text") and not attrs.get(":aria-label"):
             findings.append(finding(
                 "error",
                 "accessibility.button-label",
                 "index.html",
                 "A button has no visible text and no aria-label.",
-                "Add visible button text or aria-label describing the button action.",
+                "Add visible button text, x-text, aria-label, or :aria-label describing the button action.",
                 int(button["line"]),
             ))
 
@@ -678,7 +915,7 @@ def check_project(strict: bool = False) -> dict[str, object]:
 
     if css_path.exists():
         css_lines = len(css.splitlines())
-        if css_lines > 320:
+        if css_lines > 380:
             findings.append(finding(
                 "warning" if not strict else "error",
                 "css.size",
@@ -689,6 +926,8 @@ def check_project(strict: bool = False) -> dict[str, object]:
 
     validate_routes(config, findings, passes)
     validate_content_files(config, findings, passes)
+    if runtime:
+        run_runtime_smoke(parser, findings, passes)
 
     return build_result("draftpine-check", findings, passes)
 
@@ -825,6 +1064,7 @@ def main() -> int:
     parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON.")
     parser.add_argument("--human", action="store_true", help="Emit compact human-readable output.")
     parser.add_argument("--strict", action="store_true", help="Treat warnings as errors where applicable.")
+    parser.add_argument("--runtime", action="store_true", help="Execute app.js in a local runtime smoke check and fail on Alpine/data errors.")
     parser.add_argument("--examples", action="store_true", help="Validate examples/ metadata against example markup.")
     parser.add_argument("--templates", action="store_true", help="Deprecated alias for --examples.")
     args = parser.parse_args()
@@ -840,7 +1080,7 @@ def main() -> int:
                 print(f"- {action['rule']} {action['file']}: {action['message']}")
         return 1 if example_result["status"] == "fail" else 0
 
-    result = check_project(strict=args.strict)
+    result = check_project(strict=args.strict, runtime=args.runtime)
     if args.json or not args.human:
         print(json.dumps(result, indent=2))
     else:

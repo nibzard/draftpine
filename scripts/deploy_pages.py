@@ -97,7 +97,7 @@ def main() -> int:
     require_tool("git")
     require_tool("gh")
 
-    check = run([sys.executable, "scripts/check.py", "--json"], check=False)
+    check = run([sys.executable, "scripts/check.py", "--runtime", "--json"], check=False)
     try:
         check_result = json.loads(check.stdout)
     except json.JSONDecodeError:

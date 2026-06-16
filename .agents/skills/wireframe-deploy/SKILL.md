@@ -3,10 +3,7 @@ name: wireframe-deploy
 description: Deploy a passing Draftpine static wireframe to GitHub Pages with git and gh after the user explicitly asks to publish.
 ---
 
-Deploy only when the user explicitly asks to publish or deploy.
-
 Read and follow `AGENTS.md`, then use `agent-workflows/deploy-github-pages.md`.
 
-```bash
-python3 scripts/deploy_pages.py --branch main --path /
-```
+Deploy only when the user explicitly asks to publish or deploy.
+

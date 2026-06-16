@@ -12,6 +12,6 @@ Use this workflow when the user asks for a new or revised Draftpine wireframe.
 8. For `browsable`, keep `/` as the homepage, add route folders for new pages, wire real links, and update `draftpine.config.json` `routes`.
 9. For JSON content mode, put copy/data in `content/*.json`, declare files in `contentFiles`, and load only local static JSON.
 10. Include `data-draftpine-*` markers for required actions, states, and interactions.
-11. Run `python3 scripts/check.py --json`.
+11. Run `python3 scripts/check.py --runtime --json`.
 12. Fix all errors in `next_actions` and rerun until passing.
 13. Summarize the implemented pattern recipe, routes, content files, states, and interactions.

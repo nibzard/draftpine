@@ -6,6 +6,7 @@ from __future__ import annotations
 import sys
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -19,8 +20,8 @@ MINIMAL_HTML = """<!doctype html>
   <head>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
     <link rel="stylesheet" href="./styles.css" />
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script defer src="./app.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   </head>
   <body>
     <main>
@@ -391,6 +392,22 @@ class CdnValidationTests(unittest.TestCase):
         self.assertIn("pico.required", rules_for(result, "pico.required"))
         self.assertIn("alpine.required", rules_for(result, "alpine.required"))
 
+    def test_app_js_must_load_before_alpine(self) -> None:
+        scaffold_project(self.tmp)
+        html_path = self.tmp / "index.html"
+        html = html_path.read_text(encoding="utf-8")
+        html = html.replace(
+            '<script defer src="./app.js"></script>\n'
+            '    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>',
+            '<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>\n'
+            '    <script defer src="./app.js"></script>',
+        )
+        html_path.write_text(html, encoding="utf-8")
+
+        result = check.check_project()
+        self.assertEqual(result["status"], "fail")
+        self.assertIn("alpine.app-before-runtime", rules_for(result, "alpine.app-before-runtime"))
+
 
 class FetchValidationTests(unittest.TestCase):
     def setUp(self) -> None:
@@ -466,6 +483,81 @@ class AccessibilityParsingTests(unittest.TestCase):
         result = check.check_project()
         self.assertEqual(result["status"], "fail")
         self.assertIn("accessibility.button-label", rules_for(result, "accessibility.button-label"))
+
+    def test_x_text_button_counts_as_label(self) -> None:
+        scaffold_project(self.tmp)
+        html_path = self.tmp / "index.html"
+        html = html_path.read_text(encoding="utf-8").replace(
+            '<button data-draftpine-action="primary">Go</button>',
+            '<button data-draftpine-action="primary" x-text="primaryAction"></button>',
+        )
+        html_path.write_text(html, encoding="utf-8")
+
+        result = check.check_project()
+        self.assertEqual(result["status"], "pass", result["next_actions"])
+
+
+class RuntimeSmokeTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self._saved_root = check.ROOT
+        self._tmpdir = tempfile.TemporaryDirectory()
+        self.tmp = Path(self._tmpdir.name)
+        check.ROOT = self.tmp
+
+    def tearDown(self) -> None:
+        check.ROOT = self._saved_root
+        self._tmpdir.cleanup()
+
+    def test_runtime_check_requires_node(self) -> None:
+        scaffold_project(self.tmp)
+        with mock.patch("check.shutil.which", return_value=None):
+            result = check.check_project(runtime=True)
+
+        self.assertEqual(result["status"], "fail")
+        self.assertIn("runtime.node-required", rules_for(result, "runtime.node-required"))
+
+    def test_runtime_check_reports_expression_errors(self) -> None:
+        scaffold_project(self.tmp)
+        completed = check.subprocess.CompletedProcess(
+            args=[],
+            returncode=0,
+            stdout='{"ok": false, "errors": ["missingThing is not defined"]}',
+            stderr="",
+        )
+        with mock.patch("check.shutil.which", return_value="/usr/bin/node"), mock.patch("check.subprocess.run", return_value=completed):
+            result = check.check_project(runtime=True)
+
+        self.assertEqual(result["status"], "fail")
+        self.assertIn("runtime.alpine-evaluation", rules_for(result, "runtime.alpine-evaluation"))
+
+    def test_runtime_check_fails_when_x_data_factory_is_missing(self) -> None:
+        scaffold_project(self.tmp)
+        html_path = self.tmp / "index.html"
+        html = html_path.read_text(encoding="utf-8").replace(
+            "<main>",
+            '<main x-data="missingApp()">',
+        )
+        html_path.write_text(html, encoding="utf-8")
+
+        result = check.check_project(runtime=True)
+        self.assertEqual(result["status"], "fail")
+        self.assertIn("runtime.alpine-evaluation", rules_for(result, "runtime.alpine-evaluation"))
+
+    def test_runtime_check_passes_valid_x_data_and_x_text(self) -> None:
+        scaffold_project(self.tmp)
+        html_path = self.tmp / "index.html"
+        html = html_path.read_text(encoding="utf-8").replace(
+            "<main>",
+            '<main x-data="app()">',
+        ).replace(
+            "<section></section>",
+            '<section x-text="message">Fallback</section>',
+        )
+        html_path.write_text(html, encoding="utf-8")
+        (self.tmp / "app.js").write_text('function app() { return { message: "Ready" }; }\n', encoding="utf-8")
+
+        result = check.check_project(runtime=True)
+        self.assertEqual(result["status"], "pass", result["next_actions"])
 
 
 class RootProjectTests(unittest.TestCase):

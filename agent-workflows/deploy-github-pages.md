@@ -2,7 +2,7 @@
 
 Deploy only when the user explicitly asks to publish or deploy.
 
-1. Run `python3 scripts/check.py --json`.
+1. Run `python3 scripts/check.py --runtime --json`.
 2. Fix all checker errors.
 3. Ensure `git`, `gh`, a GitHub remote, and GitHub auth are available.
 4. Run:

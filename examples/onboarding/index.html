@@ -3,14 +3,15 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
     <title>Draftpine Onboarding Example</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
     <link rel="stylesheet" href="./styles.css" />
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script defer src="./app.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   </head>
   <body>
     <main class="container" x-data="onboardingExample()">
@@ -19,6 +20,18 @@
           <li><strong>Setup</strong></li>
         </ul>
         <ul>
+          <li>
+            <button
+              type="button"
+              class="secondary theme-toggle"
+              data-draftpine-interaction="theme"
+              @click="toggleTheme()"
+              :aria-pressed="theme === 'dark'"
+              :aria-label="theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'"
+            >
+              <span x-text="theme === 'dark' ? 'Light' : 'Dark'">Dark</span>
+            </button>
+          </li>
           <li>
             <button data-draftpine-action="primary" data-draftpine-interaction="modal" @click="modalOpen = true">
               Invite teammate

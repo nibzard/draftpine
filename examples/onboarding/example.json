@@ -4,6 +4,5 @@
   "bestFor": ["onboarding", "setup", "checklist", "activation", "workspace"],
   "sections": ["progress header", "checklist cards", "invite modal", "summary panel"],
   "states": ["default", "empty", "success"],
-  "interactions": ["modal", "toggle"]
+  "interactions": ["modal", "toggle", "theme"]
 }
-

@@ -1,4 +1,4 @@
-/* Draftpine base theme — warm-grey monochrome, editorial type, pill buttons.
+/* Draftpine base theme — warm-grey neutral, editorial type, pill buttons.
    Overrides Pico v2 design tokens so every component inherits the look. */
 :root:not([data-theme="dark"]),
 [data-theme="light"] {
@@ -47,6 +47,45 @@
   --dp-line: #d6d6d6;
 }
 
+[data-theme="dark"] {
+  --pico-font-family-sans-serif: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --pico-font-family: var(--pico-font-family-sans-serif);
+  --pico-line-height: 1.5;
+  --pico-border-radius: 0.625rem;
+  --pico-background-color: #181715;
+  --pico-color: #f0ece5;
+  --pico-h1-color: #f7f3ec;
+  --pico-h2-color: #f7f3ec;
+  --pico-h3-color: #f7f3ec;
+  --pico-h4-color: #f7f3ec;
+  --pico-h5-color: #f7f3ec;
+  --pico-h6-color: #f7f3ec;
+  --pico-muted-color: #a8a29a;
+  --pico-muted-border-color: #36332f;
+  --pico-border-color: #46413a;
+  --pico-primary: #f0ece5;
+  --pico-primary-background: #f0ece5;
+  --pico-primary-border: #f0ece5;
+  --pico-primary-hover: #ffffff;
+  --pico-primary-hover-background: #ffffff;
+  --pico-primary-hover-border: #ffffff;
+  --pico-primary-focus: rgba(240, 236, 229, 0.24);
+  --pico-primary-inverse: #181715;
+  --pico-card-background-color: #201f1c;
+  --pico-card-border-color: #46413a;
+  --pico-card-sectioning-background-color: #25231f;
+  --pico-card-box-shadow: none;
+  --pico-form-element-background-color: #201f1c;
+  --pico-form-element-border-color: #46413a;
+  --pico-form-element-active-border-color: #f0ece5;
+  --pico-form-element-focus-color: rgba(240, 236, 229, 0.24);
+  --pico-mark-background-color: #2d2a25;
+  --pico-mark-color: #f0ece5;
+  --dp-ink: #f0ece5;
+  --dp-paper: #181715;
+  --dp-line: #46413a;
+}
+
 h1,
 h2,
 h3,
@@ -54,11 +93,11 @@ h4,
 h5,
 h6 {
   font-weight: 500;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
 }
 
 h1 {
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
 }
 
 article {
@@ -102,7 +141,8 @@ button.outline:hover,
 
 body { padding-block: 1.5rem 3rem; }
 .page-header { padding-block: 2rem; }
-.eyebrow { color: var(--pico-muted-color); font-size: 0.8rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; }
+.eyebrow { color: var(--pico-muted-color); font-size: 0.8rem; font-weight: 500; letter-spacing: 0; text-transform: uppercase; }
 .pipeline { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
 .deal, .empty-state, .success-state { border: 1px solid var(--pico-border-color); border-radius: var(--pico-border-radius); background: var(--pico-card-sectioning-background-color); margin-block: 0.75rem; padding: 0.75rem 1rem; }
+.theme-toggle { width: auto; min-width: 4.75rem; padding-inline: 1rem; }
 @media (max-width: 760px) { .pipeline { grid-template-columns: 1fr; } }

@@ -13,5 +13,5 @@ Useful skills:
 Before finishing a wireframe task, run:
 
 ```bash
-python3 scripts/check.py --json
+python3 scripts/check.py --runtime --json
 ```

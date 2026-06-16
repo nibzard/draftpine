@@ -6,7 +6,7 @@
   "prototypeMode": "single-screen",
   "contentMode": "json",
   "contentFiles": ["content/pages/prototype-brief-workspace.json"],
-  "patterns": ["app shell", "outcome hero", "brief checklist", "tabs", "filter bar", "modal", "state callouts"],
+  "patterns": ["app shell", "outcome hero", "brief checklist", "tabs", "filter bar", "theme switcher", "modal", "state callouts"],
   "requiredStates": ["default", "empty", "success"],
-  "requiredInteractions": ["tabs", "modal", "filter"]
+  "requiredInteractions": ["tabs", "modal", "filter", "theme"]
 }

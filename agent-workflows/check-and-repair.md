@@ -3,7 +3,7 @@
 Run:
 
 ```bash
-python3 scripts/check.py --json
+python3 scripts/check.py --runtime --json
 ```
 
 If the checker returns `"status": "fail"`, read `next_actions` in priority order. Apply the suggested fixes, then run the checker again.

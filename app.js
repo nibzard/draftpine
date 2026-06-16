@@ -1,3 +1,9 @@
+function getInitialDraftpineTheme() {
+  const storedTheme = localStorage.getItem("draftpine-theme");
+  if (storedTheme === "light" || storedTheme === "dark") return storedTheme;
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
 function prototypeBriefWorkspace() {
   const fallbackContent = {
     screen: "Prototype brief workspace",
@@ -59,18 +65,26 @@ function prototypeBriefWorkspace() {
   return {
     content: fallbackContent,
     tab: "brief",
+    theme: "light",
     exampleQuery: "",
     modalOpen: false,
     draftPrototype: "",
     draftAudience: "",
     briefSaved: false,
     async init() {
+      this.theme = getInitialDraftpineTheme();
+      document.documentElement.dataset.theme = this.theme;
       try {
         const response = await fetch("./content/pages/prototype-brief-workspace.json");
         if (response.ok) this.content = await response.json();
       } catch (error) {
         console.warn("Using inline starter content because JSON could not be loaded.", error);
       }
+    },
+    toggleTheme() {
+      this.theme = this.theme === "dark" ? "light" : "dark";
+      document.documentElement.dataset.theme = this.theme;
+      localStorage.setItem("draftpine-theme", this.theme);
     },
     get filteredExamples() {
       const query = this.exampleQuery.trim().toLowerCase();
