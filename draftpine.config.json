@@ -1,0 +1,11 @@
+{
+  "screen": "Usage billing dashboard",
+  "audience": "startup founder",
+  "userGoal": "Understand current usage before upgrading",
+  "primaryAction": "Upgrade plan",
+  "template": "billing",
+  "requiredStates": ["default", "empty", "over-limit", "success"],
+  "requiredInteractions": ["tabs", "modal", "filter"],
+  "allowedFiles": ["index.html", "styles.css", "app.js", "draftpine.config.json"]
+}
+

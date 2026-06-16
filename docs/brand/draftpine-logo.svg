@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="440" viewBox="0 0 760 440" font-family="'SF Mono','Cascadia Code','JetBrains Mono',Menlo,Consolas,monospace">
+  <!-- ABOUTME: Draftpine logo — Vapor Mint glitch build. A pine wireframe typed from -->
+  <!-- ABOUTME: ASCII hatch + box-drawing glyphs, torn with chromatic aberration + scanlines. -->
+  <defs>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="bigglow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="9"/>
+    </filter>
+
+    <linearGradient id="vapor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0"    stop-color="#7CF5C4"/>
+      <stop offset="0.55" stop-color="#7C9BFF"/>
+      <stop offset="1"    stop-color="#C49BFF"/>
+    </linearGradient>
+
+    <pattern id="scan" width="6" height="4" patternUnits="userSpaceOnUse">
+      <rect width="6" height="4" fill="#15132B"/>
+      <rect width="6" height="1.1" y="2.7" fill="#000000" opacity="0.3"/>
+    </pattern>
+
+    <!-- THE PINE: pointed apex + tapering stair-stepped tiers -->
+    <text id="pine" font-size="28" letter-spacing="0" xml:space="preserve">
+      <tspan x="0" y="32">      /\</tspan>
+      <tspan x="0" dy="28">     ┌──┐</tspan>
+      <tspan x="0" dy="28">     │▒▒│</tspan>
+      <tspan x="0" dy="28">    ┌┴──┴┐</tspan>
+      <tspan x="0" dy="28">    │▒▒▒▒│</tspan>
+      <tspan x="0" dy="28">   ┌┴────┴┐</tspan>
+      <tspan x="0" dy="28">   │▒░╳▒░▒│</tspan>
+      <tspan x="0" dy="28">  ┌┴──────┴┐</tspan>
+      <tspan x="0" dy="28">  │▒░▒░▒░▒░│</tspan>
+      <tspan x="0" dy="28"> ┌┴────────┴┐</tspan>
+      <tspan x="0" dy="28"> │▒░▒░▒░▒░▒░│</tspan>
+      <tspan x="0" dy="28"> └────┬┬────┘</tspan>
+      <tspan x="0" dy="28">      ┃┃</tspan>
+    </text>
+
+    <text id="word" font-size="64" font-weight="600" letter-spacing="1" xml:space="preserve">draftpine</text>
+  </defs>
+
+  <rect width="760" height="440" fill="#15132B"/>
+
+  <!-- ======================== PINE GLYPH ======================== -->
+  <g transform="translate(96,28)">
+    <g filter="url(#bigglow)" opacity="0.45">
+      <use href="#pine" fill="#7CF5C4"/>
+    </g>
+
+    <!-- chromatic aberration -->
+    <use href="#pine" fill="#C49BFF" opacity="0.65" transform="translate(-2.4,0.5)"/>
+    <use href="#pine" fill="#7CF5C4" opacity="0.65" transform="translate(2.4,-0.5)"/>
+    <use href="#pine" fill="url(#vapor)" filter="url(#glow)"/>
+
+    <!-- single glitch slice across a mid tier -->
+    <svg x="0" y="232" width="240" height="22" overflow="hidden">
+      <use href="#pine" y="-232" fill="#7CF5C4" transform="translate(8,0)" opacity="0.9"/>
+    </svg>
+  </g>
+
+  <!-- ======================== WORDMARK ======================== -->
+  <g transform="translate(338,250)">
+    <!-- chromatic ghosts (whole word, solid accent) -->
+    <use href="#word" fill="#C49BFF" opacity="0.6" transform="translate(-2,0)"/>
+    <use href="#word" fill="#7CF5C4" opacity="0.6" transform="translate(2,0)"/>
+    <!-- core, two-tone: draft (cool white) + pine (mint) -->
+    <text font-size="64" font-weight="600" letter-spacing="1" filter="url(#glow)" xml:space="preserve"><tspan fill="#E7ECFF">draft</tspan><tspan fill="#7CF5C4">pine</tspan></text>
+    <!-- terminal cursor -->
+    <rect x="350" y="-44" width="20" height="46" fill="#7CF5C4" filter="url(#glow)"/>
+    <text x="2" y="44" font-size="17" letter-spacing="3" fill="#7C9BFF" opacity="0.85">PLAIN HTML WIREFRAMES</text>
+  </g>
+
+  <!-- overlays -->
+  <rect width="760" height="440" fill="url(#scan)" opacity="0.12"/>
+  <rect x="0" y="200" width="760" height="2" fill="#7CF5C4" opacity="0.18"/>
+</svg>

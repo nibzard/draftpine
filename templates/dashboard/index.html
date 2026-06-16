@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Draftpine Dashboard Template</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
+    <link rel="stylesheet" href="./styles.css" />
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="./app.js"></script>
+  </head>
+  <body>
+    <main class="container" x-data="dashboardTemplate()">
+      <nav><ul><li><strong>Dashboard</strong></li></ul><ul><li><button data-draftpine-action="primary">Export report</button></li></ul></nav>
+      <header class="page-header"><p class="eyebrow">Operations view</p><h1>Operational dashboard</h1><p>Track the core metrics and exceptions that need attention today.</p></header>
+      <section class="notice" data-draftpine-state="warning"><strong>Warning:</strong> One metric is outside the target range.</section>
+      <section class="grid" data-draftpine-state="default">
+        <template x-for="metric in metrics" :key="metric.label"><article><small x-text="metric.label"></small><h2 x-text="metric.value"></h2><p x-text="metric.note"></p></article></template>
+      </section>
+      <section data-draftpine-interaction="filter"><label>Filter activity<input type="search" x-model="query" placeholder="Search activity" /></label></section>
+      <section class="empty-state" data-draftpine-state="empty" x-show="filteredActivity.length === 0"><h2>No activity found</h2><button type="button" @click="query = ''">Clear filter</button></section>
+      <figure x-show="filteredActivity.length > 0"><table><thead><tr><th>Item</th><th>Owner</th><th>Status</th></tr></thead><tbody><template x-for="item in filteredActivity" :key="item.item"><tr><td x-text="item.item"></td><td x-text="item.owner"></td><td><mark x-text="item.status"></mark></td></tr></template></tbody></table></figure>
+    </main>
+  </body>
+</html>
+

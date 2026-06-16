@@ -1,0 +1,7 @@
+body { padding-block: 1.5rem 3rem; }
+.page-header { padding-block: 2rem; }
+.eyebrow { color: var(--pico-muted-color); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 18rem; gap: 1rem; }
+.empty-state, .success-state { border: 1px solid var(--pico-muted-border-color); border-radius: 0.5rem; margin-block: 1rem; padding: 1rem; }
+@media (max-width: 760px) { .layout { grid-template-columns: 1fr; } }
+

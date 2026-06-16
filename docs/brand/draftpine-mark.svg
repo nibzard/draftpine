@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" font-family="'SF Mono','Cascadia Code','JetBrains Mono',Menlo,Consolas,monospace">
+  <!-- ABOUTME: Draftpine square mark — pine-only glitch glyph for avatars and favicons. -->
+  <!-- ABOUTME: Vapor Mint gradient, chromatic aberration, scanline overlay on indigo. -->
+  <defs>
+    <filter id="g" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="1.4" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <linearGradient id="vapor2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7CF5C4"/>
+      <stop offset="0.55" stop-color="#7C9BFF"/>
+      <stop offset="1" stop-color="#C49BFF"/>
+    </linearGradient>
+    <pattern id="scan2" width="5" height="3" patternUnits="userSpaceOnUse">
+      <rect width="5" height="3" fill="#15132B"/>
+      <rect width="5" height="0.8" y="2" fill="#000" opacity="0.3"/>
+    </pattern>
+    <text id="p" font-size="16" xml:space="preserve">
+      <tspan x="0" y="18">      /\</tspan>
+      <tspan x="0" dy="16">     ┌──┐</tspan>
+      <tspan x="0" dy="16">     │▒▒│</tspan>
+      <tspan x="0" dy="16">    ┌┴──┴┐</tspan>
+      <tspan x="0" dy="16">    │▒▒▒▒│</tspan>
+      <tspan x="0" dy="16">   ┌┴────┴┐</tspan>
+      <tspan x="0" dy="16">   │▒░╳▒░▒│</tspan>
+      <tspan x="0" dy="16">  ┌┴──────┴┐</tspan>
+      <tspan x="0" dy="16">  │▒░▒░▒░▒░│</tspan>
+      <tspan x="0" dy="16"> ┌┴────────┴┐</tspan>
+      <tspan x="0" dy="16"> │▒░▒░▒░▒░▒░│</tspan>
+      <tspan x="0" dy="16"> └────┬┬────┘</tspan>
+      <tspan x="0" dy="16">      ┃┃</tspan>
+    </text>
+  </defs>
+
+  <rect width="256" height="256" rx="52" fill="#15132B"/>
+  <g transform="translate(70,18)">
+    <use href="#p" fill="#C49BFF" opacity="0.65" transform="translate(-1.5,0.4)"/>
+    <use href="#p" fill="#7CF5C4" opacity="0.65" transform="translate(1.5,-0.4)"/>
+    <use href="#p" fill="url(#vapor2)" filter="url(#g)"/>
+    <svg x="0" y="132" width="150" height="13" overflow="hidden">
+      <use href="#p" y="-132" fill="#7CF5C4" transform="translate(5,0)"/>
+    </svg>
+  </g>
+  <rect width="256" height="256" rx="52" fill="url(#scan2)" opacity="0.13"/>
+</svg>

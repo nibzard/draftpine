@@ -1,0 +1,9 @@
+{
+  "name": "billing",
+  "label": "Billing Dashboard",
+  "bestFor": ["billing", "usage", "plans", "invoices", "subscription", "upgrade"],
+  "sections": ["summary cards", "usage chart placeholder", "invoices table", "plan comparison"],
+  "states": ["default", "empty", "over-limit", "success"],
+  "interactions": ["tabs", "modal", "filter"]
+}
+

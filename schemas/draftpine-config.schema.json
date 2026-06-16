@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://draftpine.local/schemas/draftpine-config.schema.json",
+  "title": "Draftpine Config",
+  "type": "object",
+  "required": ["screen", "audience", "userGoal", "primaryAction", "requiredStates", "requiredInteractions"],
+  "properties": {
+    "screen": { "type": "string" },
+    "audience": { "type": "string" },
+    "userGoal": { "type": "string" },
+    "primaryAction": { "type": "string" },
+    "template": { "type": "string" },
+    "requiredStates": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "requiredInteractions": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "allowedFiles": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": true
+}
+

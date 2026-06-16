@@ -1,0 +1,6 @@
+body { padding-block: 1.5rem 3rem; }
+.page-header { padding-block: 2rem; }
+.eyebrow { color: var(--pico-muted-color); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.notice, .empty-state, .success-state { border: 1px solid var(--pico-muted-border-color); border-radius: 0.5rem; margin-block: 1rem; padding: 1rem; }
+.segmented { display: flex; gap: 0.5rem; margin-block: 1rem; }
+
