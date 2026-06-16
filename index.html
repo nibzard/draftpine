@@ -17,59 +17,59 @@
     <main class="container" x-data="billingWireframe()">
       <nav aria-label="Primary">
         <ul>
-          <li><strong x-text="content.brand"></strong></li>
+          <li><strong>Draftpine Billing</strong></li>
         </ul>
         <ul>
-          <li><a href="#usage" @click.prevent="tab = 'usage'" :aria-current="tab === 'usage' ? 'page' : null" x-text="content.nav.usage"></a></li>
-          <li><a href="#invoices" @click.prevent="tab = 'invoices'" :aria-current="tab === 'invoices' ? 'page' : null" x-text="content.nav.invoices"></a></li>
-          <li><a href="#plans" @click.prevent="tab = 'plans'" :aria-current="tab === 'plans' ? 'page' : null" x-text="content.nav.plans"></a></li>
+          <li><a href="#usage" @click.prevent="tab = 'usage'" :aria-current="tab === 'usage' ? 'page' : null">Usage</a></li>
+          <li><a href="#invoices" @click.prevent="tab = 'invoices'" :aria-current="tab === 'invoices' ? 'page' : null">Invoices</a></li>
+          <li><a href="#plans" @click.prevent="tab = 'plans'" :aria-current="tab === 'plans' ? 'page' : null">Plans</a></li>
         </ul>
       </nav>
 
       <header class="page-header">
         <div>
-          <p class="eyebrow" x-text="content.header.eyebrow"></p>
-          <h1 x-text="content.header.title"></h1>
-          <p x-text="content.header.description"></p>
+          <p class="eyebrow">Startup founder view</p>
+          <h1>Usage billing dashboard</h1>
+          <p>Understand this month's usage, review invoice status, and choose whether to upgrade before the limit blocks growth.</p>
         </div>
-        <button aria-label="Upgrade plan" data-draftpine-action="primary" data-draftpine-interaction="modal" @click="openUpgrade()" x-text="content.primaryAction"></button>
+        <button data-draftpine-action="primary" data-draftpine-interaction="modal" @click="openUpgrade()">Upgrade plan</button>
       </header>
 
       <section class="notice" data-draftpine-state="over-limit" x-show="usagePercent >= 90">
-        <strong x-text="content.notice.title"></strong>
-        <span><span x-text="content.notice.prefix"></span> <span x-text="usagePercent"></span>% <span x-text="content.notice.description"></span></span>
+        <strong>Usage warning:</strong>
+        <span>You are at <span x-text="usagePercent"></span>% of your monthly included runs. Upgrade before automations pause.</span>
       </section>
 
       <section class="grid summary-grid" aria-label="Usage summary">
         <article>
-          <small x-text="content.metrics[0].label"></small>
+          <small>Runs used</small>
           <h2 x-text="metrics.runs"></h2>
           <progress max="100" :value="usagePercent"></progress>
         </article>
         <article>
-          <small x-text="content.metrics[1].label"></small>
+          <small>Projected bill</small>
           <h2 x-text="metrics.projectedBill"></h2>
-          <p x-text="content.metrics[1].note"></p>
+          <p>Includes current overage estimate.</p>
         </article>
         <article>
-          <small x-text="content.metrics[2].label"></small>
+          <small>Next invoice</small>
           <h2 x-text="metrics.nextInvoice"></h2>
-          <p x-text="content.metrics[2].note"></p>
+          <p>Due at the end of this billing period.</p>
         </article>
       </section>
 
       <section data-draftpine-interaction="tabs">
         <div class="segmented" role="tablist" aria-label="Billing sections">
-          <button type="button" aria-label="Show usage" @click="tab = 'usage'" :aria-selected="tab === 'usage'" x-text="content.tabs.usage"></button>
-          <button type="button" aria-label="Show invoices" @click="tab = 'invoices'" :aria-selected="tab === 'invoices'" x-text="content.tabs.invoices"></button>
-          <button type="button" aria-label="Show plans" @click="tab = 'plans'" :aria-selected="tab === 'plans'" x-text="content.tabs.plans"></button>
+          <button type="button" @click="tab = 'usage'" :aria-selected="tab === 'usage'">Usage</button>
+          <button type="button" @click="tab = 'invoices'" :aria-selected="tab === 'invoices'">Invoices</button>
+          <button type="button" @click="tab = 'plans'" :aria-selected="tab === 'plans'">Plans</button>
         </div>
 
         <section id="usage" x-show="tab === 'usage'" data-draftpine-state="default">
           <div class="section-heading">
             <div>
-              <h2 x-text="content.sections.usage.title"></h2>
-              <p x-text="content.sections.usage.description"></p>
+              <h2>Usage trend</h2>
+              <p>Placeholder chart blocks keep this prototype dependency-free.</p>
             </div>
           </div>
           <div class="chart-placeholder" aria-label="Usage chart placeholder">
@@ -85,29 +85,29 @@
         <section id="invoices" x-show="tab === 'invoices'">
           <div class="section-heading">
             <div>
-              <h2 x-text="content.sections.invoices.title"></h2>
-              <p x-text="content.sections.invoices.description"></p>
+              <h2>Invoices</h2>
+              <p>Filter recent invoices and check payment state.</p>
             </div>
             <label data-draftpine-interaction="filter">
-              <span x-text="content.sections.invoices.searchLabel"></span>
-              <input type="search" :placeholder="content.sections.invoices.searchPlaceholder" x-model="invoiceQuery" />
+              Search invoices
+              <input type="search" placeholder="Search by invoice or status" x-model="invoiceQuery" />
             </label>
           </div>
 
           <section class="empty-state" data-draftpine-state="empty" x-show="filteredInvoices.length === 0">
-            <h3 x-text="content.emptyState.title"></h3>
-            <p x-text="content.emptyState.description"></p>
-            <button type="button" aria-label="Clear invoice search" class="secondary" @click="invoiceQuery = ''" x-text="content.emptyState.action"></button>
+            <h3>No invoices match this filter</h3>
+            <p>Clear the search to return to recent billing history.</p>
+            <button type="button" class="secondary" @click="invoiceQuery = ''">Clear search</button>
           </section>
 
           <figure x-show="filteredInvoices.length > 0">
             <table>
               <thead>
                 <tr>
-                  <th x-text="content.table.invoice"></th>
-                  <th x-text="content.table.date"></th>
-                  <th x-text="content.table.amount"></th>
-                  <th x-text="content.table.status"></th>
+                  <th>Invoice</th>
+                  <th>Date</th>
+                  <th>Amount</th>
+                  <th>Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -127,8 +127,8 @@
         <section id="plans" x-show="tab === 'plans'">
           <div class="section-heading">
             <div>
-              <h2 x-text="content.sections.plans.title"></h2>
-              <p x-text="content.sections.plans.description"></p>
+              <h2>Plan comparison</h2>
+              <p>Choose the plan that matches expected run volume.</p>
             </div>
           </div>
           <div class="grid plan-grid">
@@ -139,7 +139,7 @@
                   <span x-text="plan.price"></span>
                 </header>
                 <p x-text="plan.description"></p>
-                <button type="button" aria-label="Choose plan" class="secondary" @click="openUpgrade(plan)"><span x-text="content.actions.choose"></span> <span x-text="plan.name"></span></button>
+                <button type="button" class="secondary" @click="openUpgrade(plan)">Choose <span x-text="plan.name"></span></button>
               </article>
             </template>
           </div>
@@ -147,19 +147,19 @@
       </section>
 
       <section class="success-state" data-draftpine-state="success" x-show="upgradeSaved">
-        <strong x-text="content.successState.title"></strong>
-        <span x-text="content.successState.description"></span>
+        <strong>Upgrade saved.</strong>
+        <span>The prototype shows the confirmation state after a plan change.</span>
       </section>
 
       <dialog data-draftpine-interaction="modal" :open="modalOpen">
         <article>
           <header>
             <button type="button" aria-label="Close upgrade modal" rel="prev" @click="modalOpen = false"></button>
-            <strong x-text="content.modal.title"></strong>
+            <strong>Upgrade plan</strong>
           </header>
           <form @submit.prevent="saveUpgrade()">
             <label>
-              <span x-text="content.modal.selectedPlanLabel"></span>
+              Selected plan
               <select x-model="selectedPlan">
                 <template x-for="plan in plans" :key="plan.name">
                   <option :value="plan.name" x-text="plan.name"></option>
@@ -167,12 +167,12 @@
               </select>
             </label>
             <label>
-              <span x-text="content.modal.billingNoteLabel"></span>
-              <textarea x-model="billingNote" :placeholder="content.modal.billingNotePlaceholder"></textarea>
+              Billing note
+              <textarea x-model="billingNote" placeholder="Example: upgrade before next campaign launch"></textarea>
             </label>
             <footer>
-              <button type="button" aria-label="Cancel upgrade" class="secondary" @click="modalOpen = false" x-text="content.modal.cancel"></button>
-              <button type="submit" aria-label="Save mock upgrade" x-text="content.modal.submit"></button>
+              <button type="button" class="secondary" @click="modalOpen = false">Cancel</button>
+              <button type="submit">Save mock upgrade</button>
             </footer>
           </form>
         </article>
@@ -180,3 +180,4 @@
     </main>
   </body>
 </html>
+

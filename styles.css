@@ -6,6 +6,7 @@
 [data-theme="light"] {
   --pico-font-family-sans-serif: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --pico-font-family: var(--pico-font-family-sans-serif);
+  --pico-font-size: 0.9375rem;  /* 15px — scale down from Pico's 18px default */
   --pico-line-height: 1.5;
   --pico-border-radius: 0.625rem;
 
