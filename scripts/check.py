@@ -60,6 +60,9 @@ ALPINE_EVAL_ATTRS = {
     ":placeholder",
     ":value",
 }
+PLACEHOLDER_ROUTE_RE = re.compile(r"(^|/)(?:_|templates?)(?:/|$)|\{[^/]+\}|change-me", re.I)
+PLACEHOLDER_TITLE_RE = re.compile(r"^(?:page title|feature title|customer name|change me|legal page template)$|\{[^}]+\}", re.I)
+RAW_MARKDOWN_BINDING_RE = re.compile(r"\b(?:body|markdown|content|copy)\b", re.I)
 NODE_RUNTIME_SCRIPT = r"""
 const fs = require("fs");
 const path = require("path");
@@ -141,9 +144,11 @@ class DraftpineHTMLParser(HTMLParser):
         self.root_x_data: str | None = None
         self.alpine_expressions: list[str] = []
         self.x_for_vars: set[str] = set()
+        self.elements: list[dict[str, object]] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         attr = {key: value or "" for key, value in attrs}
+        self.elements.append({"tag": tag, "attrs": attr, "line": self.getpos()[0]})
         self.tags.add(tag)
         if "x-data" in attr and self.root_x_data is None:
             self.root_x_data = attr["x-data"]
@@ -456,6 +461,7 @@ def is_allowed_static_json_fetch(target: str) -> bool:
     path = parsed.path
     return (
         path.endswith(".json")
+        and not path.startswith("/")
         and not path.startswith("//")
         and ".." not in Path(path).parts
     )
@@ -483,9 +489,85 @@ def validate_fetch_calls(source: str, findings: list[dict[str, object]]) -> None
             "runtime.no-backend-calls.fetch",
             "index.html/app.js/styles.css",
             f"Forbidden fetch target detected: {target}.",
-            "Only fetch local static JSON files such as './content/pages/home.json'. Do not call remote APIs or dynamic backends.",
+            "Only fetch relative local static JSON files such as './content/pages/home.json'. Do not call remote APIs or root-absolute paths.",
             evidence=match.group(0),
         ))
+
+
+def validate_quality_gate(parser: DraftpineHTMLParser, config: dict[str, object], findings: list[dict[str, object]], passes: list[dict[str, object]]) -> None:
+    raw_markdown_elements = [
+        element
+        for element in parser.elements
+        if element["tag"] == "pre"
+        and RAW_MARKDOWN_BINDING_RE.search(str(element["attrs"].get("x-text", "")))
+    ]
+    for element in raw_markdown_elements:
+        findings.append(finding(
+            "error",
+            "quality.no-raw-markdown-dump",
+            "index.html",
+            "A <pre> element renders a raw content/body/markdown binding.",
+            "Transform content into composed sections, cards, tables, CTAs, or lists instead of dumping Markdown source into the UI.",
+            int(element["line"]),
+            evidence=str(element["attrs"].get("x-text", "")),
+        ))
+
+    required_interactions = config.get("requiredInteractions", [])
+    has_filter = "filter" in parser.interactions or (
+        isinstance(required_interactions, list) and "filter" in required_interactions
+    )
+    if has_filter and not parser.x_for_vars:
+        findings.append(finding(
+            "error",
+            "quality.filter-renders-collection",
+            "index.html",
+            "A filter interaction exists but the page does not render a dynamic collection.",
+            "Use x-for with a filtered collection, or remove the filter interaction if it only decorates a static list."
+        ))
+    elif has_filter:
+        passes.append({"rule": "quality.filter-renders-collection", "file": "index.html"})
+
+    if raw_markdown_elements:
+        return
+    passes.append({"rule": "quality.no-raw-markdown-dump", "file": "index.html"})
+
+
+def is_placeholder_route(path: str, title: str, file: str) -> bool:
+    return bool(
+        PLACEHOLDER_ROUTE_RE.search(path)
+        or PLACEHOLDER_ROUTE_RE.search(file)
+        or PLACEHOLDER_TITLE_RE.search(title.strip())
+    )
+
+
+def validate_route_page_paths(parser: DraftpineHTMLParser, file: str, route_path: str, findings: list[dict[str, object]]) -> None:
+    for href in parser.links:
+        if href in {"/styles.css", "/app.css"}:
+            findings.append(finding(
+                "error",
+                f"route.github-pages-asset.{route_path}",
+                file,
+                f"Route '{route_path}' links a root-absolute stylesheet: {href}.",
+                "Use a relative path from this route file to styles.css so GitHub Pages subpath previews work."
+            ))
+    for src in parser.scripts:
+        if src in {"/app.js"}:
+            findings.append(finding(
+                "error",
+                f"route.github-pages-asset.{route_path}",
+                file,
+                f"Route '{route_path}' links a root-absolute script: {src}.",
+                "Use a relative path from this route file to app.js so GitHub Pages subpath previews work."
+            ))
+    for href in parser.anchors:
+        if is_local_anchor(href) and href.startswith("/") and not href.startswith("//"):
+            findings.append(finding(
+                "error",
+                f"route.github-pages-link.{route_path}",
+                file,
+                f"Route '{route_path}' contains a root-absolute local link: {href}.",
+                "Use relative links such as './pricing/' or '../' so the browsable prototype works under a GitHub Pages project path."
+            ))
 
 
 def validate_content_files(config: dict[str, object], findings: list[dict[str, object]], passes: list[dict[str, object]]) -> None:
@@ -584,6 +666,7 @@ def validate_routes(config: dict[str, object], findings: list[dict[str, object]]
                 f"Route '{raw_path}' must include a non-empty title.",
                 "Add a concise title for the route."
             ))
+            title = ""
         if not isinstance(file, str) or not is_safe_route_file(file):
             findings.append(finding(
                 "error",
@@ -595,6 +678,14 @@ def validate_routes(config: dict[str, object], findings: list[dict[str, object]]
             continue
 
         path = normalize_route_path(raw_path)
+        if is_placeholder_route(path, title, file):
+            findings.append(finding(
+                "error",
+                f"route.no-placeholder.{path}",
+                "draftpine.config.json",
+                f"Configured route '{path}' looks like a template or placeholder route.",
+                "Remove internal templates and unresolved placeholder routes from public browsable prototypes, or replace them with concrete route names."
+            ))
         route_paths.add(path)
         route_files.append(file)
 
@@ -603,6 +694,7 @@ def validate_routes(config: dict[str, object], findings: list[dict[str, object]]
             passes.append({"rule": f"route.file.{path}", "file": file})
             parser = DraftpineHTMLParser()
             parser.feed(read_text(route_file))
+            validate_route_page_paths(parser, file, path, findings)
             for href in parser.anchors:
                 if is_local_anchor(href):
                     anchor_paths.add(normalize_route_path(href))
@@ -935,6 +1027,7 @@ def check_project(strict: bool = False, runtime: bool = False) -> dict[str, obje
                 evidence="counted after the Screen helpers marker" if found_marker else "Screen helpers marker missing; counted the whole file",
             ))
 
+    validate_quality_gate(parser, config, findings, passes)
     validate_routes(config, findings, passes)
     validate_content_files(config, findings, passes)
     if runtime:

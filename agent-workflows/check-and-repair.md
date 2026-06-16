@@ -16,4 +16,16 @@ link so the page can be reached in the browser.
 
 For JSON content mode, content errors are also real product issues: create the
 missing JSON file, fix invalid JSON, or remove stale entries from
-`contentFiles`. Remote fetches are not allowed; use local static `.json` files.
+`contentFiles`. Remote fetches and root-absolute fetches are not allowed; use
+relative local static `.json` files.
+
+Checker pass is the mechanical gate, not the whole quality bar. Before
+finishing, inspect the result for these common failure modes:
+
+- Raw Markdown, SEO notes, or planning outlines dumped into `<pre>` instead of
+  composed UI sections.
+- Internal template routes, `{placeholder}` routes, or `change-me` routes shown
+  as public pages.
+- Filters, tabs, modals, or theme controls that do not change visible UI state.
+- Root-absolute local links or assets (`/styles.css`, `/app.js`, `/pricing/`)
+  that will break under a GitHub Pages project path.

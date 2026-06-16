@@ -46,12 +46,15 @@ Do not skip the four onboarding questions because of remembered project context,
 5. In `single-screen` mode, edit only `index.html`, `styles.css`, `app.js`, and `draftpine.config.json` unless the user asks for project-level changes.
 6. In `browsable` mode, keep `/` as the homepage, add route folders such as `pricing/index.html` or `compare/steel-vs-browserbase/index.html`, update shared links, and declare every page in `draftpine.config.json` `routes`.
 7. Use JSON content mode when the prototype has enough real copy/data that layout and content should be reviewed separately.
-8. Use plain HTML, CSS, and JavaScript.
-9. Use Pico CSS v2 from a CDN for visual defaults.
-10. Use Alpine.js v3 from a CDN for local prototype behavior.
-11. Run `python3 scripts/check.py --runtime --json`.
-12. Fix every `error` in `next_actions`, then rerun the check until it passes.
-13. Deploy to GitHub Pages only when the user explicitly asks to publish or deploy.
+8. Convert content into product UI. Do not dump Markdown, planning notes, SEO notes, or source outlines into `<pre>` blocks as the primary screen.
+9. Filter out internal templates and unresolved placeholders from public routes unless the user explicitly asks to inspect templates.
+10. Use plain HTML, CSS, and JavaScript.
+11. Use Pico CSS v2 from a CDN for visual defaults.
+12. Use Alpine.js v3 from a CDN for local prototype behavior.
+13. Run `python3 scripts/check.py --runtime --json`.
+14. Fix every `error` in `next_actions`, then rerun the check until it passes.
+15. Do a quality pass after the checker: first viewport, primary action, real layout, real interactions, and GitHub Pages path safety.
+16. Deploy to GitHub Pages only when the user explicitly asks to publish or deploy.
 
 ## Prototype Modes
 
@@ -75,6 +78,7 @@ Rules:
 - Keep `index.html` as the homepage or entry screen.
 - Add pages at static route folders, for example `compare/steel-vs-browserbase/index.html`.
 - Use relative links that work in local preview and GitHub Pages, for example `./compare/steel-vs-browserbase/` from the homepage and `../../` back to home from nested pages.
+- Use relative asset paths from every route page. For nested pages, link back to shared files with paths like `../styles.css` or `../../app.js`; do not use `/styles.css`, `/app.js`, or `/content/...` because project-path GitHub Pages deploys will break.
 - Declare routes in `draftpine.config.json`.
 - Do not archive prior screens into disconnected folders unless the user explicitly asks for throwaway snapshots.
 - After adding a page, link to it from nav, CTA, related links, or an index page so it is browsable.
@@ -100,6 +104,7 @@ Use `json` mode when the user wants a browsable prototype, IA-backed pages, repe
 - Store copy and fake data in `content/*.json` or `content/pages/*.json`.
 - Declare every content file in `draftpine.config.json` `contentFiles`.
 - Load content with literal local static JSON fetches only, for example `fetch("./content/pages/home.json")`; the checker allows these and blocks dynamic or remote fetches.
+- For nested route pages, either fetch route-local JSON with a correct relative path or keep enough inline fallback content that the page remains useful if JSON is unavailable.
 - Do not fetch remote URLs or dynamic APIs.
 - Preview through `python3 -m http.server 5173`; direct file-open previews may not load JSON because browsers block local file fetches.
 
@@ -190,9 +195,12 @@ A Draftpine wireframe is acceptable when:
 - `index.html` opens directly for inline content mode, or through `python3 -m http.server 5173` for JSON content mode.
 - The screen has a clear title, target user context, and primary action.
 - Fake data is realistic enough to support product thinking.
+- Source content has been transformed into UI structure: hero, navigation, tables, proof panels, forms, lists, pricing, comparison grids, or workflow states. Raw Markdown dumps are not acceptable as the main page body.
+- Browsable IA prototypes omit internal templates, `{placeholder}` paths, and `change-me` pages from the public route list unless those are the intentional subject of the prototype.
 - The first viewport feels intentionally composed: the hero is dense enough to show the primary proof and a hint of the next section, with no large dead bands of whitespace.
 - Product proof panels show concrete UI artifacts, code, data, session state, output, or workflow state rather than quiet placeholder boxes.
 - Empty, error, warning, and success states exist when they change the flow.
+- Filter, tabs, modal, and theme interactions change visible UI state; decorative controls that do nothing are not acceptable.
 - Forms have labels and buttons have text or `aria-label`.
 - Layout is responsive without fixed desktop-only widths.
 - `python3 scripts/check.py --runtime --json` returns `"status": "pass"`.

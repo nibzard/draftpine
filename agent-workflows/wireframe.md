@@ -9,9 +9,12 @@ Use this workflow when the user asks for a new or revised Draftpine wireframe.
 5. Read `patterns/README.md` and the relevant pattern files.
 6. Choose a concise pattern recipe; inspect `examples/` only as reference if needed.
 7. For `single-screen`, update the root `index.html`, `styles.css`, `app.js`, and `draftpine.config.json`.
-8. For `browsable`, keep `/` as the homepage, add route folders for new pages, wire real links, and update `draftpine.config.json` `routes`.
-9. For JSON content mode, put copy/data in `content/*.json`, declare files in `contentFiles`, and load only local static JSON.
-10. Include `data-draftpine-*` markers for required actions, states, and interactions.
-11. Run `python3 scripts/check.py --runtime --json`.
-12. Fix all errors in `next_actions` and rerun until passing.
-13. Summarize the implemented pattern recipe, routes, content files, states, and interactions.
+8. For `browsable`, keep `/` as the homepage, add route folders for new pages, wire real relative links, and update `draftpine.config.json` `routes`.
+9. Exclude internal templates, unresolved `{placeholder}` routes, and `change-me` pages from public route maps unless the user explicitly asks for template inspection.
+10. For JSON content mode, put copy/data in `content/*.json`, declare files in `contentFiles`, and load only relative local static JSON.
+11. Transform source material into page UI. Do not use raw Markdown dumps as the main screen body.
+12. Include `data-draftpine-*` markers for required actions, states, and interactions.
+13. Make interactions real: filters should render filtered collections, tabs should switch panels, and modals should open/close.
+14. Run `python3 scripts/check.py --runtime --json`.
+15. Fix all errors in `next_actions` and rerun until passing.
+16. Summarize the implemented pattern recipe, routes, content files, states, and interactions.

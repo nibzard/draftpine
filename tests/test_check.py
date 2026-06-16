@@ -459,6 +459,150 @@ class FetchValidationTests(unittest.TestCase):
         self.assertEqual(result["status"], "fail")
         self.assertIn("runtime.no-backend-calls.fetch", rules_for(result, "runtime.no-backend-calls.fetch"))
 
+    def test_root_absolute_json_fetch_is_blocked_for_github_pages(self) -> None:
+        scaffold_project(self.tmp)
+        (self.tmp / "app.js").write_text(
+            'async function app() { return fetch("/content/pages/site.json"); }\n',
+            encoding="utf-8",
+        )
+        result = check.check_project()
+        self.assertEqual(result["status"], "fail")
+        self.assertIn("runtime.no-backend-calls.fetch", rules_for(result, "runtime.no-backend-calls.fetch"))
+
+
+class QualityGateTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self._saved_root = check.ROOT
+        self._tmpdir = tempfile.TemporaryDirectory()
+        self.tmp = Path(self._tmpdir.name)
+        check.ROOT = self.tmp
+
+    def tearDown(self) -> None:
+        check.ROOT = self._saved_root
+        self._tmpdir.cleanup()
+
+    def test_raw_markdown_body_dump_fails(self) -> None:
+        scaffold_project(
+            self.tmp,
+            copy="<pre x-text=\"currentPage?.body || 'No content'\">No content</pre>",
+        )
+        result = check.check_project()
+        self.assertEqual(result["status"], "fail")
+        self.assertIn("quality.no-raw-markdown-dump", rules_for(result, "quality.no-raw-markdown-dump"))
+
+    def test_filter_interaction_requires_rendered_collection(self) -> None:
+        scaffold_project(
+            self.tmp,
+            copy='<label data-draftpine-interaction="filter">Search <input x-model="query" /></label><ul><li>Static item</li></ul>',
+        )
+        (self.tmp / "draftpine.config.json").write_text(
+            """{
+  "screen": "Test",
+  "audience": "tester",
+  "userGoal": "verify",
+  "primaryAction": "Go",
+  "requiredStates": [],
+  "requiredInteractions": ["filter"]
+}
+""",
+            encoding="utf-8",
+        )
+        result = check.check_project()
+        self.assertEqual(result["status"], "fail")
+        self.assertIn("quality.filter-renders-collection", rules_for(result, "quality.filter-renders-collection"))
+
+    def test_filter_interaction_passes_with_x_for_collection(self) -> None:
+        scaffold_project(
+            self.tmp,
+            copy=(
+                '<label data-draftpine-interaction="filter">Search <input x-model="query" /></label>'
+                '<template x-for="item in filteredItems" :key="item"><span x-text="item"></span></template>'
+            ),
+        )
+        (self.tmp / "draftpine.config.json").write_text(
+            """{
+  "screen": "Test",
+  "audience": "tester",
+  "userGoal": "verify",
+  "primaryAction": "Go",
+  "requiredStates": [],
+  "requiredInteractions": ["filter"]
+}
+""",
+            encoding="utf-8",
+        )
+        result = check.check_project()
+        self.assertEqual(result["status"], "pass", result["next_actions"])
+
+    def test_placeholder_routes_fail(self) -> None:
+        scaffold_project(self.tmp)
+        (self.tmp / "draftpine.config.json").write_text(
+            """{
+  "screen": "Test",
+  "audience": "tester",
+  "userGoal": "verify",
+  "primaryAction": "Go",
+  "prototypeMode": "browsable",
+  "requiredStates": [],
+  "requiredInteractions": [],
+  "routes": [
+    { "path": "/", "title": "Home", "file": "index.html" },
+    { "path": "/features/change-me/", "title": "Feature title", "file": "features/change-me/index.html" }
+  ]
+}
+""",
+            encoding="utf-8",
+        )
+        route_dir = self.tmp / "features" / "change-me"
+        route_dir.mkdir(parents=True)
+        (route_dir / "index.html").write_text("<main><a href=\"../../\">Home</a></main>", encoding="utf-8")
+        result = check.check_project()
+        self.assertEqual(result["status"], "fail")
+        self.assertIn("route.no-placeholder./features/change-me/", rules_for(result, "route.no-placeholder"))
+
+    def test_browsable_route_pages_must_not_use_root_absolute_assets_or_links(self) -> None:
+        scaffold_project(self.tmp)
+        html_path = self.tmp / "index.html"
+        html_path.write_text(
+            html_path.read_text(encoding="utf-8").replace("</main>", '<a href="./pricing/">Pricing</a></main>'),
+            encoding="utf-8",
+        )
+        route_dir = self.tmp / "pricing"
+        route_dir.mkdir()
+        (route_dir / "index.html").write_text(
+            """<!doctype html>
+<html>
+  <head>
+    <link rel="stylesheet" href="/styles.css" />
+    <script defer src="/app.js"></script>
+  </head>
+  <body><main><a href="/">Home</a></main></body>
+</html>
+""",
+            encoding="utf-8",
+        )
+        (self.tmp / "draftpine.config.json").write_text(
+            """{
+  "screen": "Test",
+  "audience": "tester",
+  "userGoal": "verify",
+  "primaryAction": "Go",
+  "prototypeMode": "browsable",
+  "requiredStates": [],
+  "requiredInteractions": [],
+  "routes": [
+    { "path": "/", "title": "Home", "file": "index.html" },
+    { "path": "/pricing/", "title": "Pricing", "file": "pricing/index.html" }
+  ]
+}
+""",
+            encoding="utf-8",
+        )
+        result = check.check_project()
+        self.assertEqual(result["status"], "fail")
+        self.assertIn("route.github-pages-asset./pricing/", rules_for(result, "route.github-pages-asset"))
+        self.assertIn("route.github-pages-link./pricing/", rules_for(result, "route.github-pages-link"))
+
 
 class AccessibilityParsingTests(unittest.TestCase):
     def setUp(self) -> None:
