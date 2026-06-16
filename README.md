@@ -22,13 +22,13 @@ You bring the product idea. Draftpine handles the guardrails.
 **1. Paste this into your coding agent to set up the project:**
 
 ```text
-Clone https://github.com/nibzard/draftpine into a new folder and set it up so we can start
-prototyping wireframes. Read AGENTS.md to learn the rules, run `python3 scripts/check.py --json`
-to confirm the starter passes, start a local preview at http://localhost:5173, then ask me which
-screen to build first.
+Clone https://github.com/nibzard/draftpine into a new subfolder named wireframe,
+remove wireframe/.git so the prototype is ordinary project files, read AGENTS.md,
+run `python3 scripts/check.py --json` to confirm the starter passes, start a local
+preview at http://localhost:5173, then ask me which screen or prototype flow to build first.
 ```
 
-The agent clones the repo, reads the contract, verifies the checker is green, and serves the starter wireframe locally. You're now ready to prototype.
+The agent clones the kit into `wireframe/`, removes the cloned upstream Git metadata, reads the contract, verifies the checker is green, and serves the starter wireframe locally. You're now ready to prototype. Keep `.git` only when you are contributing to Draftpine itself.
 
 **2. Whenever you want a screen, describe it:**
 

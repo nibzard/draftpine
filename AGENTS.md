@@ -4,6 +4,10 @@ Draftpine is an agent-first static wireframe kit. Your job is to turn a user's p
 
 Draftpine is intentionally flexible. Do not force-fit prompts into a fixed app template. Build each screen from reusable patterns in `patterns/`, using `examples/` only as reference for finished-screen quality and stack conventions.
 
+## Setup In Another Project
+
+When using Draftpine inside another project, clone it into a subfolder named `wireframe/`, then remove `wireframe/.git` so the prototype becomes ordinary project files owned by the surrounding repo or workspace. Keep the cloned `.git` directory only when the user is explicitly contributing to Draftpine itself.
+
 ## First Run (New Project Onboarding)
 
 Before doing anything else, decide whether this is a fresh project. Treat it as fresh when **both** are true:
