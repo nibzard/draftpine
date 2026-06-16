@@ -1,45 +1,47 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" font-family="'SF Mono','Cascadia Code','JetBrains Mono',Menlo,Consolas,monospace">
-  <!-- ABOUTME: Draftpine square mark — pine-only glitch glyph for avatars and favicons. -->
-  <!-- ABOUTME: Vapor Mint gradient, chromatic aberration, scanline overlay on indigo. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- ABOUTME: Draftpine square mark — crisp vector wireframe pine printed through coarsening -->
+  <!-- ABOUTME: halftone dot screens. No CMYK ghost plates, no blur. -->
   <defs>
-    <filter id="g" x="-40%" y="-40%" width="180%" height="180%">
-      <feGaussianBlur stdDeviation="1.4" result="b"/>
-      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
-    <linearGradient id="vapor2" x1="0" y1="0" x2="0" y2="1">
+    <linearGradient id="vapor" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#7CF5C4"/>
       <stop offset="0.55" stop-color="#7C9BFF"/>
       <stop offset="1" stop-color="#C49BFF"/>
     </linearGradient>
-    <pattern id="scan2" width="5" height="3" patternUnits="userSpaceOnUse">
-      <rect width="5" height="3" fill="#15132B"/>
-      <rect width="5" height="0.8" y="2" fill="#000" opacity="0.3"/>
+
+    <!-- halftone screens: dot size grows tier by tier (print resolution coarsens) -->
+    <pattern id="dotFine" width="9" height="9" patternUnits="userSpaceOnUse">
+      <circle cx="4.5" cy="4.5" r="1.4" fill="#7CF5C4"/>
     </pattern>
-    <text id="p" font-size="16" xml:space="preserve">
-      <tspan x="0" y="18">      /\</tspan>
-      <tspan x="0" dy="16">     ┌──┐</tspan>
-      <tspan x="0" dy="16">     │▒▒│</tspan>
-      <tspan x="0" dy="16">    ┌┴──┴┐</tspan>
-      <tspan x="0" dy="16">    │▒▒▒▒│</tspan>
-      <tspan x="0" dy="16">   ┌┴────┴┐</tspan>
-      <tspan x="0" dy="16">   │▒░╳▒░▒│</tspan>
-      <tspan x="0" dy="16">  ┌┴──────┴┐</tspan>
-      <tspan x="0" dy="16">  │▒░▒░▒░▒░│</tspan>
-      <tspan x="0" dy="16"> ┌┴────────┴┐</tspan>
-      <tspan x="0" dy="16"> │▒░▒░▒░▒░▒░│</tspan>
-      <tspan x="0" dy="16"> └────┬┬────┘</tspan>
-      <tspan x="0" dy="16">      ┃┃</tspan>
-    </text>
+    <pattern id="dotMid" width="12" height="12" patternUnits="userSpaceOnUse">
+      <circle cx="6" cy="6" r="2.2" fill="#7C9BFF"/>
+    </pattern>
+    <pattern id="dotCoarse" width="16" height="16" patternUnits="userSpaceOnUse">
+      <circle cx="8" cy="8" r="3.4" fill="#C49BFF"/>
+    </pattern>
+
+    <g id="outline" fill="none" stroke-width="3" stroke-linejoin="round">
+      <path d="M128 46 L106 74 L150 74 Z"/>
+      <rect x="96"  y="74"  width="64"  height="30" rx="2"/>
+      <rect x="74"  y="110" width="108" height="40" rx="2"/>
+      <rect x="52"  y="156" width="152" height="50" rx="2"/>
+      <rect x="120" y="206" width="16"  height="30" rx="1"/>
+    </g>
   </defs>
 
   <rect width="256" height="256" rx="52" fill="#15132B"/>
-  <g transform="translate(70,18)">
-    <use href="#p" fill="#C49BFF" opacity="0.65" transform="translate(-1.5,0.4)"/>
-    <use href="#p" fill="#7CF5C4" opacity="0.65" transform="translate(1.5,-0.4)"/>
-    <use href="#p" fill="url(#vapor2)" filter="url(#g)"/>
-    <svg x="0" y="132" width="150" height="13" overflow="hidden">
-      <use href="#p" y="-132" fill="#7CF5C4" transform="translate(5,0)"/>
-    </svg>
+
+  <!-- halftone-printed fills -->
+  <path d="M128 49 L109 73 L147 73 Z" fill="url(#dotFine)"/>
+  <rect x="98"  y="76"  width="60"  height="26" fill="url(#dotFine)"/>
+  <rect x="76"  y="112" width="104" height="36" fill="url(#dotMid)"/>
+  <rect x="54"  y="158" width="148" height="46" fill="url(#dotCoarse)"/>
+
+  <!-- crisp gradient outline -->
+  <use href="#outline" stroke="url(#vapor)"/>
+
+  <!-- registration mark = wireframe image placeholder -->
+  <g stroke="#E7ECFF" stroke-width="1.6" fill="none" opacity="0.9">
+    <circle cx="128" cy="130" r="7"/>
+    <path d="M128 119 V141 M117 130 H139"/>
   </g>
-  <rect width="256" height="256" rx="52" fill="url(#scan2)" opacity="0.13"/>
 </svg>

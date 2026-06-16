@@ -17,12 +17,7 @@
     "requiredInteractions": {
       "type": "array",
       "items": { "type": "string" }
-    },
-    "allowedFiles": {
-      "type": "array",
-      "items": { "type": "string" }
     }
   },
   "additionalProperties": true
 }
-

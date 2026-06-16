@@ -11,16 +11,75 @@
   </head>
   <body>
     <main class="container" x-data="pipelineTemplate()">
-      <nav><ul><li><strong>Pipeline</strong></li></ul><ul><li><button data-draftpine-action="primary" data-draftpine-interaction="modal" @click="modalOpen = true">Add deal</button></li></ul></nav>
-      <header class="page-header"><p class="eyebrow">Sales workspace</p><h1>CRM pipeline</h1><p>Review deal stages, search active opportunities, and mock the add-deal flow.</p></header>
-      <label data-draftpine-interaction="filter">Search deals<input type="search" x-model="query" placeholder="Search account or stage" /></label>
-      <section class="empty-state" data-draftpine-state="empty" x-show="filteredDeals.length === 0"><h2>No deals match</h2><button type="button" @click="query = ''">Clear search</button></section>
-      <section class="pipeline" data-draftpine-state="default">
-        <template x-for="stage in stages" :key="stage"><article><header><strong x-text="stage"></strong></header><template x-for="deal in dealsFor(stage)" :key="deal.account"><section class="deal"><strong x-text="deal.account"></strong><p x-text="deal.value"></p></section></template></article></template>
+      <nav>
+        <ul>
+          <li><strong>Pipeline</strong></li>
+        </ul>
+        <ul>
+          <li>
+            <button data-draftpine-action="primary" data-draftpine-interaction="modal" @click="modalOpen = true">
+              Add deal
+            </button>
+          </li>
+        </ul>
+      </nav>
+
+      <header class="page-header">
+        <p class="eyebrow">Sales workspace</p>
+        <h1>CRM pipeline</h1>
+        <p>Review deal stages, search active opportunities, and mock the add-deal flow.</p>
+      </header>
+
+      <label data-draftpine-interaction="filter">
+        Search deals
+        <input type="search" x-model="query" placeholder="Search account or stage" />
+      </label>
+
+      <section class="empty-state" data-draftpine-state="empty" x-show="filteredDeals.length === 0">
+        <h2>No deals match</h2>
+        <button type="button" @click="query = ''">Clear search</button>
       </section>
-      <section class="success-state" data-draftpine-state="success" x-show="saved">Deal added in the prototype.</section>
-      <dialog data-draftpine-interaction="modal" :open="modalOpen"><article><header><button type="button" aria-label="Close modal" rel="prev" @click="modalOpen = false"></button><strong>Add deal</strong></header><form @submit.prevent="saved = true; modalOpen = false"><label>Account<input placeholder="Acme" /></label><label>Value<input placeholder="$24k" /></label><footer><button type="button" class="secondary" @click="modalOpen = false">Cancel</button><button type="submit">Save mock deal</button></footer></form></article></dialog>
+
+      <section class="pipeline" data-draftpine-state="default">
+        <template x-for="stage in stages" :key="stage">
+          <article>
+            <header><strong x-text="stage"></strong></header>
+            <template x-for="deal in dealsFor(stage)" :key="deal.account">
+              <section class="deal">
+                <strong x-text="deal.account"></strong>
+                <p x-text="deal.value"></p>
+              </section>
+            </template>
+          </article>
+        </template>
+      </section>
+
+      <section class="success-state" data-draftpine-state="success" x-show="saved">
+        Deal added in the prototype.
+      </section>
+
+      <dialog data-draftpine-interaction="modal" :open="modalOpen">
+        <article>
+          <header>
+            <button type="button" aria-label="Close modal" rel="prev" @click="modalOpen = false"></button>
+            <strong>Add deal</strong>
+          </header>
+          <form @submit.prevent="saved = true; modalOpen = false">
+            <label>
+              Account
+              <input placeholder="Acme" />
+            </label>
+            <label>
+              Value
+              <input placeholder="$24k" />
+            </label>
+            <footer>
+              <button type="button" class="secondary" @click="modalOpen = false">Cancel</button>
+              <button type="submit">Save mock deal</button>
+            </footer>
+          </form>
+        </article>
+      </dialog>
     </main>
   </body>
 </html>
-
