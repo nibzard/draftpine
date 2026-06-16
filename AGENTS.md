@@ -13,7 +13,7 @@ When using Draftpine inside another project, clone it into a subfolder named `wi
 Before doing anything else, decide whether this is a fresh project. Treat it as fresh when **both** are true:
 
 - The user has not yet described a screen in this conversation (they only asked to set up or start prototyping).
-- The root wireframe is still the shipped starter — `draftpine.config.json` reads `"screen": "Usage billing dashboard"` and includes billing-dashboard-style `patterns`, and `index.html` is the unmodified billing demo.
+- The root wireframe is still the shipped starter — `draftpine.config.json` reads `"screen": "Prototype brief workspace"` and includes starter-workspace-style `patterns`, and `index.html` is the unmodified starter workspace.
 
 When it is a fresh project, **do not start editing**. Onboard the user first:
 
@@ -32,6 +32,8 @@ When it is a fresh project, **do not start editing**. Onboard the user first:
    - Say "deploy" when they want it published to GitHub Pages.
 
 If the user already described a screen, or the root wireframe has been customized, skip onboarding and go straight to the Happy Path.
+
+Do not skip the four onboarding questions because of remembered project context, existing IA documents, prior Draftpine clones, previous conversations, competitive research, or inferred goals. Only skip onboarding when the user has described the screen or flow in the current conversation, or when the root wireframe has already been customized away from the shipped starter.
 
 ## Happy Path
 

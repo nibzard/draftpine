@@ -1,12 +1,12 @@
 {
-  "screen": "Usage billing dashboard",
-  "audience": "startup founder",
-  "userGoal": "Understand current usage before upgrading",
-  "primaryAction": "Upgrade plan",
+  "screen": "Prototype brief workspace",
+  "audience": "product builder",
+  "userGoal": "Turn a rough product idea into the first Draftpine screen packet",
+  "primaryAction": "Start first screen",
   "prototypeMode": "single-screen",
   "contentMode": "json",
-  "contentFiles": ["content/pages/usage-billing-dashboard.json"],
-  "patterns": ["app shell", "summary cards", "tabs", "usage chart placeholder", "data table", "pricing table", "modal", "filter bar"],
-  "requiredStates": ["default", "empty", "over-limit", "success"],
+  "contentFiles": ["content/pages/prototype-brief-workspace.json"],
+  "patterns": ["app shell", "outcome hero", "brief checklist", "tabs", "filter bar", "modal", "state callouts"],
+  "requiredStates": ["default", "empty", "success"],
   "requiredInteractions": ["tabs", "modal", "filter"]
 }

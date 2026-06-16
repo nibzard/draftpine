@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
-    <title>Draftpine - Usage Billing Wireframe</title>
+    <title>Draftpine - Prototype Brief Workspace</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
@@ -14,165 +14,139 @@
     <script defer src="./app.js"></script>
   </head>
   <body>
-    <main class="container" x-data="billingWireframe()">
+    <main class="container" x-data="prototypeBriefWorkspace()" x-init="init()">
       <nav aria-label="Primary">
         <ul>
-          <li><strong>Draftpine Billing</strong></li>
+          <li><strong x-text="content.brand">Draftpine</strong></li>
         </ul>
         <ul>
-          <li><a href="#usage" @click.prevent="tab = 'usage'" :aria-current="tab === 'usage' ? 'page' : null">Usage</a></li>
-          <li><a href="#invoices" @click.prevent="tab = 'invoices'" :aria-current="tab === 'invoices' ? 'page' : null">Invoices</a></li>
-          <li><a href="#plans" @click.prevent="tab = 'plans'" :aria-current="tab === 'plans' ? 'page' : null">Plans</a></li>
+          <li><a href="#brief" @click.prevent="tab = 'brief'" :aria-current="tab === 'brief' ? 'page' : null" x-text="content.nav.brief">Brief</a></li>
+          <li><a href="#recipe" @click.prevent="tab = 'recipe'" :aria-current="tab === 'recipe' ? 'page' : null" x-text="content.nav.recipe">Recipe</a></li>
+          <li><a href="#states" @click.prevent="tab = 'states'" :aria-current="tab === 'states' ? 'page' : null" x-text="content.nav.states">States</a></li>
         </ul>
       </nav>
 
       <header class="page-header">
         <div>
-          <p class="eyebrow">Startup founder view</p>
-          <h1>Usage billing dashboard</h1>
-          <p>Understand this month's usage, review invoice status, and choose whether to upgrade before the limit blocks growth.</p>
+          <p class="eyebrow" x-text="content.header.eyebrow">Fresh project starter</p>
+          <h1 x-text="content.header.title">Prototype brief workspace</h1>
+          <p x-text="content.header.description">A neutral first screen for gathering the product, user, primary action, and deliberate omissions before Draftpine replaces the starter with the real wireframe.</p>
         </div>
-        <button data-draftpine-action="primary" data-draftpine-interaction="modal" @click="openUpgrade()">Upgrade plan</button>
+        <button data-draftpine-action="primary" data-draftpine-interaction="modal" @click="openBriefModal()" x-text="content.primaryAction">Start first screen</button>
       </header>
 
-      <section class="notice" data-draftpine-state="over-limit" x-show="usagePercent >= 90">
-        <strong>Usage warning:</strong>
-        <span>You are at <span x-text="usagePercent"></span>% of your monthly included runs. Upgrade before automations pause.</span>
+      <section class="notice" data-draftpine-state="default">
+        <strong x-text="content.notice.title">Agent contract:</strong>
+        <span x-text="content.notice.description">When this starter is still present, ask the four onboarding questions before editing.</span>
       </section>
 
-      <section class="grid summary-grid" aria-label="Usage summary">
-        <article>
-          <small>Runs used</small>
-          <h2 x-text="metrics.runs"></h2>
-          <progress max="100" :value="usagePercent"></progress>
-        </article>
-        <article>
-          <small>Projected bill</small>
-          <h2 x-text="metrics.projectedBill"></h2>
-          <p>Includes current overage estimate.</p>
-        </article>
-        <article>
-          <small>Next invoice</small>
-          <h2 x-text="metrics.nextInvoice"></h2>
-          <p>Due at the end of this billing period.</p>
-        </article>
+      <section class="grid question-grid" aria-label="First-run brief questions">
+        <template x-for="question in content.briefQuestions" :key="question.label">
+          <article>
+            <small>Onboarding question</small>
+            <h2 x-text="question.label"></h2>
+            <p x-text="question.hint"></p>
+          </article>
+        </template>
       </section>
 
       <section data-draftpine-interaction="tabs">
-        <div class="segmented" role="tablist" aria-label="Billing sections">
-          <button type="button" @click="tab = 'usage'" :aria-selected="tab === 'usage'">Usage</button>
-          <button type="button" @click="tab = 'invoices'" :aria-selected="tab === 'invoices'">Invoices</button>
-          <button type="button" @click="tab = 'plans'" :aria-selected="tab === 'plans'">Plans</button>
+        <div class="segmented" role="tablist" aria-label="Starter sections">
+          <button type="button" @click="tab = 'brief'" :aria-selected="tab === 'brief'" x-text="content.nav.brief">Brief</button>
+          <button type="button" @click="tab = 'recipe'" :aria-selected="tab === 'recipe'" x-text="content.nav.recipe">Recipe</button>
+          <button type="button" @click="tab = 'states'" :aria-selected="tab === 'states'" x-text="content.nav.states">States</button>
         </div>
 
-        <section id="usage" x-show="tab === 'usage'" data-draftpine-state="default">
+        <section id="brief" x-show="tab === 'brief'">
           <div class="section-heading">
             <div>
-              <h2>Usage trend</h2>
-              <p>Placeholder chart blocks keep this prototype dependency-free.</p>
+              <h2>Brief quality gate</h2>
+              <p>These are the fields an agent should gather before touching files.</p>
             </div>
           </div>
-          <div class="chart-placeholder" aria-label="Usage chart placeholder">
-            <template x-for="bar in usageBars" :key="bar.label">
-              <div>
-                <span :style="`height: ${bar.value}%`"></span>
-                <small x-text="bar.label"></small>
-              </div>
+          <div class="brief-board">
+            <template x-for="question in content.briefQuestions" :key="question.label">
+              <article>
+                <strong x-text="question.label"></strong>
+                <p x-text="question.hint"></p>
+              </article>
             </template>
           </div>
         </section>
 
-        <section id="invoices" x-show="tab === 'invoices'">
+        <section id="recipe" x-show="tab === 'recipe'">
           <div class="section-heading">
             <div>
-              <h2>Invoices</h2>
-              <p>Filter recent invoices and check payment state.</p>
+              <h2>Pattern recipe search</h2>
+              <p>Filter common starting points without treating them as templates.</p>
             </div>
             <label data-draftpine-interaction="filter">
-              Search invoices
-              <input type="search" placeholder="Search by invoice or status" x-model="invoiceQuery" />
+              Search examples
+              <input type="search" placeholder="Homepage, settings, comparison..." x-model="exampleQuery" />
             </label>
           </div>
 
-          <section class="empty-state" data-draftpine-state="empty" x-show="filteredInvoices.length === 0">
-            <h3>No invoices match this filter</h3>
-            <p>Clear the search to return to recent billing history.</p>
-            <button type="button" class="secondary" @click="invoiceQuery = ''">Clear search</button>
+          <section class="empty-state" data-draftpine-state="empty" x-show="filteredExamples.length === 0">
+            <h3 x-text="content.emptyState.title">No starter examples match</h3>
+            <p x-text="content.emptyState.description">Clear the filter and use the user's product prompt as the source of truth.</p>
+            <button type="button" class="secondary" @click="exampleQuery = ''" x-text="content.emptyState.action">Clear filter</button>
           </section>
 
-          <figure x-show="filteredInvoices.length > 0">
-            <table>
-              <thead>
-                <tr>
-                  <th>Invoice</th>
-                  <th>Date</th>
-                  <th>Amount</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <template x-for="invoice in filteredInvoices" :key="invoice.id">
-                  <tr>
-                    <td x-text="invoice.id"></td>
-                    <td x-text="invoice.date"></td>
-                    <td x-text="invoice.amount"></td>
-                    <td><mark x-text="invoice.status"></mark></td>
-                  </tr>
-                </template>
-              </tbody>
-            </table>
-          </figure>
-        </section>
-
-        <section id="plans" x-show="tab === 'plans'">
-          <div class="section-heading">
-            <div>
-              <h2>Plan comparison</h2>
-              <p>Choose the plan that matches expected run volume.</p>
-            </div>
-          </div>
-          <div class="grid plan-grid">
-            <template x-for="plan in plans" :key="plan.name">
+          <div class="recipe-list" x-show="filteredExamples.length > 0">
+            <template x-for="example in filteredExamples" :key="example.name">
               <article>
                 <header>
-                  <strong x-text="plan.name"></strong>
-                  <span x-text="plan.price"></span>
+                  <strong x-text="example.name"></strong>
                 </header>
-                <p x-text="plan.description"></p>
-                <button type="button" class="secondary" @click="openUpgrade(plan)">Choose <span x-text="plan.name"></span></button>
+                <p x-text="example.fit"></p>
+              </article>
+            </template>
+          </div>
+        </section>
+
+        <section id="states" x-show="tab === 'states'">
+          <div class="section-heading">
+            <div>
+              <h2>Starter states</h2>
+              <p>The shipped screen demonstrates the markers the checker expects.</p>
+            </div>
+          </div>
+          <div class="grid state-grid">
+            <template x-for="state in content.starterStates" :key="state.name">
+              <article>
+                <header>
+                  <strong x-text="state.name"></strong>
+                </header>
+                <p x-text="state.description"></p>
               </article>
             </template>
           </div>
         </section>
       </section>
 
-      <section class="success-state" data-draftpine-state="success" x-show="upgradeSaved">
-        <strong>Upgrade saved.</strong>
-        <span>The prototype shows the confirmation state after a plan change.</span>
+      <section class="success-state" data-draftpine-state="success" x-show="briefSaved">
+        <strong x-text="content.successState.title">Brief captured.</strong>
+        <span x-text="content.successState.description">This starter shows the confirmation state; the next step is replacing it with the requested screen.</span>
       </section>
 
       <dialog data-draftpine-interaction="modal" :open="modalOpen">
         <article>
           <header>
-            <button type="button" aria-label="Close upgrade modal" rel="prev" @click="modalOpen = false"></button>
-            <strong>Upgrade plan</strong>
+            <button type="button" aria-label="Close brief modal" rel="prev" @click="modalOpen = false"></button>
+            <strong x-text="content.modal.title">Start first screen</strong>
           </header>
-          <form @submit.prevent="saveUpgrade()">
+          <form @submit.prevent="saveBrief()">
             <label>
-              Selected plan
-              <select x-model="selectedPlan">
-                <template x-for="plan in plans" :key="plan.name">
-                  <option :value="plan.name" x-text="plan.name"></option>
-                </template>
-              </select>
+              <span x-text="content.modal.prototypeLabel">Prototype</span>
+              <input type="text" x-model="draftPrototype" :placeholder="content.modal.prototypePlaceholder" />
             </label>
             <label>
-              Billing note
-              <textarea x-model="billingNote" placeholder="Example: upgrade before next campaign launch"></textarea>
+              <span x-text="content.modal.audienceLabel">User and goal</span>
+              <textarea x-model="draftAudience" :placeholder="content.modal.audiencePlaceholder"></textarea>
             </label>
             <footer>
-              <button type="button" class="secondary" @click="modalOpen = false">Cancel</button>
-              <button type="submit">Save mock upgrade</button>
+              <button type="button" class="secondary" @click="modalOpen = false" x-text="content.modal.cancel">Cancel</button>
+              <button type="submit" x-text="content.modal.submit">Save mock brief</button>
             </footer>
           </form>
         </article>
@@ -180,4 +154,3 @@
     </main>
   </body>
 </html>
-

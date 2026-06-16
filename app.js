@@ -1,51 +1,91 @@
-function billingWireframe() {
-  return {
-    tab: "usage",
-    invoiceQuery: "",
-    modalOpen: false,
-    selectedPlan: "Growth",
-    billingNote: "",
-    upgradeSaved: false,
-    usagePercent: 92,
-    metrics: {
-      runs: "92k / 100k",
-      projectedBill: "$428",
-      nextInvoice: "Jun 30"
+function prototypeBriefWorkspace() {
+  const fallbackContent = {
+    screen: "Prototype brief workspace",
+    audience: "product builder",
+    userGoal: "Turn a rough product idea into the first Draftpine screen packet",
+    primaryAction: "Start first screen",
+    brand: "Draftpine",
+    nav: {
+      brief: "Brief",
+      recipe: "Recipe",
+      states: "States"
     },
-    usageBars: [
-      { label: "Jan", value: 38 },
-      { label: "Feb", value: 46 },
-      { label: "Mar", value: 54 },
-      { label: "Apr", value: 63 },
-      { label: "May", value: 76 },
-      { label: "Jun", value: 92 }
+    header: {
+      eyebrow: "Fresh project starter",
+      title: "Prototype brief workspace",
+      description: "A neutral first screen for gathering the product, user, primary action, and deliberate omissions before Draftpine replaces the starter with the real wireframe."
+    },
+    notice: {
+      title: "Agent contract:",
+      description: "When this starter is still present, ask the four onboarding questions before editing."
+    },
+    briefQuestions: [
+      { label: "What are you prototyping?", hint: "Product and first screen in one line." },
+      { label: "Who is the user?", hint: "Their role and the job they need done." },
+      { label: "What is the primary action?", hint: "The one action this screen should drive." },
+      { label: "What should be left out?", hint: "Auth, real backends, real charts, or other distractions." }
     ],
-    invoices: [
-      { id: "INV-1042", date: "Jun 1", amount: "$328", status: "Open" },
-      { id: "INV-1041", date: "May 1", amount: "$290", status: "Paid" },
-      { id: "INV-1040", date: "Apr 1", amount: "$240", status: "Paid" }
+    starterStates: [
+      { name: "Default", description: "The starter is ready and waiting for a real screen prompt." },
+      { name: "Empty", description: "Filtering can produce an empty list without breaking layout." },
+      { name: "Success", description: "The modal can record a mock brief and show completion feedback." }
     ],
-    plans: [
-      { name: "Starter", price: "$99/mo", description: "For early usage and occasional automations." },
-      { name: "Growth", price: "$299/mo", description: "More included runs with predictable overage." },
-      { name: "Scale", price: "$699/mo", description: "Higher limits for launch weeks and busy teams." }
+    examples: [
+      { name: "SaaS homepage", fit: "Outcome hero, proof, feature bento, final CTA" },
+      { name: "Settings screen", fit: "App shell, forms, empty state, confirmation" },
+      { name: "Comparison page", fit: "Hero, spec table, proof, conversion band" },
+      { name: "Onboarding flow", fit: "Checklist, invite form, progress, success state" }
     ],
-    get filteredInvoices() {
-      const query = this.invoiceQuery.trim().toLowerCase();
-      if (!query) return this.invoices;
-      return this.invoices.filter((invoice) =>
-        `${invoice.id} ${invoice.date} ${invoice.amount} ${invoice.status}`.toLowerCase().includes(query)
+    emptyState: {
+      title: "No starter examples match",
+      description: "Clear the filter and use the user's product prompt as the source of truth.",
+      action: "Clear filter"
+    },
+    successState: {
+      title: "Brief captured.",
+      description: "This starter shows the confirmation state; the next step is replacing it with the requested screen."
+    },
+    modal: {
+      title: "Start first screen",
+      prototypeLabel: "Prototype",
+      prototypePlaceholder: "Example: AI sales copilot homepage",
+      audienceLabel: "User and goal",
+      audiencePlaceholder: "Example: sales manager comparing pipeline risk",
+      cancel: "Cancel",
+      submit: "Save mock brief"
+    }
+  };
+
+  return {
+    content: fallbackContent,
+    tab: "brief",
+    exampleQuery: "",
+    modalOpen: false,
+    draftPrototype: "",
+    draftAudience: "",
+    briefSaved: false,
+    async init() {
+      try {
+        const response = await fetch("./content/pages/prototype-brief-workspace.json");
+        if (response.ok) this.content = await response.json();
+      } catch (error) {
+        console.warn("Using inline starter content because JSON could not be loaded.", error);
+      }
+    },
+    get filteredExamples() {
+      const query = this.exampleQuery.trim().toLowerCase();
+      if (!query) return this.content.examples;
+      return this.content.examples.filter((example) =>
+        `${example.name} ${example.fit}`.toLowerCase().includes(query)
       );
     },
-    openUpgrade(plan) {
-      if (plan) this.selectedPlan = plan.name;
-      this.upgradeSaved = false;
+    openBriefModal() {
+      this.briefSaved = false;
       this.modalOpen = true;
     },
-    saveUpgrade() {
+    saveBrief() {
       this.modalOpen = false;
-      this.upgradeSaved = true;
+      this.briefSaved = true;
     }
   };
 }
-

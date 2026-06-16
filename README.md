@@ -13,7 +13,7 @@
 
 ---
 
-Hand a coding agent a vague "make me a billing dashboard" and it tends to reach for React, a bundler, and an afternoon of setup. Draftpine removes that temptation. It's a small, opinionated workspace that gives the agent strict rules, reusable screen patterns, finished examples, and a checker that tells it exactly what to fix — so you get a throwaway wireframe or browsable static prototype in one pass, not a half-built app.
+Hand a coding agent a vague "make me a product screen" and it tends to reach for React, a bundler, and an afternoon of setup. Draftpine removes that temptation. It's a small, opinionated workspace that gives the agent strict rules, reusable screen patterns, finished examples, and a checker that tells it exactly what to fix — so you get a throwaway wireframe or browsable static prototype in one pass, not a half-built app.
 
 You bring the product idea. Draftpine handles the guardrails.
 
@@ -25,10 +25,11 @@ You bring the product idea. Draftpine handles the guardrails.
 Clone https://github.com/nibzard/draftpine into a new subfolder named wireframe,
 remove wireframe/.git so the prototype is ordinary project files, read AGENTS.md,
 run `python3 scripts/check.py --json` to confirm the starter passes, start a local
-preview at http://localhost:5173, then ask me which screen or prototype flow to build first.
+preview at http://localhost:5173, then ask the four first-run onboarding questions
+from AGENTS.md before editing anything.
 ```
 
-The agent clones the kit into `wireframe/`, removes the cloned upstream Git metadata, reads the contract, verifies the checker is green, and serves the starter wireframe locally. You're now ready to prototype. Keep `.git` only when you are contributing to Draftpine itself.
+The agent clones the kit into `wireframe/`, removes the cloned upstream Git metadata, reads the contract, verifies the checker is green, and serves the neutral starter workspace locally. You're now ready to prototype. Keep `.git` only when you are contributing to Draftpine itself.
 
 **2. Whenever you want a screen, describe it:**
 
