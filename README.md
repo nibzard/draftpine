@@ -24,12 +24,14 @@ You bring the product idea. Draftpine handles the guardrails.
 ```text
 Clone https://github.com/nibzard/draftpine into a new subfolder named wireframe,
 remove wireframe/.git so the prototype is ordinary project files, read AGENTS.md,
-run `python3 scripts/check.py --runtime --json` to confirm the starter passes, start a local
-preview at http://localhost:5173, then ask the four first-run onboarding questions
-from AGENTS.md before editing anything.
+run `python3 scripts/install_global_skills.py`, run `python3 scripts/check.py --runtime --json`
+to confirm the starter passes, start a local preview at http://localhost:5173,
+then ask the four first-run onboarding questions from AGENTS.md before editing anything.
 ```
 
 The agent clones the kit into `wireframe/`, removes the cloned upstream Git metadata, reads the contract, verifies the checker is green, and serves the neutral starter workspace locally. You're now ready to prototype. Keep `.git` only when you are contributing to Draftpine itself.
+
+The global skill installer writes namespaced adapters such as `draftpine-wireframe` and `draftpine-check` to `~/.agents/skills/`, so Codex can discover Draftpine workflows even when you start from the parent project folder. The canonical rules still live in `wireframe/AGENTS.md`.
 
 **2. Whenever you want a screen, describe it:**
 
@@ -217,6 +219,7 @@ AGENTS.md            agent contract (read first); CLAUDE.md mirrors it for Claud
 index.html · styles.css · app.js · draftpine.config.json   the wireframe you edit
 route folders        optional browsable pages, e.g. compare/steel-vs-browserbase/index.html
 scripts/             check.py (the checker) · deploy_pages.py (Pages publish)
+                     install_global_skills.py (global draftpine-* skill adapters)
 tests/               stdlib unit tests for the checker
 patterns/            reusable screen patterns agents compose from
 examples/            finished reference screens
