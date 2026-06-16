@@ -33,16 +33,17 @@ action, key states) before editing.
 
 1. Briefly restate the requested screen or flow.
 2. Identify the core sections and user actions.
-3. Choose the closest template from `templates/*/template.json`.
+3. Choose a concise pattern recipe from `patterns/`.
 4. Propose a short implementation plan before editing.
-5. Edit only `index.html`, `styles.css`, `app.js`, and `draftpine.config.json` unless asked otherwise.
-6. Use Pico defaults first; add minimal custom CSS only for layout, spacing, and density.
-7. Use Alpine only for local prototype behavior (tabs, dropdowns, modals, search, fake CRUD).
-8. Include realistic placeholder copy and fake data in `app.js`.
-9. Include empty / error / success states whenever they clarify the flow.
-10. Add `data-draftpine-*` markers for required actions, states, and interactions.
-11. Run `python3 scripts/check.py --json` and fix all errors before finishing.
-12. Keep the result easy to throw away or rewrite.
+5. Inspect `examples/` only as reference if a finished screen helps.
+6. Edit only `index.html`, `styles.css`, `app.js`, and `draftpine.config.json` unless asked otherwise.
+7. Use Pico defaults first; add minimal custom CSS only for layout, spacing, and density.
+8. Use Alpine only for local prototype behavior (tabs, dropdowns, modals, search, fake CRUD).
+9. Include realistic placeholder copy and fake data in `app.js`.
+10. Include empty / error / success states whenever they clarify the flow.
+11. Add `data-draftpine-*` markers for required actions, states, and interactions.
+12. Run `python3 scripts/check.py --json` and fix all errors before finishing.
+13. Keep the result easy to throw away or rewrite.
 
 ## Hard constraints
 

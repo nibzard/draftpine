@@ -1,13 +1,13 @@
-# Template Selection
+# Pattern Recipe
 
-Choose templates by matching the screen packet against each template's `bestFor`, `sections`, `states`, and `interactions`.
+Choose patterns by matching the screen packet against the screen's job, sections, states, and interactions.
 
-Preferred mapping:
+Process:
 
-- Billing, usage, invoices, plans, upgrade flows: `templates/billing`.
-- Overview metrics, reports, operational status: `templates/dashboard`.
-- Sales stages, deals, pipeline, account lists: `templates/crm-pipeline`.
-- Setup, activation, getting started, invited users: `templates/onboarding`.
+1. Read `patterns/README.md`.
+2. Open only the pattern files relevant to the requested screen.
+3. Pick 5-9 patterns that cover the screen without overbuilding it.
+4. Put those pattern names in `draftpine.config.json` under `patterns`.
+5. Use `examples/` only as reference if you need a concrete finished screen.
 
-If no template matches, start from the root starter and keep the same structural conventions.
-
+Do not force-fit a prompt into `examples/billing`, `examples/dashboard`, `examples/crm-pipeline`, or `examples/onboarding`. Examples are references, not templates.

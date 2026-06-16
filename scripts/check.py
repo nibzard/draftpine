@@ -9,6 +9,7 @@ import re
 import sys
 from html.parser import HTMLParser
 from pathlib import Path
+from urllib.parse import urlparse
 
 
 ROOT = Path.cwd()
@@ -33,6 +34,9 @@ FORBIDDEN_PATTERNS = {
 }
 CONFIG_STRING_FIELDS = ["screen", "audience", "userGoal", "primaryAction"]
 CONFIG_ARRAY_FIELDS = ["requiredStates", "requiredInteractions"]
+EXAMPLE_STRING_FIELDS = ["name", "label"]
+EXAMPLE_ARRAY_FIELDS = ["bestFor", "sections", "states", "interactions"]
+CDN_HOSTS = {"cdn.jsdelivr.net", "unpkg.com"}
 
 
 class DraftpineHTMLParser(HTMLParser):
@@ -48,6 +52,7 @@ class DraftpineHTMLParser(HTMLParser):
         self.inputs: list[dict[str, object]] = []
         self.labels_for: set[str] = set()
         self.label_depth = 0
+        self.current_button: dict[str, object] | None = None
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         attr = {key: value or "" for key, value in attrs}
@@ -68,17 +73,20 @@ class DraftpineHTMLParser(HTMLParser):
             if attr.get("for"):
                 self.labels_for.add(attr["for"])
         if tag == "button":
-            self.buttons.append({"attrs": attr, "text": "", "line": self.getpos()[0]})
+            self.current_button = {"attrs": attr, "text": "", "line": self.getpos()[0]}
+            self.buttons.append(self.current_button)
         if tag in {"input", "select", "textarea"}:
             self.inputs.append({"tag": tag, "attrs": attr, "inside_label": self.label_depth > 0, "line": self.getpos()[0]})
 
     def handle_endtag(self, tag: str) -> None:
         if tag == "label" and self.label_depth:
             self.label_depth -= 1
+        if tag == "button":
+            self.current_button = None
 
     def handle_data(self, data: str) -> None:
-        if self.buttons:
-            self.buttons[-1]["text"] = str(self.buttons[-1]["text"]) + data.strip()
+        if self.current_button:
+            self.current_button["text"] = str(self.current_button["text"]) + data.strip()
 
 
 def finding(severity: str, rule: str, file: str, message: str, suggested_fix: str, line: int | None = None, evidence: str | None = None) -> dict[str, object]:
@@ -130,6 +138,31 @@ def read_text(path: Path) -> str:
         return path.read_text(encoding="utf-8")
     except UnicodeDecodeError:
         return path.read_text(errors="replace")
+
+
+def is_cdn_url(value: str) -> bool:
+    parsed = urlparse(value)
+    return parsed.scheme == "https" and parsed.netloc.lower() in CDN_HOSTS
+
+
+def has_major_version(value: str, package: str, major: int) -> bool:
+    return re.search(rf"/{re.escape(package)}@{major}(?:[./]|x|$)", value, re.I) is not None
+
+
+def is_pico_v2_cdn(href: str) -> bool:
+    return (
+        is_cdn_url(href)
+        and has_major_version(href, "@picocss/pico", 2)
+        and href.lower().endswith(".css")
+    )
+
+
+def is_alpine_v3_cdn(src: str) -> bool:
+    return (
+        is_cdn_url(src)
+        and has_major_version(src, "alpinejs", 3)
+        and src.lower().endswith(".js")
+    )
 
 
 def load_config(findings: list[dict[str, object]]) -> dict[str, object]:
@@ -187,6 +220,26 @@ def load_config(findings: list[dict[str, object]]) -> dict[str, object]:
                 f"Set '{field}' to an array like [\"default\", \"empty\"]."
             ))
 
+    if "patterns" in config:
+        patterns = config.get("patterns")
+        if not isinstance(patterns, list) or any(not isinstance(item, str) or not item.strip() for item in patterns):
+            findings.append(finding(
+                "error",
+                "config.field.patterns",
+                "draftpine.config.json",
+                "Config field 'patterns' must be an array of non-empty strings when present.",
+                "Set 'patterns' to the pattern recipe used for the screen, like [\"outcome hero\", \"feature bento\", \"final CTA band\"]."
+            ))
+
+    if isinstance(config.get("template"), str) and config.get("template", "").strip():
+        findings.append(finding(
+            "warning",
+            "config.deprecated-template",
+            "draftpine.config.json",
+            "Config field 'template' is deprecated.",
+            "Replace 'template' with a 'patterns' array so agents compose from reusable patterns instead of force-fitting whole screens."
+        ))
+
     return config
 
 
@@ -241,7 +294,7 @@ def check_project(strict: bool = False) -> dict[str, object]:
                 evidence=match.group(0),
             ))
 
-    if any("picocss" in href.lower() and "pico" in href.lower() for href in parser.links):
+    if any(is_pico_v2_cdn(href) for href in parser.links):
         passes.append({"rule": "pico.required", "file": "index.html"})
     else:
         findings.append(finding(
@@ -252,7 +305,7 @@ def check_project(strict: bool = False) -> dict[str, object]:
             "Add Pico v2 before local styles.css: <link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css\" />."
         ))
 
-    if any("alpinejs" in src.lower() for src in parser.scripts):
+    if any(is_alpine_v3_cdn(src) for src in parser.scripts):
         passes.append({"rule": "alpine.required", "file": "index.html"})
     else:
         findings.append(finding(
@@ -366,21 +419,21 @@ def check_project(strict: bool = False) -> dict[str, object]:
     return build_result("draftpine-check", findings, passes)
 
 
-def check_template(template_dir: Path) -> list[dict[str, object]]:
-    """Validate that a template's index.html contains every state and interaction
-    its template.json advertises, so metadata can't drift from the markup."""
+def check_example(example_dir: Path) -> list[dict[str, object]]:
+    """Validate that an example's index.html contains every state and interaction
+    its example.json advertises, so metadata can't drift from the markup."""
     findings: list[dict[str, object]] = []
-    name = template_dir.name
-    meta_path = template_dir / "template.json"
-    html_path = template_dir / "index.html"
+    name = example_dir.name
+    meta_path = example_dir / "example.json"
+    html_path = example_dir / "index.html"
 
     if not meta_path.exists():
         findings.append(finding(
             "error",
-            "template.metadata-required",
-            f"templates/{name}/template.json",
-            f"Template '{name}' is missing template.json.",
-            "Add template.json with name, label, bestFor, sections, states, and interactions."
+            "example.metadata-required",
+            f"examples/{name}/example.json",
+            f"Example '{name}' is missing example.json.",
+            "Add example.json with name, label, bestFor, sections, states, and interactions."
         ))
         return findings
 
@@ -389,66 +442,108 @@ def check_template(template_dir: Path) -> list[dict[str, object]]:
     except json.JSONDecodeError as exc:
         findings.append(finding(
             "error",
-            "template.valid-json",
-            f"templates/{name}/template.json",
-            f"template.json for '{name}' is invalid JSON: {exc.msg}.",
-            "Fix the JSON syntax so the template metadata can be validated.",
+            "example.valid-json",
+            f"examples/{name}/example.json",
+            f"example.json for '{name}' is invalid JSON: {exc.msg}.",
+            "Fix the JSON syntax so the example metadata can be validated.",
             exc.lineno,
         ))
         return findings
 
+    if not isinstance(meta, dict):
+        findings.append(finding(
+            "error",
+            "example.metadata-object",
+            f"examples/{name}/example.json",
+            f"example.json for '{name}' must contain a JSON object.",
+            "Replace the top-level value with an object containing name, label, bestFor, sections, states, and interactions."
+        ))
+        return findings
+
+    for field in EXAMPLE_STRING_FIELDS:
+        if not isinstance(meta.get(field), str) or not meta.get(field, "").strip():
+            findings.append(finding(
+                "error",
+                f"example.field.{field}",
+                f"examples/{name}/example.json",
+                f"Example field '{field}' must be a non-empty string.",
+                f"Add a non-empty string value for '{field}'."
+            ))
+
+    for field in EXAMPLE_ARRAY_FIELDS:
+        value = meta.get(field)
+        if not isinstance(value, list) or any(not isinstance(item, str) or not item.strip() for item in value):
+            findings.append(finding(
+                "error",
+                f"example.field.{field}",
+                f"examples/{name}/example.json",
+                f"Example field '{field}' must be an array of non-empty strings.",
+                f"Set '{field}' to an array of strings."
+            ))
+
     if not html_path.exists():
         findings.append(finding(
             "error",
-            "template.index-required",
-            f"templates/{name}/index.html",
-            f"Template '{name}' is missing index.html.",
-            "Add an index.html that demonstrates the template's declared states and interactions."
+            "example.index-required",
+            f"examples/{name}/index.html",
+            f"Example '{name}' is missing index.html.",
+            "Add an index.html that demonstrates the example's declared states and interactions."
         ))
         return findings
 
     parser = DraftpineHTMLParser()
     parser.feed(read_text(html_path))
 
-    for state in [str(item) for item in meta.get("states", [])]:
+    states = meta.get("states", [])
+    interactions = meta.get("interactions", [])
+    for state in states if isinstance(states, list) else []:
         if state not in parser.states:
             findings.append(finding(
                 "error",
-                f"template.state-missing.{state}",
-                f"templates/{name}/index.html",
-                f"Template '{name}' declares state '{state}' but its index.html has no matching marker.",
-                f"Add data-draftpine-state=\"{state}\" to the template, or remove '{state}' from template.json states."
+                f"example.state-missing.{state}",
+                f"examples/{name}/index.html",
+                f"Example '{name}' declares state '{state}' but its index.html has no matching marker.",
+                f"Add data-draftpine-state=\"{state}\" to the example, or remove '{state}' from example.json states."
             ))
 
-    for interaction in [str(item) for item in meta.get("interactions", [])]:
+    for interaction in interactions if isinstance(interactions, list) else []:
         if interaction not in parser.interactions:
             findings.append(finding(
                 "error",
-                f"template.interaction-missing.{interaction}",
-                f"templates/{name}/index.html",
-                f"Template '{name}' declares interaction '{interaction}' but its index.html has no matching marker.",
-                f"Add data-draftpine-interaction=\"{interaction}\" to the template, or remove '{interaction}' from template.json interactions."
+                f"example.interaction-missing.{interaction}",
+                f"examples/{name}/index.html",
+                f"Example '{name}' declares interaction '{interaction}' but its index.html has no matching marker.",
+                f"Add data-draftpine-interaction=\"{interaction}\" to the example, or remove '{interaction}' from example.json interactions."
             ))
 
     return findings
 
 
-def check_templates(templates_root: Path) -> dict[str, object]:
+def check_examples(examples_root: Path) -> dict[str, object]:
     findings: list[dict[str, object]] = []
     passes: list[dict[str, str]] = []
 
-    template_dirs = (
-        sorted(p for p in templates_root.iterdir() if (p / "template.json").exists())
-        if templates_root.exists()
+    example_dirs = (
+        sorted(p for p in examples_root.iterdir() if p.is_dir())
+        if examples_root.exists()
         else []
     )
-    for template_dir in template_dirs:
-        template_findings = check_template(template_dir)
-        findings.extend(template_findings)
-        if not any(item["severity"] == "error" for item in template_findings):
-            passes.append({"rule": "template.consistent", "template": template_dir.name})
+    for example_dir in example_dirs:
+        example_findings = check_example(example_dir)
+        findings.extend(example_findings)
+        if not any(item["severity"] == "error" for item in example_findings):
+            passes.append({"rule": "example.consistent", "example": example_dir.name})
 
-    return build_result("draftpine-check-templates", findings, passes)
+    return build_result("draftpine-check-examples", findings, passes)
+
+
+def check_templates(templates_root: Path) -> dict[str, object]:
+    """Deprecated compatibility wrapper for callers still using --templates."""
+    if templates_root.name == "templates" and not templates_root.exists():
+        examples_root = templates_root.parent / "examples"
+        if examples_root.exists():
+            return check_examples(examples_root)
+    return check_examples(templates_root)
 
 
 def main() -> int:
@@ -456,18 +551,20 @@ def main() -> int:
     parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON.")
     parser.add_argument("--human", action="store_true", help="Emit compact human-readable output.")
     parser.add_argument("--strict", action="store_true", help="Treat warnings as errors where applicable.")
-    parser.add_argument("--templates", action="store_true", help="Validate templates/ metadata against template markup.")
+    parser.add_argument("--examples", action="store_true", help="Validate examples/ metadata against example markup.")
+    parser.add_argument("--templates", action="store_true", help="Deprecated alias for --examples.")
     args = parser.parse_args()
 
-    if args.templates:
-        template_result = check_templates(ROOT / "templates")
+    if args.examples or args.templates:
+        examples_root = ROOT / "examples"
+        example_result = check_examples(examples_root)
         if args.json or not args.human:
-            print(json.dumps(template_result, indent=2))
+            print(json.dumps(example_result, indent=2))
         else:
-            print(f"Draftpine template check: {template_result['status']}")
-            for action in template_result["next_actions"]:
+            print(f"Draftpine example check: {example_result['status']}")
+            for action in example_result["next_actions"]:
                 print(f"- {action['rule']} {action['file']}: {action['message']}")
-        return 1 if template_result["status"] == "fail" else 0
+        return 1 if example_result["status"] == "fail" else 0
 
     result = check_project(strict=args.strict)
     if args.json or not args.human:

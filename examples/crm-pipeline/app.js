@@ -1,4 +1,4 @@
-function pipelineTemplate() {
+function pipelineExample() {
   return {
     query: "",
     modalOpen: false,

@@ -18,4 +18,5 @@ python3 scripts/deploy_pages.py --branch main --path /
 4. Report the `pages_url` from the JSON output.
 
 If deployment fails, report the script's `message` and `suggested_fix`.
-
+If it refuses because unrelated files are dirty, ask the user whether to commit,
+stash, or leave those files out; only root wireframe files are auto-committed.

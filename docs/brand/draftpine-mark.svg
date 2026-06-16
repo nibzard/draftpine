@@ -1,47 +1,35 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
-  <!-- ABOUTME: Draftpine square mark — crisp vector wireframe pine printed through coarsening -->
-  <!-- ABOUTME: halftone dot screens. No CMYK ghost plates, no blur. -->
+  <!-- ABOUTME: Draftpine mark — narrow pointy pine of half + full hatched blocks over a trunk. -->
+  <!-- ABOUTME: Flat cream surface, hard corners, clashing orange/teal, ink hatch. No gradients. -->
   <defs>
-    <linearGradient id="vapor" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#7CF5C4"/>
-      <stop offset="0.55" stop-color="#7C9BFF"/>
-      <stop offset="1" stop-color="#C49BFF"/>
-    </linearGradient>
-
-    <!-- halftone screens: dot size grows tier by tier (print resolution coarsens) -->
-    <pattern id="dotFine" width="9" height="9" patternUnits="userSpaceOnUse">
-      <circle cx="4.5" cy="4.5" r="1.4" fill="#7CF5C4"/>
-    </pattern>
-    <pattern id="dotMid" width="12" height="12" patternUnits="userSpaceOnUse">
-      <circle cx="6" cy="6" r="2.2" fill="#7C9BFF"/>
-    </pattern>
-    <pattern id="dotCoarse" width="16" height="16" patternUnits="userSpaceOnUse">
-      <circle cx="8" cy="8" r="3.4" fill="#C49BFF"/>
-    </pattern>
-
-    <g id="outline" fill="none" stroke-width="3" stroke-linejoin="round">
-      <path d="M128 46 L106 74 L150 74 Z"/>
-      <rect x="96"  y="74"  width="64"  height="30" rx="2"/>
-      <rect x="74"  y="110" width="108" height="40" rx="2"/>
-      <rect x="52"  y="156" width="152" height="50" rx="2"/>
-      <rect x="120" y="206" width="16"  height="30" rx="1"/>
-    </g>
+    <pattern id="p_dots"  width="8"  height="8"  patternUnits="userSpaceOnUse"><circle cx="4" cy="4" r="1.7" fill="#16140F"/></pattern>
+    <pattern id="p_diag"  width="8"  height="8"  patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="2.6" height="8" fill="#16140F"/></pattern>
+    <pattern id="p_vline" width="8"  height="8"  patternUnits="userSpaceOnUse"><rect width="2.6" height="8" fill="#16140F"/></pattern>
+    <pattern id="p_grid"  width="9"  height="9"  patternUnits="userSpaceOnUse"><rect width="1.8" height="9" fill="#16140F"/><rect width="9" height="1.8" fill="#16140F"/></pattern>
+    <pattern id="p_check" width="8"  height="8"  patternUnits="userSpaceOnUse"><rect width="4" height="4" fill="#16140F"/><rect x="4" y="4" width="4" height="4" fill="#16140F"/></pattern>
   </defs>
 
-  <rect width="256" height="256" rx="52" fill="#15132B"/>
+  <rect width="256" height="256" fill="#ECE3CE"/>
 
-  <!-- halftone-printed fills -->
-  <path d="M128 49 L109 73 L147 73 Z" fill="url(#dotFine)"/>
-  <rect x="98"  y="76"  width="60"  height="26" fill="url(#dotFine)"/>
-  <rect x="76"  y="112" width="104" height="36" fill="url(#dotMid)"/>
-  <rect x="54"  y="158" width="148" height="46" fill="url(#dotCoarse)"/>
+  <g stroke="#16140F" stroke-width="2">
+    <!-- trunk (steady anchor) -->
+    <g><rect x="121" y="161" width="14" height="26" fill="#DC5B27" stroke="none"/><rect x="121" y="161" width="14" height="26" fill="url(#p_vline)" stroke="none"/><rect x="121" y="161" width="14" height="26" fill="none"/></g>
 
-  <!-- crisp gradient outline -->
-  <use href="#outline" stroke="url(#vapor)"/>
+    <!-- tip (small square = the point) -->
+    <g><rect x="119" y="44" width="18" height="18" fill="#DC5B27" stroke="none"/><rect x="119" y="44" width="18" height="18" fill="url(#p_dots)" stroke="none"/><rect x="119" y="44" width="18" height="18" fill="none"/></g>
 
-  <!-- registration mark = wireframe image placeholder -->
-  <g stroke="#E7ECFF" stroke-width="1.6" fill="none" opacity="0.9">
-    <circle cx="128" cy="130" r="7"/>
-    <path d="M128 119 V141 M117 130 H139"/>
+    <!-- level A: 1 full -->
+    <g><rect x="114" y="66" width="28" height="28" fill="#1C8C7C" stroke="none"/><rect x="114" y="66" width="28" height="28" fill="url(#p_diag)" stroke="none"/><rect x="114" y="66" width="28" height="28" fill="none"/></g>
+
+    <!-- level B: half | full | half -->
+    <g><rect x="96"  y="98" width="14" height="28" fill="#DC5B27" stroke="none"/><rect x="96"  y="98" width="14" height="28" fill="url(#p_vline)" stroke="none"/><rect x="96"  y="98" width="14" height="28" fill="none"/></g>
+    <g><rect x="114" y="98" width="28" height="28" fill="#1C8C7C" stroke="none"/><rect x="114" y="98" width="28" height="28" fill="url(#p_dots)"  stroke="none"/><rect x="114" y="98" width="28" height="28" fill="none"/></g>
+    <g><rect x="146" y="98" width="14" height="28" fill="#DC5B27" stroke="none"/><rect x="146" y="98" width="14" height="28" fill="url(#p_check)" stroke="none"/><rect x="146" y="98" width="14" height="28" fill="none"/></g>
+
+    <!-- level C (base): half | full | full | half -->
+    <g><rect x="80"  y="130" width="14" height="28" fill="#1C8C7C" stroke="none"/><rect x="80"  y="130" width="14" height="28" fill="url(#p_check)" stroke="none"/><rect x="80"  y="130" width="14" height="28" fill="none"/></g>
+    <g><rect x="98"  y="130" width="28" height="28" fill="#DC5B27" stroke="none"/><rect x="98"  y="130" width="28" height="28" fill="url(#p_dots)"  stroke="none"/><rect x="98"  y="130" width="28" height="28" fill="none"/></g>
+    <g><rect x="130" y="130" width="28" height="28" fill="#1C8C7C" stroke="none"/><rect x="130" y="130" width="28" height="28" fill="url(#p_grid)"  stroke="none"/><rect x="130" y="130" width="28" height="28" fill="none"/></g>
+    <g><rect x="162" y="130" width="14" height="28" fill="#DC5B27" stroke="none"/><rect x="162" y="130" width="14" height="28" fill="url(#p_dots)"  stroke="none"/><rect x="162" y="130" width="14" height="28" fill="none"/></g>
   </g>
 </svg>

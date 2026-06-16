@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/brand/draftpine-logo.png" alt="Draftpine" width="320">
+  <img src="docs/brand/draftpine-mark-animated.svg" alt="Draftpine" width="200">
 </p>
 
 <p align="center">
@@ -13,7 +13,7 @@
 
 ---
 
-Hand a coding agent a vague "make me a billing dashboard" and it tends to reach for React, a bundler, and an afternoon of setup. Draftpine removes that temptation. It's a small, opinionated workspace that gives the agent strict rules, ready-made templates, and a checker that tells it exactly what to fix — so you get a throwaway prototype in one pass, not a half-built app.
+Hand a coding agent a vague "make me a billing dashboard" and it tends to reach for React, a bundler, and an afternoon of setup. Draftpine removes that temptation. It's a small, opinionated workspace that gives the agent strict rules, reusable screen patterns, finished examples, and a checker that tells it exactly what to fix — so you get a throwaway prototype in one pass, not a half-built app.
 
 You bring the product idea. Draftpine handles the guardrails.
 
@@ -44,14 +44,15 @@ Interactions:  tabs, modal, filter invoices
 Skip:          auth, backend calls, real chart library
 ```
 
-The agent picks the closest template, edits the four root files, and loops on the checker until it passes. Refine, add screens, or ask it to deploy when you're happy.
+The agent assembles a screen-specific pattern recipe, edits the four root files, and loops on the checker until it passes. Refine, add screens, or ask it to deploy when you're happy.
 
 ## How it works
 
 ```text
 your prompt
   → agent reads AGENTS.md            (the rules)
-  → agent picks a template/          (a close starting point)
+  → agent chooses patterns/          (a screen-specific recipe)
+  → agent may inspect examples/      (finished reference screens)
   → agent edits index.html, styles.css, app.js, draftpine.config.json
   → python3 scripts/check.py --json  (structured pass/fail + fixes)
   → agent loops until status: pass
@@ -96,7 +97,7 @@ The agent works the `next_actions` list until `"status": "pass"`. The checker en
 Extra modes:
 
 ```bash
-python3 scripts/check.py --templates --json   # verify each template's metadata matches its markup
+python3 scripts/check.py --examples --json    # verify each example's metadata matches its markup
 python3 -m unittest discover -s tests          # run the checker's tests (stdlib only)
 ```
 
@@ -108,7 +109,7 @@ Ask the agent to deploy, and it runs:
 python3 scripts/deploy_pages.py --branch main --path /
 ```
 
-The script refuses to publish unless `git`, `gh`, GitHub auth, an `origin` remote, and a passing check are all in place, then enables or updates Pages and prints the live URL.
+The script refuses to publish unless `git`, `gh`, GitHub auth, an `origin` remote, and a passing check are all in place, then enables or updates Pages and prints the live URL. If the working tree is dirty, it only auto-commits the root wireframe files (`index.html`, `styles.css`, `app.js`, and `draftpine.config.json`) and asks you to handle unrelated files first.
 
 ## Stack rules
 
@@ -131,11 +132,24 @@ Lightweight `data-draftpine-*` attributes let the checker judge intent without p
 
 Which states and interactions are required is declared in `draftpine.config.json`.
 
-## Templates
+## Patterns And Examples
 
-Start from the closest template instead of inventing a layout:
+Draftpine is pattern-first. Agents should assemble screens from `patterns/` instead of force-fitting prompts into a whole-screen template.
 
-| Template | Use it for |
+Useful pattern groups:
+
+| Group | Use it for |
+| --- | --- |
+| `patterns/heroes.md` | outcome heroes, code/runtime heroes, benchmark heroes, install-command heroes |
+| `patterns/proof.md` | logo walls, metrics, testimonials, customer stories, compliance strips |
+| `patterns/developer.md` | code tabs, request/response blocks, IDE/browser mocks, quickstarts |
+| `patterns/features.md` | feature bentos, alternating rows, use-case grids, spec tables |
+| `patterns/conversion.md` | CTA pairs, final CTA bands, pricing, calculators |
+| `patterns/interactions.md` | tabs, filters, modals, accordions, copy buttons |
+
+The old full-screen starters live in `examples/`. They are reference screens, not mandatory starting points:
+
+| Example | Shows |
 | --- | --- |
 | `billing` | usage, invoices, subscriptions, plan upgrades |
 | `dashboard` | metrics, reporting, status, operational overviews |
@@ -149,7 +163,8 @@ AGENTS.md            agent contract (read first); CLAUDE.md mirrors it for Claud
 index.html · styles.css · app.js · draftpine.config.json   the wireframe you edit
 scripts/             check.py (the checker) · deploy_pages.py (Pages publish)
 tests/               stdlib unit tests for the checker
-templates/           billing · dashboard · crm-pipeline · onboarding
+patterns/            reusable screen patterns agents compose from
+examples/            finished reference screens
 schemas/             JSON schemas for the screen packet and config
 agent-workflows/     step-by-step playbooks; .claude/skills/ mirrors them
 ```

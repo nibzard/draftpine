@@ -9,6 +9,11 @@
     "audience": { "type": "string", "minLength": 1 },
     "userGoal": { "type": "string", "minLength": 1 },
     "primaryAction": { "type": "string", "minLength": 1 },
+    "patterns": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
     "sections": {
       "type": "array",
       "items": { "type": "string" },
@@ -32,4 +37,3 @@
   },
   "additionalProperties": true
 }
-

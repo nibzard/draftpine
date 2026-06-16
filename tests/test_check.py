@@ -137,6 +137,100 @@ class ConfigValidationTests(unittest.TestCase):
         self.assertEqual(result["status"], "fail")
         self.assertIn("config.field.requiredStates", rules_for(result, "config.field.requiredStates"))
 
+    def test_patterns_config_must_be_string_array_when_present(self) -> None:
+        scaffold_project(self.tmp)
+        (self.tmp / "draftpine.config.json").write_text(
+            """{
+  "screen": "Test",
+  "audience": "tester",
+  "userGoal": "verify",
+  "primaryAction": "Go",
+  "patterns": ["outcome hero", 42],
+  "requiredStates": [],
+  "requiredInteractions": []
+}
+""",
+            encoding="utf-8",
+        )
+        result = check.check_project()
+        self.assertEqual(result["status"], "fail")
+        self.assertIn("config.field.patterns", rules_for(result, "config.field.patterns"))
+
+    def test_template_config_warns_as_deprecated(self) -> None:
+        scaffold_project(self.tmp)
+        (self.tmp / "draftpine.config.json").write_text(
+            """{
+  "screen": "Test",
+  "audience": "tester",
+  "userGoal": "verify",
+  "primaryAction": "Go",
+  "template": "billing",
+  "requiredStates": [],
+  "requiredInteractions": []
+}
+""",
+            encoding="utf-8",
+        )
+        result = check.check_project()
+        self.assertEqual(result["status"], "pass")
+        self.assertIn("config.deprecated-template", rules_for(result, "config.deprecated-template"))
+
+
+class CdnValidationTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self._saved_root = check.ROOT
+        self._tmpdir = tempfile.TemporaryDirectory()
+        self.tmp = Path(self._tmpdir.name)
+        check.ROOT = self.tmp
+
+    def tearDown(self) -> None:
+        check.ROOT = self._saved_root
+        self._tmpdir.cleanup()
+
+    def test_pico_and_alpine_must_be_supported_major_versions_from_cdn(self) -> None:
+        scaffold_project(self.tmp)
+        html_path = self.tmp / "index.html"
+        html = html_path.read_text(encoding="utf-8")
+        html = html.replace(
+            "https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css",
+            "https://example.com/not-picocss-pico-v0.css",
+        )
+        html = html.replace(
+            "https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js",
+            "/vendor/alpinejs-legacy.js",
+        )
+        html_path.write_text(html, encoding="utf-8")
+
+        result = check.check_project()
+        self.assertEqual(result["status"], "fail")
+        self.assertIn("pico.required", rules_for(result, "pico.required"))
+        self.assertIn("alpine.required", rules_for(result, "alpine.required"))
+
+
+class AccessibilityParsingTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self._saved_root = check.ROOT
+        self._tmpdir = tempfile.TemporaryDirectory()
+        self.tmp = Path(self._tmpdir.name)
+        check.ROOT = self.tmp
+
+    def tearDown(self) -> None:
+        check.ROOT = self._saved_root
+        self._tmpdir.cleanup()
+
+    def test_text_after_empty_button_does_not_count_as_button_label(self) -> None:
+        scaffold_project(self.tmp)
+        html_path = self.tmp / "index.html"
+        html = html_path.read_text(encoding="utf-8").replace(
+            '<button data-draftpine-action="primary">Go</button>',
+            '<button data-draftpine-action="primary"></button><p>Later copy</p>',
+        )
+        html_path.write_text(html, encoding="utf-8")
+
+        result = check.check_project()
+        self.assertEqual(result["status"], "fail")
+        self.assertIn("accessibility.button-label", rules_for(result, "accessibility.button-label"))
+
 
 class RootProjectTests(unittest.TestCase):
     def setUp(self) -> None:
@@ -151,29 +245,69 @@ class RootProjectTests(unittest.TestCase):
         self.assertEqual(result["status"], "pass", result["next_actions"])
 
 
-class TemplateConsistencyTests(unittest.TestCase):
-    def test_shipped_templates_are_consistent(self) -> None:
+class ExampleConsistencyTests(unittest.TestCase):
+    def test_shipped_examples_are_consistent(self) -> None:
+        result = check.check_examples(REPO_ROOT / "examples")
+        self.assertEqual(result["status"], "pass", result["next_actions"])
+
+    def test_deprecated_template_checker_falls_back_to_examples(self) -> None:
         result = check.check_templates(REPO_ROOT / "templates")
         self.assertEqual(result["status"], "pass", result["next_actions"])
 
     def test_declared_interaction_without_marker_fails(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            template = Path(tmp) / "bogus"
-            template.mkdir()
-            (template / "template.json").write_text(
+            example = Path(tmp) / "bogus"
+            example.mkdir()
+            (example / "example.json").write_text(
                 '{"name": "bogus", "states": [], "interactions": ["tabs"]}',
                 encoding="utf-8",
             )
-            (template / "index.html").write_text(
+            (example / "index.html").write_text(
                 '<main><button data-draftpine-action="primary">Go</button></main>',
                 encoding="utf-8",
             )
-            result = check.check_templates(Path(tmp))
+            result = check.check_examples(Path(tmp))
             self.assertEqual(result["status"], "fail")
             self.assertIn(
-                "template.interaction-missing.tabs",
+                "example.interaction-missing.tabs",
                 [f["rule"] for f in result["findings"]],
             )
+
+    def test_example_directory_without_metadata_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            example = Path(tmp) / "missing-meta"
+            example.mkdir()
+            (example / "index.html").write_text(
+                '<main><button data-draftpine-action="primary">Go</button></main>',
+                encoding="utf-8",
+            )
+
+            result = check.check_examples(Path(tmp))
+            self.assertEqual(result["status"], "fail")
+            self.assertIn(
+                "example.metadata-required",
+                [f["rule"] for f in result["findings"]],
+            )
+
+    def test_example_metadata_requires_selection_fields(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            example = Path(tmp) / "thin-meta"
+            example.mkdir()
+            (example / "example.json").write_text(
+                '{"name": "thin-meta", "states": [], "interactions": []}',
+                encoding="utf-8",
+            )
+            (example / "index.html").write_text(
+                '<main><button data-draftpine-action="primary">Go</button></main>',
+                encoding="utf-8",
+            )
+
+            result = check.check_examples(Path(tmp))
+            self.assertEqual(result["status"], "fail")
+            rules = [f["rule"] for f in result["findings"]]
+            self.assertIn("example.field.label", rules)
+            self.assertIn("example.field.bestFor", rules)
+            self.assertIn("example.field.sections", rules)
 
 
 if __name__ == "__main__":

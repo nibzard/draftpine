@@ -10,6 +10,9 @@ import subprocess
 import sys
 
 
+DEPLOY_FILES = ["index.html", "styles.css", "app.js", "draftpine.config.json"]
+
+
 def run(cmd: list[str], check: bool = True) -> subprocess.CompletedProcess[str]:
     return subprocess.run(cmd, check=check, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
@@ -21,6 +24,24 @@ def require_tool(name: str) -> None:
             "message": f"Required tool '{name}' was not found.",
             "suggested_fix": f"Install {name} or run this deployment from an environment that has it."
         }, indent=2))
+
+
+def parse_status_paths(status: str) -> list[str]:
+    paths: list[str] = []
+    for line in status.splitlines():
+        if len(line) < 4:
+            continue
+        path = line[3:]
+        if " -> " in path:
+            path = path.split(" -> ", 1)[1]
+        paths.append(path)
+    return paths
+
+
+def split_deploy_status(paths: list[str]) -> tuple[list[str], list[str]]:
+    deploy_files = [path for path in paths if path in DEPLOY_FILES]
+    other_files = [path for path in paths if path not in DEPLOY_FILES]
+    return deploy_files, other_files
 
 
 def main() -> int:
@@ -85,8 +106,17 @@ def main() -> int:
     committed = False
     committed_files: list[str] = []
     if status:
-        committed_files = [line[3:] for line in status.splitlines()]
-        run(["git", "add", "."])
+        paths = parse_status_paths(status)
+        committed_files, other_files = split_deploy_status(paths)
+        if other_files:
+            print(json.dumps({
+                "status": "fail",
+                "message": "Refusing to deploy with unrelated dirty files.",
+                "dirty_files": other_files,
+                "suggested_fix": "Commit, stash, or remove unrelated files before deploying. The deploy script only auto-commits Draftpine root wireframe files."
+            }, indent=2))
+            return 1
+        run(["git", "add", "--", *committed_files])
         run(["git", "commit", "-m", args.message])
         committed = True
 

@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- ABOUTME: Draftpine animated mark — the pine CONSTRUCTS from the trunk up: elements flicker in -->
+  <!-- ABOUTME: bottom-to-top, hold while color+hatch strobe, then reset and rebuild. CSS-only. -->
+  <defs>
+    <pattern id="p_dots"  width="8"  height="8"  patternUnits="userSpaceOnUse"><circle cx="4" cy="4" r="1.7" fill="#16140F"/></pattern>
+    <pattern id="p_diag"  width="8"  height="8"  patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="2.6" height="8" fill="#16140F"/></pattern>
+    <pattern id="p_grid"  width="9"  height="9"  patternUnits="userSpaceOnUse"><rect width="1.8" height="9" fill="#16140F"/><rect width="9" height="1.8" fill="#16140F"/></pattern>
+    <pattern id="p_check" width="8"  height="8"  patternUnits="userSpaceOnUse"><rect width="4" height="4" fill="#16140F"/><rect x="4" y="4" width="4" height="4" fill="#16140F"/></pattern>
+    <pattern id="p_vline" width="8"  height="8"  patternUnits="userSpaceOnUse"><rect width="2.6" height="8" fill="#16140F"/></pattern>
+  </defs>
+
+  <style>
+    /* ---- build-on: each tier flickers in bottom->top, holds, then all reset together ---- */
+    /* default opacity:1 so the full pine shows if a renderer ignores the animation */
+    .el { opacity: 1; animation-duration: 3s; animation-timing-function: linear; animation-iteration-count: infinite; }
+    .rev0 { animation-name: rev0 } .rev1 { animation-name: rev1 } .rev2 { animation-name: rev2 }
+    .rev3 { animation-name: rev3 } .rev4 { animation-name: rev4 }
+    @keyframes rev0 { 0%,1%{opacity:0} 2%{opacity:1} 3%{opacity:0} 4%{opacity:1} 5%{opacity:0} 6%{opacity:1} 88%{opacity:1} 93%{opacity:0} 100%{opacity:0} }
+    @keyframes rev1 { 0%,10%{opacity:0} 11%{opacity:1} 12%{opacity:0} 13%{opacity:1} 14%{opacity:0} 15%{opacity:1} 88%{opacity:1} 93%{opacity:0} 100%{opacity:0} }
+    @keyframes rev2 { 0%,19%{opacity:0} 20%{opacity:1} 21%{opacity:0} 22%{opacity:1} 23%{opacity:0} 24%{opacity:1} 88%{opacity:1} 93%{opacity:0} 100%{opacity:0} }
+    @keyframes rev3 { 0%,28%{opacity:0} 29%{opacity:1} 30%{opacity:0} 31%{opacity:1} 32%{opacity:0} 33%{opacity:1} 88%{opacity:1} 93%{opacity:0} 100%{opacity:0} }
+    @keyframes rev4 { 0%,37%{opacity:0} 38%{opacity:1} 39%{opacity:0} 40%{opacity:1} 41%{opacity:0} 42%{opacity:1} 88%{opacity:1} 93%{opacity:0} 100%{opacity:0} }
+
+    /* ---- while present: color flips + hatch screen cycles, in a left-to-right wave ---- */
+    .blk { animation: flip 0.5s linear infinite; }
+    @keyframes flip { 0%,49.5%{ fill:#DC5B27 } 50%,100%{ fill:#1C8C7C } }
+    .pat { opacity: 0; animation-duration: 0.5s; animation-timing-function: linear; animation-iteration-count: infinite; }
+    .s1 { animation-name: s1 } .s2 { animation-name: s2 } .s3 { animation-name: s3 } .s4 { animation-name: s4 }
+    @keyframes s1 { 0%,25%{opacity:1}   25.01%,100%{opacity:0} }
+    @keyframes s2 { 0%,25%{opacity:0}   25.01%,50%{opacity:1}  50.01%,100%{opacity:0} }
+    @keyframes s3 { 0%,50%{opacity:0}   50.01%,75%{opacity:1}  75.01%,100%{opacity:0} }
+    @keyframes s4 { 0%,75%{opacity:0}   75.01%,100%{opacity:1} }
+    .col0 { animation-delay: -0.417s } .col1 { animation-delay: -0.333s }
+    .col2 { animation-delay: -0.250s } .col3 { animation-delay: -0.167s }
+    .col4 { animation-delay: -0.083s } .col5 { animation-delay: 0s }
+
+    @media (prefers-reduced-motion: reduce) {
+      .el, .blk, .pat { animation: none !important; }
+      .el { opacity: 1 !important; }
+      .s1 { opacity: 1 !important; }
+    }
+  </style>
+
+  <rect width="256" height="256" fill="#ECE3CE"/>
+
+  <g stroke="#16140F" stroke-width="2">
+    <!-- trunk (tier 0, appears first; steady once shown) -->
+    <g class="el rev0"><rect x="121" y="161" width="14" height="26" fill="#DC5B27" stroke="none"/><rect x="121" y="161" width="14" height="26" fill="url(#p_vline)" stroke="none"/><rect x="121" y="161" width="14" height="26" fill="none"/></g>
+
+    <!-- level C (base, tier 1): half | full | full | half -->
+    <g class="el rev1"><rect class="blk col0" x="80" y="130" width="14" height="28" fill="#1C8C7C" stroke="none"/>
+       <rect class="pat s1 col0" x="80" y="130" width="14" height="28" fill="url(#p_dots)" stroke="none"/><rect class="pat s2 col0" x="80" y="130" width="14" height="28" fill="url(#p_diag)" stroke="none"/><rect class="pat s3 col0" x="80" y="130" width="14" height="28" fill="url(#p_grid)" stroke="none"/><rect class="pat s4 col0" x="80" y="130" width="14" height="28" fill="url(#p_check)" stroke="none"/>
+       <rect x="80" y="130" width="14" height="28" fill="none"/></g>
+    <g class="el rev1"><rect class="blk col1" x="98" y="130" width="28" height="28" fill="#DC5B27" stroke="none"/>
+       <rect class="pat s1 col1" x="98" y="130" width="28" height="28" fill="url(#p_dots)" stroke="none"/><rect class="pat s2 col1" x="98" y="130" width="28" height="28" fill="url(#p_diag)" stroke="none"/><rect class="pat s3 col1" x="98" y="130" width="28" height="28" fill="url(#p_grid)" stroke="none"/><rect class="pat s4 col1" x="98" y="130" width="28" height="28" fill="url(#p_check)" stroke="none"/>
+       <rect x="98" y="130" width="28" height="28" fill="none"/></g>
+    <g class="el rev1"><rect class="blk col3" x="130" y="130" width="28" height="28" fill="#1C8C7C" stroke="none"/>
+       <rect class="pat s1 col3" x="130" y="130" width="28" height="28" fill="url(#p_dots)" stroke="none"/><rect class="pat s2 col3" x="130" y="130" width="28" height="28" fill="url(#p_diag)" stroke="none"/><rect class="pat s3 col3" x="130" y="130" width="28" height="28" fill="url(#p_grid)" stroke="none"/><rect class="pat s4 col3" x="130" y="130" width="28" height="28" fill="url(#p_check)" stroke="none"/>
+       <rect x="130" y="130" width="28" height="28" fill="none"/></g>
+    <g class="el rev1"><rect class="blk col5" x="162" y="130" width="14" height="28" fill="#DC5B27" stroke="none"/>
+       <rect class="pat s1 col5" x="162" y="130" width="14" height="28" fill="url(#p_dots)" stroke="none"/><rect class="pat s2 col5" x="162" y="130" width="14" height="28" fill="url(#p_diag)" stroke="none"/><rect class="pat s3 col5" x="162" y="130" width="14" height="28" fill="url(#p_grid)" stroke="none"/><rect class="pat s4 col5" x="162" y="130" width="14" height="28" fill="url(#p_check)" stroke="none"/>
+       <rect x="162" y="130" width="14" height="28" fill="none"/></g>
+
+    <!-- level B (tier 2): half | full | half -->
+    <g class="el rev2"><rect class="blk col1" x="96" y="98" width="14" height="28" fill="#DC5B27" stroke="none"/>
+       <rect class="pat s1 col1" x="96" y="98" width="14" height="28" fill="url(#p_dots)" stroke="none"/><rect class="pat s2 col1" x="96" y="98" width="14" height="28" fill="url(#p_diag)" stroke="none"/><rect class="pat s3 col1" x="96" y="98" width="14" height="28" fill="url(#p_grid)" stroke="none"/><rect class="pat s4 col1" x="96" y="98" width="14" height="28" fill="url(#p_check)" stroke="none"/>
+       <rect x="96" y="98" width="14" height="28" fill="none"/></g>
+    <g class="el rev2"><rect class="blk col2" x="114" y="98" width="28" height="28" fill="#1C8C7C" stroke="none"/>
+       <rect class="pat s1 col2" x="114" y="98" width="28" height="28" fill="url(#p_dots)" stroke="none"/><rect class="pat s2 col2" x="114" y="98" width="28" height="28" fill="url(#p_diag)" stroke="none"/><rect class="pat s3 col2" x="114" y="98" width="28" height="28" fill="url(#p_grid)" stroke="none"/><rect class="pat s4 col2" x="114" y="98" width="28" height="28" fill="url(#p_check)" stroke="none"/>
+       <rect x="114" y="98" width="28" height="28" fill="none"/></g>
+    <g class="el rev2"><rect class="blk col4" x="146" y="98" width="14" height="28" fill="#DC5B27" stroke="none"/>
+       <rect class="pat s1 col4" x="146" y="98" width="14" height="28" fill="url(#p_dots)" stroke="none"/><rect class="pat s2 col4" x="146" y="98" width="14" height="28" fill="url(#p_diag)" stroke="none"/><rect class="pat s3 col4" x="146" y="98" width="14" height="28" fill="url(#p_grid)" stroke="none"/><rect class="pat s4 col4" x="146" y="98" width="14" height="28" fill="url(#p_check)" stroke="none"/>
+       <rect x="146" y="98" width="14" height="28" fill="none"/></g>
+
+    <!-- level A (tier 3): 1 full -->
+    <g class="el rev3"><rect class="blk col2" x="114" y="66" width="28" height="28" fill="#1C8C7C" stroke="none"/>
+       <rect class="pat s1 col2" x="114" y="66" width="28" height="28" fill="url(#p_dots)" stroke="none"/><rect class="pat s2 col2" x="114" y="66" width="28" height="28" fill="url(#p_diag)" stroke="none"/><rect class="pat s3 col2" x="114" y="66" width="28" height="28" fill="url(#p_grid)" stroke="none"/><rect class="pat s4 col2" x="114" y="66" width="28" height="28" fill="url(#p_check)" stroke="none"/>
+       <rect x="114" y="66" width="28" height="28" fill="none"/></g>
+
+    <!-- tip (tier 4, last) -->
+    <g class="el rev4"><rect class="blk col2" x="119" y="44" width="18" height="18" fill="#DC5B27" stroke="none"/>
+       <rect class="pat s1 col2" x="119" y="44" width="18" height="18" fill="url(#p_dots)" stroke="none"/><rect class="pat s2 col2" x="119" y="44" width="18" height="18" fill="url(#p_diag)" stroke="none"/><rect class="pat s3 col2" x="119" y="44" width="18" height="18" fill="url(#p_grid)" stroke="none"/><rect class="pat s4 col2" x="119" y="44" width="18" height="18" fill="url(#p_check)" stroke="none"/>
+       <rect x="119" y="44" width="18" height="18" fill="none"/></g>
+  </g>
+</svg>

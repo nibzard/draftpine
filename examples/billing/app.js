@@ -1,4 +1,4 @@
-function billingTemplate() {
+function billingExample() {
   return {
     tab: "invoices",
     query: "",

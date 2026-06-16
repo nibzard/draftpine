@@ -1,4 +1,4 @@
-function onboardingTemplate() {
+function onboardingExample() {
   return {
     modalOpen: false,
     invited: false,

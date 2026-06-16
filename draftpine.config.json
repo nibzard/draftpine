@@ -3,7 +3,7 @@
   "audience": "startup founder",
   "userGoal": "Understand current usage before upgrading",
   "primaryAction": "Upgrade plan",
-  "template": "billing",
+  "patterns": ["app shell", "summary cards", "tabs", "usage chart placeholder", "data table", "pricing table", "modal", "filter bar"],
   "requiredStates": ["default", "empty", "over-limit", "success"],
   "requiredInteractions": ["tabs", "modal", "filter"]
 }

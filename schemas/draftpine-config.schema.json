@@ -9,7 +9,16 @@
     "audience": { "type": "string" },
     "userGoal": { "type": "string" },
     "primaryAction": { "type": "string" },
-    "template": { "type": "string" },
+    "patterns": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+    "template": {
+      "type": "string",
+      "deprecated": true,
+      "description": "Deprecated. Prefer patterns."
+    },
     "requiredStates": {
       "type": "array",
       "items": { "type": "string" }

@@ -1,4 +1,4 @@
-function dashboardTemplate() {
+function dashboardExample() {
   return {
     query: "",
     metrics: [
