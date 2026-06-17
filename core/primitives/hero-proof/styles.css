@@ -1,8 +1,8 @@
 [data-primitive="core.heroProof"] .dp-proof-artifact {
   background: var(--pico-background-color);
   border-radius: var(--dp-radius-xl);
-  padding: var(--dp-space-6);
-  box-shadow: 0 18px 45px rgba(17, 17, 17, 0.08);
+  padding: var(--dp-space-5);
+  box-shadow: 0 12px 30px rgba(17, 17, 17, 0.06);
 }
 :root[data-theme="dark"] [data-primitive="core.heroProof"] .dp-proof-artifact {
   background: var(--dp-surface);
@@ -13,8 +13,8 @@
   overflow-x: auto;
   background: var(--dp-surface-soft);
   border-radius: var(--dp-radius-md);
-  padding: var(--dp-space-4);
+  padding: var(--dp-space-3);
 }
 [data-primitive="core.heroProof"] .dp-proof-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr)); gap: var(--dp-space-3); margin-top: var(--dp-space-4); }
 [data-primitive="core.heroProof"] .dp-proof-metrics span { display: grid; gap: var(--dp-space-1); color: var(--dp-muted); }
-[data-primitive="core.heroProof"] .dp-proof-metrics b { color: var(--dp-ink); font-size: 1.35rem; }
+[data-primitive="core.heroProof"] .dp-proof-metrics b { color: var(--dp-ink); font-size: 1.1rem; }
