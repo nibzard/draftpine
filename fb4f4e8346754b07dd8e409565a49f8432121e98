@@ -1,0 +1,10 @@
+# Context
+
+## Background
+The static starter still read as Pico defaults after the route-variety work. User feedback called out oversized typography, weak containment, repeated-feeling pages, and dark-mode contrast issues.
+
+## Why This Way
+Kept Draftpine's static HTML/CSS/JS architecture and made the base theme more shadcn-like through tokens and scoped primitive CSS: smaller type, tighter controls, stronger borders, clearer containers, denser tables, framed product artifacts, and better dark-mode card contrast. This avoids a React/Tailwind migration while improving the default visual quality.
+
+## Verification
+Ran pnpm typecheck, pnpm test, pnpm build, docs generation, root strict eval, and regenerated three 10-route live prototypes for music teachers, clinic nurses, and museum exhibit planning. Browser screenshots were captured with agent-browser in light and dark mode.
