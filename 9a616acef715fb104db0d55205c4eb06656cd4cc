@@ -1,0 +1,1 @@
+Follow-up to live preview feedback that generated pages still looked oversized. Reduced Draftpine's default visual scale: smaller h1/h2/body/nav/button type, tighter section rhythm, smaller card/proof padding, smaller metric/pricing display values, and versioned generated CSS/JS URLs to avoid stale browser previews during iterative local testing.
