@@ -1,3 +1,37 @@
+// Browsable-mode site shell. Define global links once here; every page
+// component should expose them through createDraftpineShell().
+// Format: [{ label: "Platform", path: "/platform/" }, ...]
+const SITE_NAV = [];
+const SITE_FOOTER = [];
+
+function getRouteDepth(pathname = window.location.pathname) {
+  const cleanPath = pathname.replace(/\/index\.html$/, "/").replace(/\/+$/, "/");
+  if (cleanPath === "/" || cleanPath.endsWith("/wireframe/")) return 0;
+  const parts = cleanPath.split("/").filter(Boolean);
+  return Math.max(parts.length - 1, 0);
+}
+
+function routeHref(routePath, depth = getRouteDepth()) {
+  if (!routePath || routePath === "/") return depth === 0 ? "./" : "../".repeat(depth);
+  const cleanRoute = String(routePath).replace(/^\/+/, "").replace(/\/?$/, "/");
+  return `${"../".repeat(depth)}${cleanRoute}`;
+}
+
+function createDraftpineShell(options = {}) {
+  const depth = Number.isInteger(options.depth) ? options.depth : getRouteDepth();
+  const normalizeItem = (item) => ({
+    ...item,
+    href: item.href || routeHref(item.path || "/", depth)
+  });
+  return {
+    siteNav: SITE_NAV.map(normalizeItem),
+    siteFooter: SITE_FOOTER.map(normalizeItem),
+    routeHref(path) {
+      return routeHref(path, depth);
+    }
+  };
+}
+
 function getInitialDraftpineTheme() {
   const storedTheme = localStorage.getItem("draftpine-theme");
   if (storedTheme === "light" || storedTheme === "dark") return storedTheme;
@@ -63,6 +97,7 @@ function prototypeBriefWorkspace() {
   };
 
   return {
+    ...createDraftpineShell(),
     content: fallbackContent,
     tab: "brief",
     theme: "light",

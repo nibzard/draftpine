@@ -2,6 +2,11 @@
 
 Patterns are the primary building blocks for Draftpine screens. Agents should assemble a screen-specific recipe from these patterns instead of copying a whole finished example.
 
+Start with `design-profiles.md`, then choose only the pattern files needed for
+the requested screen. Use `components.md` for shared recipes such as site shell,
+filterable hubs, pricing tables, comparison tables, docs pages, modal forms, and
+state panels.
+
 Use this flow:
 
 1. Normalize the prompt into a screen packet.
@@ -95,4 +100,3 @@ Patterns are not component-library code. They are implementation guidance for pl
 - Mobile nav
 - Modal/dialog
 - Expand/collapse wall
-

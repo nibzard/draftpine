@@ -18,6 +18,7 @@ import check  # noqa: E402
 MINIMAL_HTML = """<!doctype html>
 <html lang="en">
   <head>
+    <script>(function(){{var t=localStorage.getItem('draftpine-theme');if(!t)t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;}})();</script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
     <link rel="stylesheet" href="./styles.css" />
     <script defer src="./app.js"></script>
@@ -29,6 +30,22 @@ MINIMAL_HTML = """<!doctype html>
       <section>{copy}</section>
       <button data-draftpine-action="primary">Go</button>
     </main>
+  </body>
+</html>
+"""
+
+ROUTE_HTML = """<!doctype html>
+<html lang="en">
+  <head>
+    <script>(function(){{var t=localStorage.getItem('draftpine-theme');if(!t)t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;}})();</script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
+    <link rel="stylesheet" href="../styles.css" />
+    <script defer src="../app.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  </head>
+  <body>
+    <nav><ul><li><a href="../">Home</a></li></ul></nav>
+    <main><h1>{title}</h1>{body}</main>
   </body>
 </html>
 """
@@ -176,6 +193,25 @@ class ConfigValidationTests(unittest.TestCase):
         self.assertEqual(result["status"], "pass")
         self.assertIn("config.deprecated-template", rules_for(result, "config.deprecated-template"))
 
+    def test_design_profile_must_be_known_when_present(self) -> None:
+        scaffold_project(self.tmp)
+        (self.tmp / "draftpine.config.json").write_text(
+            """{
+  "screen": "Test",
+  "audience": "tester",
+  "userGoal": "verify",
+  "primaryAction": "Go",
+  "designProfile": "spaceship",
+  "requiredStates": [],
+  "requiredInteractions": []
+}
+""",
+            encoding="utf-8",
+        )
+        result = check.check_project()
+        self.assertEqual(result["status"], "fail")
+        self.assertIn("config.field.designProfile", rules_for(result, "config.field.designProfile"))
+
     def test_browsable_mode_requires_routes(self) -> None:
         scaffold_project(self.tmp)
         (self.tmp / "draftpine.config.json").write_text(
@@ -222,7 +258,7 @@ class ConfigValidationTests(unittest.TestCase):
         scaffold_project(self.tmp)
         route_dir = self.tmp / "pricing"
         route_dir.mkdir()
-        (route_dir / "index.html").write_text("<main><a href=\"../\">Home</a></main>", encoding="utf-8")
+        (route_dir / "index.html").write_text(ROUTE_HTML.format(title="Pricing", body=""), encoding="utf-8")
         (self.tmp / "draftpine.config.json").write_text(
             """{
   "screen": "Test",
@@ -256,7 +292,7 @@ class ConfigValidationTests(unittest.TestCase):
         )
         route_dir = self.tmp / "pricing"
         route_dir.mkdir()
-        (route_dir / "index.html").write_text("<main><a href=\"../\">Home</a></main>", encoding="utf-8")
+        (route_dir / "index.html").write_text(ROUTE_HTML.format(title="Pricing", body=""), encoding="utf-8")
         (self.tmp / "draftpine.config.json").write_text(
             """{
   "screen": "Test",
@@ -555,7 +591,7 @@ class QualityGateTests(unittest.TestCase):
         )
         route_dir = self.tmp / "features" / "change-me"
         route_dir.mkdir(parents=True)
-        (route_dir / "index.html").write_text("<main><a href=\"../../\">Home</a></main>", encoding="utf-8")
+        (route_dir / "index.html").write_text(ROUTE_HTML.format(title="Placeholder", body=""), encoding="utf-8")
         result = check.check_project()
         self.assertEqual(result["status"], "fail")
         self.assertIn("route.no-placeholder./features/change-me/", rules_for(result, "route.no-placeholder"))
@@ -602,6 +638,96 @@ class QualityGateTests(unittest.TestCase):
         self.assertEqual(result["status"], "fail")
         self.assertIn("route.github-pages-asset./pricing/", rules_for(result, "route.github-pages-asset"))
         self.assertIn("route.github-pages-link./pricing/", rules_for(result, "route.github-pages-link"))
+
+    def test_theme_bootstrap_is_required_before_pico(self) -> None:
+        scaffold_project(self.tmp)
+        html_path = self.tmp / "index.html"
+        html = html_path.read_text(encoding="utf-8")
+        html = html.replace(
+            "<script>(function(){var t=localStorage.getItem('draftpine-theme');if(!t)t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;})();</script>\n    ",
+            "",
+        )
+        html_path.write_text(html, encoding="utf-8")
+
+        result = check.check_project()
+        self.assertEqual(result["status"], "fail")
+        self.assertIn("theme.bootstrap-before-pico", rules_for(result, "theme.bootstrap-before-pico"))
+
+    def test_route_x_data_factory_must_exist_in_app_js(self) -> None:
+        scaffold_project(self.tmp)
+        html_path = self.tmp / "index.html"
+        html_path.write_text(
+            html_path.read_text(encoding="utf-8").replace("</main>", '<a href="./pricing/">Pricing</a></main>'),
+            encoding="utf-8",
+        )
+        route_dir = self.tmp / "pricing"
+        route_dir.mkdir()
+        (route_dir / "index.html").write_text(
+            ROUTE_HTML.format(title="Pricing", body=' <section x-data="pricingPage()">Pricing</section>'),
+            encoding="utf-8",
+        )
+        (self.tmp / "draftpine.config.json").write_text(
+            """{
+  "screen": "Test",
+  "audience": "tester",
+  "userGoal": "verify",
+  "primaryAction": "Go",
+  "prototypeMode": "browsable",
+  "requiredStates": [],
+  "requiredInteractions": [],
+  "routes": [
+    { "path": "/", "title": "Home", "file": "index.html" },
+    { "path": "/pricing/", "title": "Pricing", "file": "pricing/index.html" }
+  ]
+}
+""",
+            encoding="utf-8",
+        )
+
+        result = check.check_project()
+        self.assertEqual(result["status"], "fail")
+        self.assertIn("runtime.factory-defined.pricingPage", rules_for(result, "runtime.factory-defined"))
+
+    def test_browsable_nav_drift_is_warned(self) -> None:
+        scaffold_project(self.tmp)
+        html_path = self.tmp / "index.html"
+        html_path.write_text(
+            html_path.read_text(encoding="utf-8").replace(
+                "<main>",
+                '<nav><ul><li><a href="./pricing/">Pricing</a></li></ul></nav><main>',
+            ),
+            encoding="utf-8",
+        )
+        route_dir = self.tmp / "pricing"
+        route_dir.mkdir()
+        (route_dir / "index.html").write_text(
+            ROUTE_HTML.format(title="Pricing", body="").replace(
+                '<nav><ul><li><a href="../">Home</a></li></ul></nav>',
+                '<nav><ul><li><a href="../">Home</a></li><li><a href="../docs/">Docs</a></li></ul></nav>',
+            ),
+            encoding="utf-8",
+        )
+        (self.tmp / "draftpine.config.json").write_text(
+            """{
+  "screen": "Test",
+  "audience": "tester",
+  "userGoal": "verify",
+  "primaryAction": "Go",
+  "prototypeMode": "browsable",
+  "requiredStates": [],
+  "requiredInteractions": [],
+  "routes": [
+    { "path": "/", "title": "Home", "file": "index.html" },
+    { "path": "/pricing/", "title": "Pricing", "file": "pricing/index.html" }
+  ]
+}
+""",
+            encoding="utf-8",
+        )
+
+        result = check.check_project()
+        self.assertEqual(result["status"], "pass")
+        self.assertIn("route.nav-consistency", rules_for(result, "route.nav-consistency"))
 
 
 class AccessibilityParsingTests(unittest.TestCase):

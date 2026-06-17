@@ -9,6 +9,10 @@
     "audience": { "type": "string" },
     "userGoal": { "type": "string" },
     "primaryAction": { "type": "string" },
+    "designProfile": {
+      "type": "string",
+      "enum": ["editorial", "saas", "marketing", "docs", "app"]
+    },
     "prototypeMode": {
       "type": "string",
       "enum": ["single-screen", "browsable"],
@@ -31,6 +35,18 @@
       "type": "array",
       "items": { "type": "string" },
       "default": []
+    },
+    "visualQa": {
+      "type": "object",
+      "properties": {
+        "required": { "type": "boolean", "default": false },
+        "sampleRoutes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": []
+        }
+      },
+      "additionalProperties": true
     },
     "routes": {
       "type": "array",

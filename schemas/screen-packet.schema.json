@@ -9,6 +9,11 @@
     "audience": { "type": "string", "minLength": 1 },
     "userGoal": { "type": "string", "minLength": 1 },
     "primaryAction": { "type": "string", "minLength": 1 },
+    "designProfile": {
+      "type": "string",
+      "enum": ["editorial", "saas", "marketing", "docs", "app"],
+      "default": "editorial"
+    },
     "prototypeMode": {
       "type": "string",
       "enum": ["single-screen", "browsable"],

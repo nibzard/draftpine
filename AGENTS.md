@@ -40,21 +40,23 @@ Do not skip the four onboarding questions because of remembered project context,
 1. Read this file before editing.
 2. Convert the user's request into a screen packet.
 3. Choose a small pattern recipe from `patterns/` when starting a new screen. Use `examples/` only for reference, not as a required starting point.
-4. Choose the prototype mode:
+4. Choose one design profile from `patterns/design-profiles.md` (`editorial`, `saas`, `marketing`, `docs`, or `app`) and keep it consistent across the prototype.
+5. Choose the prototype mode:
    - Use `single-screen` for disposable one-screen exploration.
    - Use `browsable` for a website, app flow, IA, sitemap, multi-screen prototype, or whenever the user expects links/navigation to work.
-5. In `single-screen` mode, edit only `index.html`, `styles.css`, `app.js`, and `draftpine.config.json` unless the user asks for project-level changes.
-6. In `browsable` mode, keep `/` as the homepage, add route folders such as `pricing/index.html` or `compare/steel-vs-browserbase/index.html`, update shared links, and declare every page in `draftpine.config.json` `routes`.
-7. Use JSON content mode when the prototype has enough real copy/data that layout and content should be reviewed separately.
-8. Convert content into product UI. Do not dump Markdown, planning notes, SEO notes, or source outlines into `<pre>` blocks as the primary screen.
-9. Filter out internal templates and unresolved placeholders from public routes unless the user explicitly asks to inspect templates.
-10. Use plain HTML, CSS, and JavaScript.
-11. Use Pico CSS v2 from a CDN for visual defaults.
-12. Use Alpine.js v3 from a CDN for local prototype behavior.
-13. Run `python3 scripts/check.py --runtime --json`.
-14. Fix every `error` in `next_actions`, then rerun the check until it passes.
-15. Do a quality pass after the checker: first viewport, primary action, real layout, real interactions, and GitHub Pages path safety.
-16. Deploy to GitHub Pages only when the user explicitly asks to publish or deploy.
+6. In `single-screen` mode, edit only `index.html`, `styles.css`, `app.js`, and `draftpine.config.json` unless the user asks for project-level changes.
+7. In `browsable` mode, keep `/` as the homepage, add route folders such as `pricing/index.html` or `compare/steel-vs-browserbase/index.html`, update shared links, and declare every page in `draftpine.config.json` `routes`.
+8. Use JSON content mode when the prototype has enough real copy/data that layout and content should be reviewed separately.
+9. Convert content into product UI. Do not dump Markdown, planning notes, SEO notes, or source outlines into `<pre>` blocks as the primary screen.
+10. Filter out internal templates and unresolved placeholders from public routes unless the user explicitly asks to inspect templates.
+11. Use plain HTML, CSS, and JavaScript.
+12. Use Pico CSS v2 from a CDN for visual defaults.
+13. Use Alpine.js v3 from a CDN for local prototype behavior.
+14. Run `python3 scripts/check.py --runtime --json`.
+15. Fix every `error` in `next_actions`, then rerun the check until it passes.
+16. Run `python3 scripts/visual_qa.py --json` for browsable prototypes or visual-heavy screens; inspect the screenshots/checklist before declaring done.
+17. Do a quality pass after the checker: first viewport, primary action, real layout, real interactions, shared nav, light/dark mode, mobile layout, and GitHub Pages path safety.
+18. Deploy to GitHub Pages only when the user explicitly asks to publish or deploy.
 
 ## Prototype Modes
 
@@ -82,6 +84,9 @@ Rules:
 - Declare routes in `draftpine.config.json`.
 - Do not archive prior screens into disconnected folders unless the user explicitly asks for throwaway snapshots.
 - After adding a page, link to it from nav, CTA, related links, or an index page so it is browsable.
+- **Shared shell:** Define site-wide links once in `app.js` by populating `SITE_NAV` and `SITE_FOOTER` (`{ label, path }` objects). Every page component must expose `...createDraftpineShell({ depth })` so HTML can render `siteNav`, `siteFooter`, and `routeHref()`. Never hardcode different nav sets per page — all pages must share the same shell data.
+- **Literal route links:** Alpine `:href` bindings are good for rendering, but the checker also requires normal literal `<a href="...">` links so routes remain reachable without JavaScript. Add hub links, related links, or a static sitemap footer for every configured route.
+- **Large sites:** For IA-backed or 10+ route prototypes, follow `agent-workflows/large-browsable-site.md`: route graph first, minimal shells second, checker pass third, content enrichment after.
 
 Example config:
 
@@ -136,6 +141,11 @@ Draftpine ships a shared look on top of Pico: a warm-grey neutral palette, one r
 
 - Keep the base theme block (and the Inter font `<link>` tags in the head) when starting or rewriting a screen.
 - Keep the light/dark theme switcher in the top navigation unless the user explicitly asks to remove it; mark it with `data-draftpine-interaction="theme"`.
+- **Theme init (required on every page):** Add this FOUC-prevention script in `<head>` immediately after the font `<link>` tags and before the Pico CSS `<link>`. It runs synchronously so the correct theme is applied before any CSS renders, regardless of Alpine.js load order or component state:
+  ```html
+  <script>(function(){var t=localStorage.getItem('draftpine-theme');if(!t)t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;})();</script>
+  ```
+  Additionally, every Alpine page component **must** call `getInitialDraftpineTheme()` in its `init()` function and assign the result to both `this.theme` and `document.documentElement.dataset.theme`. Missing this causes pages to ignore the user's stored preference and system setting.
 - Restyle through Pico's design tokens first; reach for component-specific CSS only when a token can't express it.
 - Do not let the page become a generic grayscale wireframe. Use the accent token sparingly for live status, selected proof, active tabs, or one primary product signal.
 - Keep heading and eyebrow `letter-spacing: 0`; use weight, size, spacing, and case for hierarchy.

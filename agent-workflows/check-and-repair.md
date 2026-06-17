@@ -10,6 +10,15 @@ If the checker returns `"status": "fail"`, read `next_actions` in priority order
 
 Do not finish a Draftpine wireframe while checker errors remain.
 
+After the checker passes, run the visual QA helper for browsable prototypes,
+marketing pages, dashboards, or anything with meaningful layout risk:
+
+```bash
+python3 scripts/visual_qa.py --json
+```
+
+Inspect the screenshots or manual checklist before reporting completion.
+
 For browsable prototypes, route errors are real product issues: create the
 missing route file, remove stale route config, or add a normal `<a href="...">`
 link so the page can be reached in the browser.
@@ -34,3 +43,7 @@ finishing, inspect the result for these common failure modes:
 - Filters, tabs, modals, or theme controls that do not change visible UI state.
 - Root-absolute local links or assets (`/styles.css`, `/app.js`, `/pricing/`)
   that will break under a GitHub Pages project path.
+- Missing theme bootstrap before Pico CSS, which causes light/dark flashes and
+  pages ignoring stored theme preferences.
+- Route pages whose `x-data` factory is not defined in `app.js`.
+- Navigation drift between configured route pages; use shared shell helpers.

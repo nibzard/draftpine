@@ -5,6 +5,7 @@
   "primaryAction": "Start first screen",
   "prototypeMode": "single-screen",
   "contentMode": "json",
+  "designProfile": "app",
   "contentFiles": ["content/pages/prototype-brief-workspace.json"],
   "patterns": ["app shell", "outcome hero", "brief checklist", "tabs", "filter bar", "theme switcher", "modal", "state callouts"],
   "requiredStates": ["default", "empty", "success"],

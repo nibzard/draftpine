@@ -38,6 +38,7 @@ FORBIDDEN_PATTERNS = {
 }
 CONFIG_STRING_FIELDS = ["screen", "audience", "userGoal", "primaryAction"]
 CONFIG_ARRAY_FIELDS = ["requiredStates", "requiredInteractions"]
+DESIGN_PROFILES = {"editorial", "saas", "marketing", "docs", "app"}
 EXAMPLE_STRING_FIELDS = ["name", "label"]
 EXAMPLE_ARRAY_FIELDS = ["bestFor", "sections", "states", "interactions"]
 CDN_HOSTS = {"cdn.jsdelivr.net", "unpkg.com"}
@@ -143,7 +144,9 @@ class DraftpineHTMLParser(HTMLParser):
         self.tags: set[str] = set()
         self.links: list[str] = []
         self.scripts: list[str] = []
+        self.inline_scripts: list[str] = []
         self.anchors: list[str] = []
+        self.nav_anchors: list[tuple[str, str]] = []
         self.states: set[str] = set()
         self.interactions: set[str] = set()
         self.actions: set[str] = set()
@@ -152,15 +155,22 @@ class DraftpineHTMLParser(HTMLParser):
         self.labels_for: set[str] = set()
         self.label_depth = 0
         self.current_button: dict[str, object] | None = None
+        self.current_anchor: dict[str, object] | None = None
+        self.nav_depth = 0
+        self.script_depth = 0
+        self.current_script = ""
         self.root_x_data: str | None = None
         self.alpine_expressions: list[str] = []
         self.x_for_vars: set[str] = set()
         self.elements: list[dict[str, object]] = []
+        self.bound_hrefs: list[str] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         attr = {key: value or "" for key, value in attrs}
         self.elements.append({"tag": tag, "attrs": attr, "line": self.getpos()[0]})
         self.tags.add(tag)
+        if tag == "nav":
+            self.nav_depth += 1
         if "x-data" in attr and self.root_x_data is None:
             self.root_x_data = attr["x-data"]
         if "x-for" in attr:
@@ -171,12 +181,18 @@ class DraftpineHTMLParser(HTMLParser):
         for name, value in attr.items():
             if name in ALPINE_EVAL_ATTRS and value:
                 self.alpine_expressions.append(value)
+            if name in {":href", "x-bind:href"} and value:
+                self.bound_hrefs.append(value)
         if tag == "link" and attr.get("href"):
             self.links.append(attr["href"])
         if tag == "script" and attr.get("src"):
             self.scripts.append(attr["src"])
+        if tag == "script" and not attr.get("src"):
+            self.script_depth += 1
+            self.current_script = ""
         if tag == "a" and attr.get("href"):
             self.anchors.append(attr["href"])
+            self.current_anchor = {"href": attr["href"], "text": ""}
         if "data-draftpine-state" in attr:
             self.states.add(attr["data-draftpine-state"])
         if "data-draftpine-interaction" in attr:
@@ -199,10 +215,27 @@ class DraftpineHTMLParser(HTMLParser):
             self.label_depth -= 1
         if tag == "button":
             self.current_button = None
+        if tag == "a" and self.current_anchor:
+            if self.nav_depth:
+                self.nav_anchors.append((
+                    str(self.current_anchor["href"]),
+                    re.sub(r"\s+", " ", str(self.current_anchor["text"]).strip()),
+                ))
+            self.current_anchor = None
+        if tag == "nav" and self.nav_depth:
+            self.nav_depth -= 1
+        if tag == "script" and self.script_depth:
+            self.inline_scripts.append(self.current_script)
+            self.current_script = ""
+            self.script_depth -= 1
 
     def handle_data(self, data: str) -> None:
         if self.current_button:
             self.current_button["text"] = str(self.current_button["text"]) + data.strip()
+        if self.current_anchor:
+            self.current_anchor["text"] = str(self.current_anchor["text"]) + data.strip()
+        if self.script_depth:
+            self.current_script += data
 
 
 def finding(severity: str, rule: str, file: str, message: str, suggested_fix: str, line: int | None = None, evidence: str | None = None) -> dict[str, object]:
@@ -303,8 +336,71 @@ def extract_x_data_factory(expression: str | None) -> str | None:
     return match.group(1) if match else None
 
 
+def function_defined(source: str, name: str) -> bool:
+    return re.search(rf"(?:function\s+{re.escape(name)}\s*\(|(?:const|let|var)\s+{re.escape(name)}\s*=)", source) is not None
+
+
 def expression_uses_loop_var(expression: str, loop_vars: set[str]) -> bool:
     return any(re.search(rf"\b{re.escape(name)}\b", expression) for name in loop_vars)
+
+
+def has_theme_bootstrap_before_pico(html: str, parser: DraftpineHTMLParser) -> bool:
+    pico_matches = [href for href in parser.links if is_pico_v2_cdn(href)]
+    if not pico_matches:
+        return False
+    pico_index = html.find(pico_matches[0])
+    if pico_index < 0:
+        return False
+    before_pico = html[:pico_index]
+    return (
+        "draftpine-theme" in before_pico
+        and "document.documentElement.dataset.theme" in before_pico
+        and "matchMedia" in before_pico
+    )
+
+
+def normalized_nav_signature(parser: DraftpineHTMLParser) -> tuple[tuple[str, str], ...]:
+    signature: list[tuple[str, str]] = []
+    for href, label in parser.nav_anchors:
+        if not label:
+            continue
+        normalized_href = normalize_route_path(href) if is_local_anchor(href) else href
+        signature.append((label, normalized_href))
+    return tuple(signature)
+
+
+def validate_page_runtime_contract(
+    parser: DraftpineHTMLParser,
+    html: str,
+    js: str,
+    file: str,
+    findings: list[dict[str, object]],
+    passes: list[dict[str, object]],
+) -> None:
+    if has_theme_bootstrap_before_pico(html, parser):
+        passes.append({"rule": "theme.bootstrap-before-pico", "file": file})
+    else:
+        findings.append(finding(
+            "error",
+            "theme.bootstrap-before-pico",
+            file,
+            "The Draftpine theme bootstrap script is missing before Pico CSS.",
+            "Add the synchronous draftpine-theme script in <head> after fonts and before the Pico stylesheet so light/dark mode is correct before render."
+        ))
+
+    factory = extract_x_data_factory(parser.root_x_data)
+    if factory is None:
+        return
+    if function_defined(js, factory):
+        passes.append({"rule": f"runtime.factory-defined.{factory}", "file": file})
+    else:
+        findings.append(finding(
+            "error",
+            f"runtime.factory-defined.{factory}",
+            file,
+            f"Page references x-data factory '{factory}()' but app.js does not define it.",
+            f"Define function {factory}() in app.js, or change the page x-data to an existing factory."
+        ))
 
 
 def run_runtime_smoke(parser: DraftpineHTMLParser, findings: list[dict[str, object]], passes: list[dict[str, object]]) -> None:
@@ -654,6 +750,9 @@ def validate_routes(config: dict[str, object], findings: list[dict[str, object]]
     route_paths: set[str] = set()
     route_files: list[str] = []
     anchor_paths: set[str] = set()
+    route_parsers: dict[str, DraftpineHTMLParser] = {}
+    route_signatures: dict[str, tuple[tuple[str, str], ...]] = {}
+    js = read_text(ROOT / "app.js") if (ROOT / "app.js").exists() else ""
 
     for index, route in enumerate(routes):
         raw_path = route.get("path")
@@ -703,9 +802,15 @@ def validate_routes(config: dict[str, object], findings: list[dict[str, object]]
         route_file = ROOT / file
         if route_file.exists():
             passes.append({"rule": f"route.file.{path}", "file": file})
+            route_html = read_text(route_file)
             parser = DraftpineHTMLParser()
-            parser.feed(read_text(route_file))
+            parser.feed(route_html)
+            route_parsers[file] = parser
             validate_route_page_paths(parser, file, path, findings)
+            validate_page_runtime_contract(parser, route_html, js, file, findings, passes)
+            signature = normalized_nav_signature(parser)
+            if signature:
+                route_signatures[file] = signature
             for href in parser.anchors:
                 if is_local_anchor(href):
                     anchor_paths.add(normalize_route_path(href))
@@ -733,13 +838,33 @@ def validate_routes(config: dict[str, object], findings: list[dict[str, object]]
         if path in anchor_paths:
             passes.append({"rule": f"route.linked.{path}", "file": "draftpine.config.json"})
         else:
+            dynamic_hint = " Dynamic Alpine href bindings do not satisfy this route rule; include at least one literal <a href=\"...\"> fallback."
+            if not any(parser.bound_hrefs for parser in route_parsers.values()):
+                dynamic_hint = ""
             findings.append(finding(
                 "error",
                 f"route.linked.{path}",
                 "draftpine.config.json",
                 f"Configured route '{path}' is not linked from any configured page.",
-                "Add a normal <a href=\"...\"> link to this route so the prototype is browsable."
+                "Add a normal <a href=\"...\"> link to this route so the prototype is browsable." + dynamic_hint
             ))
+
+    non_empty_signatures = {file: sig for file, sig in route_signatures.items() if sig}
+    if len(non_empty_signatures) > 1:
+        first_file, first_signature = next(iter(non_empty_signatures.items()))
+        for file, signature in list(non_empty_signatures.items())[1:]:
+            if signature != first_signature:
+                findings.append(finding(
+                    "warning",
+                    "route.nav-consistency",
+                    file,
+                    "This page's navigation links differ from another configured route.",
+                    f"Use a shared SITE_NAV/site shell helper so this route matches {first_file}, or remove page-specific nav drift intentionally.",
+                    evidence=f"{file}: {signature} != {first_file}: {first_signature}",
+                ))
+                break
+    if non_empty_signatures:
+        passes.append({"rule": "route.nav-present", "file": "draftpine.config.json"})
 
 def load_config(findings: list[dict[str, object]]) -> dict[str, object]:
     config_path = ROOT / "draftpine.config.json"
@@ -825,6 +950,16 @@ def load_config(findings: list[dict[str, object]]) -> dict[str, object]:
             "draftpine.config.json",
             "Config field 'contentMode' must be 'inline' or 'json' when present.",
             "Use 'inline' for copy in markup/app.js or 'json' for static content files."
+        ))
+
+    design_profile = config.get("designProfile")
+    if design_profile is not None and design_profile not in DESIGN_PROFILES:
+        findings.append(finding(
+            "error",
+            "config.field.designProfile",
+            "draftpine.config.json",
+            "Config field 'designProfile' must be one of editorial, saas, marketing, docs, or app when present.",
+            "Choose the closest design profile from patterns/design-profiles.md."
         ))
 
     if isinstance(config.get("template"), str) and config.get("template", "").strip():
@@ -1038,6 +1173,7 @@ def check_project(strict: bool = False, runtime: bool = False) -> dict[str, obje
                 evidence="counted after the Screen helpers marker" if found_marker else "Screen helpers marker missing; counted the whole file",
             ))
 
+    validate_page_runtime_contract(parser, html, js, "index.html", findings, passes)
     validate_quality_gate(parser, config, findings, passes)
     validate_routes(config, findings, passes)
     validate_content_files(config, findings, passes)

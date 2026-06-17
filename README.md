@@ -49,17 +49,29 @@ Skip:          auth, backend calls, real chart library
 
 The agent assembles a screen-specific pattern recipe, chooses single-screen or browsable mode, edits the static files, and loops on the checker until it passes. Refine, add screens, or ask it to deploy when you're happy.
 
+For IA-backed or content-heavy prototypes, the agent can scaffold routes and
+content files from Markdown first:
+
+```bash
+python3 scripts/scaffold_from_content.py path/to/pages --write
+```
+
+That creates route shells, `content/pages/*.json`, and route config; the agent
+then replaces the shells with composed UI.
+
 ## How it works
 
 ```text
 your prompt
   → agent reads AGENTS.md            (the rules)
   → agent chooses patterns/          (a screen-specific recipe)
+  → agent chooses a design profile   (editorial, saas, marketing, docs, app)
   → agent chooses prototype mode     (single-screen or browsable)
   → agent may inspect examples/      (finished reference screens)
   → agent edits static HTML/CSS/JS plus draftpine.config.json
   → python3 scripts/check.py --runtime --json  (structured pass/fail + fixes)
   → agent loops until status: pass
+  → python3 scripts/visual_qa.py --json       (screenshots/checklist)
   → deploy to GitHub Pages           (only when you ask)
 ```
 
@@ -102,8 +114,14 @@ Extra modes:
 
 ```bash
 python3 scripts/check.py --examples --json    # verify each example's metadata matches its markup
+python3 scripts/visual_qa.py --json           # capture representative desktop/mobile screenshots
 python3 -m unittest discover -s tests          # run the checker's tests (stdlib only)
 ```
+
+The checker is the mechanical gate. `visual_qa.py` is the product-quality gate:
+it samples root/hub/detail routes, captures screenshots when Chrome is
+available, and emits a checklist for nav consistency, light/dark mode,
+interactions, mobile layout, and motion.
 
 ## Deploy to GitHub Pages
 
@@ -159,6 +177,12 @@ Browsable prototypes declare routes in `draftpine.config.json`:
 
 The checker verifies that route files exist and that non-home routes are linked from the configured pages.
 
+In browsable mode, define shared navigation once in `app.js` with `SITE_NAV`,
+`SITE_FOOTER`, and `createDraftpineShell()`. Dynamic Alpine links are fine for
+rendering, but every configured route also needs at least one literal
+`<a href="...">` fallback so the prototype remains reachable without
+JavaScript and the checker can prove the route graph.
+
 ## JSON Content Mode
 
 Draftpine can keep layout and copy separate. Use `contentMode: "json"` when a prototype has real IA copy, repeated pages, comparison data, pricing tables, or content that should be reviewed without touching markup.
@@ -196,6 +220,8 @@ Useful pattern groups:
 
 | Group | Use it for |
 | --- | --- |
+| `patterns/design-profiles.md` | choosing the prototype's visual posture: editorial, saas, marketing, docs, app |
+| `patterns/components.md` | shared site shell, filterable hubs, pricing, comparisons, docs pages, modals, states |
 | `patterns/heroes.md` | outcome heroes, code/runtime heroes, benchmark heroes, install-command heroes |
 | `patterns/proof.md` | logo walls, metrics, testimonials, customer stories, compliance strips |
 | `patterns/developer.md` | code tabs, request/response blocks, IDE/browser mocks, quickstarts |
@@ -225,6 +251,7 @@ patterns/            reusable screen patterns agents compose from
 examples/            finished reference screens
 schemas/             JSON schemas for the screen packet and config
 agent-workflows/     shared playbooks used by .agents/skills/ and .claude/skills/
+                     includes large-browsable-site.md and visual-qa.md
 ```
 
 ---
