@@ -1,0 +1,1 @@
+Second density pass after live preview still read oversized. This intentionally shifts Draftpine defaults from marketing-page scale to compact wireframe/product scale: 28px desktop h1, tighter h2/body/button sizing, 32px sections, 16px cards, smaller proof/metric/pricing treatments, and restarted live preview servers for direct validation.
