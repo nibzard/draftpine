@@ -5,6 +5,7 @@
   --dp-code-font: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   --dp-background: #ffffff;
+  --dp-page-bg: #f4f4f5;
   --dp-foreground: #171717;
   --dp-card: #ffffff;
   --dp-card-subtle: #fafafa;
@@ -38,6 +39,7 @@
   --dp-surface-dark-elevated: #18181b;
   --dp-shadow-sm: 0 1px 2px rgba(24, 24, 27, 0.05);
   --dp-shadow-md: 0 8px 24px rgba(24, 24, 27, 0.08);
+  --dp-shell-shadow: 0 18px 50px rgba(24, 24, 27, 0.08);
 
   --pico-font-family: var(--font-family);
   --pico-background-color: var(--dp-background);
@@ -82,6 +84,7 @@
 :root[data-theme="dark"] {
   color-scheme: dark;
   --dp-background: #09090b;
+  --dp-page-bg: #050507;
   --dp-foreground: #fafafa;
   --dp-card: #111113;
   --dp-card-subtle: #18181b;
@@ -115,6 +118,7 @@
   --dp-surface-dark-elevated: #111113;
   --dp-shadow-sm: none;
   --dp-shadow-md: none;
+  --dp-shell-shadow: none;
 }
 
 * { box-sizing: border-box; }
@@ -123,12 +127,19 @@ body {
   min-width: 0;
   margin: 0;
   color: var(--dp-body);
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--dp-muted-bg), transparent 62%), transparent 18rem),
-    var(--dp-background);
+  background: var(--dp-page-bg);
   font-size: 14px;
   line-height: 1.45;
   text-rendering: optimizeLegibility;
+}
+main {
+  width: min(100% - 1.5rem, 78rem);
+  margin: 0.5rem auto 1.25rem;
+  overflow: clip;
+  border: 1px solid var(--dp-line);
+  border-radius: var(--dp-radius-xl);
+  background: var(--dp-background);
+  box-shadow: var(--dp-shell-shadow);
 }
 h1, h2, h3, h4, h5, h6, p { letter-spacing: 0; overflow-wrap: anywhere; }
 h1, h2, h3 {
@@ -219,8 +230,8 @@ th, td { border-color: var(--dp-line); }
   position: sticky;
   top: 0;
   z-index: 10;
-  border-block-end: 1px solid var(--dp-line);
-  background: color-mix(in srgb, var(--dp-background), transparent 5%);
+  border-block-end: 0;
+  background: color-mix(in srgb, var(--dp-page-bg), transparent 7%);
   backdrop-filter: blur(16px);
 }
 .dp-site-header nav {
@@ -230,7 +241,12 @@ th, td { border-color: var(--dp-line); }
   gap: var(--dp-space-3);
   flex-wrap: nowrap;
   min-height: 3.35rem;
-  padding-block: 0.3rem;
+  margin-block: 0.65rem;
+  padding: 0.42rem;
+  border: 1px solid var(--dp-line);
+  border-radius: var(--dp-radius-xl);
+  background: var(--dp-background);
+  box-shadow: var(--dp-shadow-sm);
 }
 .dp-site-header ul,
 .dp-site-footer ul {
@@ -276,6 +292,19 @@ th, td { border-color: var(--dp-line); }
   background: var(--dp-muted-bg);
   color: var(--dp-ink);
 }
+.dp-route-id-home .dp-site-header a[href="./"],
+.dp-route-id-dashboard .dp-site-header a[href="../dashboard/"],
+.dp-route-id-directory .dp-site-header a[href="../directory/"],
+.dp-route-id-detail .dp-site-header a[href="../detail/"],
+.dp-route-id-pricing .dp-site-header a[href="../pricing/"],
+.dp-route-id-compare .dp-site-header a[href="../compare/"],
+.dp-route-id-checkout .dp-site-header a[href="../checkout/"],
+.dp-route-id-settings .dp-site-header a[href="../settings/"],
+.dp-route-id-support .dp-site-header a[href="../support/"],
+.dp-route-id-editorial .dp-site-header a[href="../editorial/"] {
+  background: var(--dp-muted-bg);
+  color: var(--dp-ink);
+}
 .dp-site-header strong {
   display: block;
   min-height: 1.9rem;
@@ -302,9 +331,12 @@ th, td { border-color: var(--dp-line); }
 }
 
 .dp-site-footer {
+  width: min(100% - 1.5rem, 78rem);
+  margin: 0 auto 1.5rem;
   padding-block: 2.1rem;
   color: #a1a1aa;
   background: var(--dp-surface-dark);
+  border-radius: var(--dp-radius-xl);
 }
 .dp-site-footer .dp-container {
   display: grid;
@@ -386,10 +418,14 @@ button[data-draftpine-action="primary"]:hover {
 .dp-section header p { max-width: 38rem; }
 
 .dp-route-home [data-primitive="core.heroProof"] {
-  padding-block: 2rem 1.6rem;
+  padding-block: 2.4rem 1.8rem;
+  background:
+    radial-gradient(circle at 82% 18%, color-mix(in srgb, var(--dp-accent), transparent 86%), transparent 14rem),
+    var(--dp-background);
 }
 .dp-route-home [data-primitive="core.heroProof"] .dp-container {
   width: min(100% - 2rem, var(--dp-container-xl));
+  align-items: center;
 }
 .dp-route-home [data-primitive="core.heroProof"] h1 {
   max-width: 12ch;
@@ -434,7 +470,9 @@ button[data-draftpine-action="primary"]:hover {
 
 .dp-route-directory [data-primitive="core.decisionHero"] {
   padding-block: 1.2rem;
-  background: var(--dp-muted-bg);
+  background:
+    linear-gradient(90deg, var(--dp-muted-bg), transparent 72%),
+    var(--dp-background);
 }
 .dp-route-directory [data-primitive="core.decisionHero"] .dp-container {
   width: min(100% - 2rem, var(--dp-container-lg));
@@ -501,6 +539,15 @@ button[data-draftpine-action="primary"]:hover {
 
 .dp-route-editorial [data-primitive="core.decisionHero"] {
   padding-block: 2.4rem;
+  background: var(--dp-surface-dark);
+}
+.dp-route-editorial [data-primitive="core.decisionHero"] h1,
+.dp-route-editorial [data-primitive="core.decisionHero"] p {
+  color: #ffffff;
+}
+.dp-route-editorial [data-primitive="core.decisionHero"] .dp-eyebrow,
+.dp-route-editorial [data-primitive="core.decisionHero"] .dp-decision-signal {
+  color: #a1a1aa;
 }
 .dp-route-editorial [data-primitive="core.decisionHero"] .dp-container {
   max-width: var(--dp-container-sm);
@@ -539,7 +586,17 @@ button[data-draftpine-action="primary"]:hover {
 
 @media (max-width: 760px) {
   .dp-container { width: min(100% - 1rem, var(--dp-container-lg)); }
+  main {
+    width: 100%;
+    margin: 0;
+    border-inline: 0;
+    border-radius: 0;
+  }
   .dp-site-header nav { align-items: flex-start; flex-wrap: wrap; }
+  .dp-site-header nav {
+    width: min(100% - 0.75rem, var(--dp-container-lg));
+    margin-block: 0.35rem;
+  }
   .dp-site-header nav ul:last-child { justify-content: flex-start; width: 100%; }
   .dp-site-header strong { max-width: calc(100vw - 2rem); }
   .dp-split,
@@ -555,6 +612,11 @@ button[data-draftpine-action="primary"]:hover {
     grid-template-columns: 1fr;
   }
   .dp-section { padding-block: 1.35rem; }
+  .dp-site-footer {
+    width: 100%;
+    margin: 0;
+    border-radius: 0;
+  }
   h1 { font-size: 1.45rem; }
   h2 { font-size: 1.05rem; }
   .dp-route-home [data-primitive="core.heroProof"] h1,
