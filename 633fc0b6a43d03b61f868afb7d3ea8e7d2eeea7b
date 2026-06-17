@@ -1,0 +1,10 @@
+# Context
+
+## Background
+The previous Draftpine browsable starter produced too-similar pages across unrelated prompts: repeated hero structures, weak route differentiation, and inconsistent containment/dark-mode behavior in generated examples.
+
+## Why This Way
+This commit expands the starter around route-specific contracts, new reusable primitives/layouts, and prompt-domain content presets so generated prototypes start with visibly different screen structures before hand tuning. The changes were validated with fresh 10-route prototypes for music teachers, clinic nursing operations, and museum exhibit planning.
+
+## Verification
+Ran pnpm typecheck, pnpm test, pnpm build, generated docs, and strict eval on the three fresh live-test prototypes. Browser screenshots were captured with agent-browser for the final live routes.
