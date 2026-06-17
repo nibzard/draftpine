@@ -1,0 +1,10 @@
+# Context
+
+## Background
+The prior shadcn-inspired token pass still looked too similar because the page silhouette remained a full-width document: header, hero, sections, cards.
+
+## Why This Way
+This follow-up changes the visible shell rather than only component polish. Generated previews now render inside a bounded app canvas on a neutral page background, with a floating bordered nav, active nav state, contained footer, and more distinct route bands. The goal is for the default output to read as an intentional static prototype surface instead of a Pico document.
+
+## Verification
+Ran typecheck, tests, build, root strict eval, and strict eval on regenerated 10-route music, clinic, and museum live prototypes. Captured the music home preview with agent-browser to confirm the silhouette changed.
