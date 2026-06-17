@@ -7,7 +7,7 @@
   border: 1px solid var(--dp-line);
   border-radius: var(--dp-radius-xl);
   padding: var(--dp-space-4);
-  box-shadow: 0 12px 30px rgba(17, 17, 17, 0.06);
+  box-shadow: 0 8px 20px rgba(17, 17, 17, 0.05);
 }
 
 :root[data-theme="dark"] [data-primitive="core.productMockup"] .dp-product-shell {
@@ -28,13 +28,13 @@
 [data-primitive="core.productMockup"] .dp-product-toolbar span {
   display: inline-flex;
   align-items: center;
-  min-height: 1.75rem;
-  padding-inline: var(--dp-space-3);
+  min-height: 1.6rem;
+  padding-inline: var(--dp-space-2);
   border-radius: var(--dp-radius-pill);
   background: var(--pico-background-color);
   border: 1px solid var(--dp-line);
   color: var(--dp-ink);
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 

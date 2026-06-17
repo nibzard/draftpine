@@ -2,5 +2,5 @@
   background: var(--dp-surface-card);
   border-color: var(--dp-line);
   border-radius: var(--dp-radius-lg);
-  padding: var(--dp-space-5);
+  padding: var(--dp-space-4);
 }
