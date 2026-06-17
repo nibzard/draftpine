@@ -1,0 +1,60 @@
+[data-primitive="core.stepperFlow"] .dp-stepper-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(16rem, 0.45fr);
+  gap: var(--dp-space-4);
+  align-items: start;
+}
+[data-primitive="core.stepperFlow"] .dp-step-list {
+  display: grid;
+  gap: var(--dp-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+[data-primitive="core.stepperFlow"] .dp-step-list li {
+  counter-increment: step;
+  display: grid;
+  grid-template-columns: 1.75rem minmax(7rem, 1fr);
+  gap: var(--dp-space-3);
+  align-items: start;
+  border: 1px solid var(--dp-line);
+  border-radius: var(--dp-radius-lg);
+  padding: var(--dp-space-3);
+  background: var(--pico-background-color);
+}
+[data-primitive="core.stepperFlow"] .dp-step-list li::before {
+  content: counter(step);
+  display: grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: var(--dp-radius-pill);
+  background: var(--dp-surface-card);
+  color: var(--dp-ink);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+[data-primitive="core.stepperFlow"] .dp-step-list span {
+  display: block;
+  color: var(--dp-muted);
+  font-size: 0.875rem;
+  margin-top: var(--dp-space-1);
+}
+[data-primitive="core.stepperFlow"] .dp-step-list strong {
+  white-space: nowrap;
+}
+[data-primitive="core.stepperFlow"] .dp-step-summary {
+  border: 1px solid var(--dp-line);
+  border-radius: var(--dp-radius-lg);
+  background: var(--dp-surface-card);
+  padding: var(--dp-space-4);
+}
+[data-primitive="core.stepperFlow"] small {
+  color: var(--dp-muted);
+}
+@media (max-width: 760px) {
+  [data-primitive="core.stepperFlow"] .dp-stepper-shell {
+    grid-template-columns: 1fr;
+  }
+}

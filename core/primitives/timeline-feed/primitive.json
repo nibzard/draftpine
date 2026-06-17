@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "2.0",
+  "name": "timelineFeed",
+  "namespace": "core",
+  "type": "primitive",
+  "description": "Narrative timeline or activity feed for editorial and product history pages.",
+  "slots": {
+    "title": { "type": "string", "required": true },
+    "description": { "type": "text" },
+    "items": { "type": "array" }
+  },
+  "variants": ["editorial", "activity"],
+  "layouts": ["core.stack"],
+  "interactions": [],
+  "states": ["default"],
+  "accessibility": { "requiresHeading": true }
+}

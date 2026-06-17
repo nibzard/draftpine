@@ -1,0 +1,4 @@
+.dp-app-shell-layout {
+  display: grid;
+  gap: var(--dp-space-4);
+}

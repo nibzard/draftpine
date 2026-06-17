@@ -1,0 +1,9 @@
+{
+  "title": "Support options",
+  "description": "Choose a path based on urgency and account state.",
+  "options": [
+    { "title": "Troubleshoot", "body": "Walk through the likely issue.", "label": "Start", "href": "#" },
+    { "title": "Contact team", "body": "Send context to support.", "label": "Open form", "href": "#" }
+  ],
+  "status": [{ "label": "Status", "value": "Operational" }, { "label": "Response", "value": "2 hours" }]
+}

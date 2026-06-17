@@ -81,12 +81,16 @@ export type RouteTypeName =
   | "detail"
   | "pricing"
   | "comparison"
+  | "directory"
   | "docs"
+  | "editorial"
   | "article"
   | "legal"
   | "contact"
+  | "support"
   | "appDashboard"
   | "settings"
+  | "checkout"
   | "onboarding"
   | "utility";
 

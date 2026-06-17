@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "2.0",
+  "name": "timeline",
+  "namespace": "core",
+  "description": "Timeline or activity layout for editorial and history pages.",
+  "parameters": {},
+  "responsive": { "mobile": "stack" },
+  "overflow": "forbidden"
+}

@@ -1,0 +1,30 @@
+[data-primitive="core.timelineFeed"] .dp-timeline-layout {
+  display: grid;
+  grid-template-columns: minmax(14rem, 0.35fr) minmax(0, 1fr);
+  gap: var(--dp-space-5);
+  align-items: start;
+}
+[data-primitive="core.timelineFeed"] .dp-timeline {
+  display: grid;
+  gap: var(--dp-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+[data-primitive="core.timelineFeed"] .dp-timeline li {
+  border-inline-start: 2px solid var(--dp-line);
+  padding-inline-start: var(--dp-space-4);
+}
+[data-primitive="core.timelineFeed"] .dp-timeline span {
+  color: var(--dp-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+[data-primitive="core.timelineFeed"] .dp-timeline p {
+  margin-block: var(--dp-space-1) 0;
+}
+@media (max-width: 760px) {
+  [data-primitive="core.timelineFeed"] .dp-timeline-layout {
+    grid-template-columns: 1fr;
+  }
+}

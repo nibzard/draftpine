@@ -8,6 +8,7 @@ export function parseArgs(argv: string[]): ParsedArgs {
   const command: string[] = [];
   const positionals: string[] = [];
   const flags: Record<string, string | boolean | string[]> = {};
+  const booleanFlags = new Set(["force", "json", "strict", "aiReview", "help"]);
   let commandDone = false;
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -16,7 +17,7 @@ export function parseArgs(argv: string[]): ParsedArgs {
       const [rawKey, inline] = arg.slice(2).split("=", 2);
       const key = rawKey.replace(/-([a-z])/g, (_, char: string) => char.toUpperCase());
       const next = argv[index + 1];
-      const value = inline ?? (next && !next.startsWith("--") ? next : true);
+      const value = inline ?? (booleanFlags.has(key) ? true : next && !next.startsWith("--") ? next : true);
       if (value === next) index += 1;
       if (flags[key]) {
         const existing = flags[key];

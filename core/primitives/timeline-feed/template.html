@@ -1,0 +1,11 @@
+<section class="dp-section dp-timeline-feed" data-primitive="core.timelineFeed" data-variant="{{variant}}">
+  <div class="dp-container dp-timeline-layout">
+    <header class="dp-stack">
+      <h2>{{title}}</h2>
+      {{#if description}}<p>{{description}}</p>{{/if}}
+    </header>
+    <ol class="dp-timeline">
+      {{#each items}}<li><span>{{label}}</span><strong>{{title}}</strong><p>{{body}}</p></li>{{/each}}
+    </ol>
+  </div>
+</section>

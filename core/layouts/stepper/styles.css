@@ -1,0 +1,4 @@
+.dp-stepper-layout {
+  display: grid;
+  gap: var(--dp-space-3);
+}

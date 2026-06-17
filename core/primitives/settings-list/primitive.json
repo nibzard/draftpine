@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "2.0",
+  "name": "settingsList",
+  "namespace": "core",
+  "type": "primitive",
+  "description": "Grouped settings rows with visible states and actions.",
+  "slots": {
+    "title": { "type": "string", "required": true },
+    "description": { "type": "text" },
+    "groups": { "type": "array" }
+  },
+  "variants": ["account", "product"],
+  "layouts": ["core.stack", "core.sidebar"],
+  "interactions": [],
+  "states": ["default", "success"],
+  "accessibility": { "requiresHeading": true }
+}

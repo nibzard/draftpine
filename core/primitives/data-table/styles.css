@@ -1,0 +1,17 @@
+[data-primitive="core.dataTable"] .dp-table-shell {
+  border: 1px solid var(--dp-line);
+  border-radius: var(--dp-radius-lg);
+  background: var(--pico-background-color);
+}
+[data-primitive="core.dataTable"] table {
+  min-width: 42rem;
+  margin: 0;
+}
+[data-primitive="core.dataTable"] th,
+[data-primitive="core.dataTable"] td {
+  font-size: 0.85rem;
+  padding: 0.65rem 0.8rem;
+}
+:root[data-theme="dark"] [data-primitive="core.dataTable"] .dp-table-shell {
+  background: var(--dp-surface);
+}

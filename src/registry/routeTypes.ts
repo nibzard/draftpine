@@ -34,11 +34,27 @@ export const routeTypeContracts: RouteTypeContract[] = [
     requiredInteractions: []
   },
   {
+    name: "directory",
+    purpose: "Help users browse, filter, and compare a set of entries.",
+    requiredPrimitives: ["core.filterableList"],
+    forbiddenPrimitives: [],
+    firstViewport: ["h1", "filter", "items"],
+    requiredInteractions: ["filter"]
+  },
+  {
     name: "detail",
     purpose: "Explain one feature, use case, integration, or industry.",
     requiredPrimitives: ["core.heroProof", "core.productMockup"],
     forbiddenPrimitives: [],
     firstViewport: ["h1", "proof"],
+    requiredInteractions: []
+  },
+  {
+    name: "editorial",
+    purpose: "Present narrative content with proof, timeline, or related references.",
+    requiredPrimitives: ["core.timelineFeed"],
+    forbiddenPrimitives: ["core.pricingTable"],
+    firstViewport: ["h1", "summary"],
     requiredInteractions: []
   },
   {
@@ -66,6 +82,14 @@ export const routeTypeContracts: RouteTypeContract[] = [
     requiredInteractions: []
   },
   {
+    name: "support",
+    purpose: "Let users diagnose an issue and choose a help path.",
+    requiredPrimitives: ["core.supportPanel"],
+    forbiddenPrimitives: [],
+    firstViewport: ["h1", "supportOptions"],
+    requiredInteractions: []
+  },
+  {
     name: "article",
     purpose: "Present long-form narrative content.",
     requiredPrimitives: [],
@@ -84,15 +108,23 @@ export const routeTypeContracts: RouteTypeContract[] = [
   {
     name: "settings",
     purpose: "Configure product or account behavior.",
-    requiredPrimitives: ["core.statePanel"],
+    requiredPrimitives: ["core.settingsList"],
     forbiddenPrimitives: [],
     firstViewport: ["h1"],
     requiredInteractions: []
   },
   {
+    name: "checkout",
+    purpose: "Guide a user through review, confirmation, or purchase steps.",
+    requiredPrimitives: ["core.stepperFlow"],
+    forbiddenPrimitives: [],
+    firstViewport: ["h1", "primaryAction", "steps"],
+    requiredInteractions: []
+  },
+  {
     name: "onboarding",
     purpose: "Guide a user through first setup.",
-    requiredPrimitives: ["core.statePanel"],
+    requiredPrimitives: ["core.stepperFlow"],
     forbiddenPrimitives: [],
     firstViewport: ["h1", "primaryAction"],
     requiredInteractions: []

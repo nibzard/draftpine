@@ -22,7 +22,12 @@ async function main() {
   }
 
   if (key === "init") {
-    await initProject(parsed.positionals[0] ?? ".", (flagString(parsed.flags, "starter", "single-screen") as "single-screen" | "browsable" | "docs") ?? "single-screen", flagBoolean(parsed.flags, "force"));
+    await initProject(
+      parsed.positionals[0] ?? ".",
+      (flagString(parsed.flags, "starter", "single-screen") as "single-screen" | "browsable" | "docs") ?? "single-screen",
+      flagBoolean(parsed.flags, "force"),
+      flagString(parsed.flags, "prompt")
+    );
     console.log("Draftpine project initialized.");
     return;
   }
@@ -130,7 +135,7 @@ function printHelp() {
   console.log(`Draftpine v2
 
 Commands:
-  draftpine init [path] [--starter single-screen|browsable|docs] [--force]
+  draftpine init [path] [--starter single-screen|browsable|docs] [--prompt "..."] [--force]
   draftpine generate [--json]
   draftpine check [--json] [--scope source|generated|all]
   draftpine eval [--json] [--strict] [--ai-review] [--routes /,/pricing/]

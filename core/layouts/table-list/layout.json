@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "2.0",
+  "name": "tableList",
+  "namespace": "core",
+  "description": "Dense table/list layout for record review pages.",
+  "parameters": {},
+  "responsive": { "mobile": "scroll" },
+  "overflow": "conditional"
+}

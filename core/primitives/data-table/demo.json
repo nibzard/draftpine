@@ -1,0 +1,9 @@
+{
+  "title": "Recent records",
+  "description": "A compact table for operational review.",
+  "columns": [{ "label": "Record" }, { "label": "Status" }, { "label": "Owner" }, { "label": "Updated" }],
+  "rows": [
+    { "label": "Account review", "status": "Ready", "owner": "Avery", "updated": "Today" },
+    { "label": "Risk flag", "status": "Needs review", "owner": "Mina", "updated": "Yesterday" }
+  ]
+}

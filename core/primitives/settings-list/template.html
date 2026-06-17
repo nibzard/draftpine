@@ -1,0 +1,14 @@
+<section class="dp-section dp-settings-list" data-primitive="core.settingsList" data-variant="{{variant}}">
+  <div class="dp-container dp-stack">
+    <header class="dp-stack">
+      <h2>{{title}}</h2>
+      {{#if description}}<p>{{description}}</p>{{/if}}
+    </header>
+    <div class="dp-settings-grid">
+      {{#each groups}}<article class="dp-settings-group">
+        <h3>{{title}}</h3>
+        {{#each rows}}<div class="dp-settings-row"><span>{{label}}</span><strong>{{value}}</strong></div>{{/each}}
+      </article>{{/each}}
+    </div>
+  </div>
+</section>

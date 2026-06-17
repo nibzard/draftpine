@@ -55,13 +55,44 @@ describe("Draftpine v2 CLI internals", () => {
     process.chdir(dir);
     const generated = await generate();
     expect(generated.findings).toEqual([]);
-    expect(generated.artifact.routesRendered.map((route) => route.path)).toEqual(["/", "/pricing/", "/compare/", "/contact/"]);
+    expect(generated.artifact.routesRendered.map((route) => route.path)).toEqual([
+      "/",
+      "/dashboard/",
+      "/directory/",
+      "/detail/",
+      "/pricing/",
+      "/compare/",
+      "/checkout/",
+      "/settings/",
+      "/support/",
+      "/editorial/"
+    ]);
+    expect(new Set(generated.artifact.routesRendered.map((route) => route.routeType))).toEqual(
+      new Set(["home", "appDashboard", "directory", "detail", "pricing", "comparison", "checkout", "settings", "support", "editorial"])
+    );
+    const routeFingerprints = await Promise.all(
+      ["home", "dashboard", "directory", "detail", "pricing", "compare", "checkout", "settings", "support", "editorial"].map(async (id) => {
+        const recipe = JSON.parse(await readFile(path.join(dir, "recipes", `${id}.json`), "utf8"));
+        return recipe.sections.map((section: { primitive: string; layout: string }) => `${section.primitive}:${section.layout}`).join(">");
+      })
+    );
+    expect(new Set(routeFingerprints).size).toBeGreaterThanOrEqual(8);
     const report = await evalProject({ strict: true });
     expect(report.summary.errors).toBe(0);
-    expect(report.summary.routesEvaluated).toBe(4);
+    expect(report.summary.routesEvaluated).toBe(10);
     expect(report.deterministicStatus).toBe("pass");
     expect(report.status).toBe("pass-with-review");
     expect(report.manualReviewRequired).toBe(true);
+  });
+
+  it("uses prompt text to name initialized projects", async () => {
+    const dir = await mkdtemp(path.join(os.tmpdir(), "draftpine-prompt-"));
+    tempDirs.push(dir);
+    await initProject(dir, "browsable", true, "membership portal for urban garden cooperative");
+    const config = JSON.parse(await readFile(path.join(dir, "draftpine.config.json"), "utf8"));
+    expect(config.project.name).toBe("Membership Portal Urban Garden Prototype");
+    const home = JSON.parse(await readFile(path.join(dir, "content/pages/home.json"), "utf8"));
+    expect(home.hero.title).toContain("membership portal urban garden");
   });
 
   it("supports safe project override CSS without extension fixtures", async () => {
@@ -85,7 +116,7 @@ describe("Draftpine v2 CLI internals", () => {
     expect(css).toContain("max-width: 700px");
   });
 
-  it("evaluates an eight-route prototype without mobile nav overflow and cleans stale screenshots", async () => {
+  it("evaluates a larger prototype without mobile nav overflow and cleans stale screenshots", async () => {
     const dir = await mkdtemp(path.join(os.tmpdir(), "draftpine-large-nav-"));
     tempDirs.push(dir);
     await initProject(dir, "browsable", true);
@@ -93,7 +124,7 @@ describe("Draftpine v2 CLI internals", () => {
 
     const configPath = path.join(dir, "draftpine.config.json");
     const config = JSON.parse(await readFile(configPath, "utf8"));
-    config.routeBudget.defaultMaxRoutes = 10;
+    config.routeBudget.defaultMaxRoutes = 14;
     config.eval.aiReview = "off";
     config.eval.viewports = ["mobile"];
     await writeFile(configPath, `${JSON.stringify(config, null, 2)}\n`);
@@ -163,7 +194,7 @@ describe("Draftpine v2 CLI internals", () => {
     const report = await evalProject({ strict: true });
     expect(report.status).toBe("pass");
     expect(report.summary.errors).toBe(0);
-    expect(report.summary.routesEvaluated).toBe(8);
+    expect(report.summary.routesEvaluated).toBe(14);
     expect(report.findings.some((finding) => finding.id === "mobile.horizontalOverflow")).toBe(false);
     await expect(readFile(path.join(dir, "reports/screenshots/stale.png"))).rejects.toThrow();
   });

@@ -46,6 +46,21 @@ Slots:
 - `columns`: array required
 - `rows`: array required
 
+### core.dataTable
+
+Compact table/list view for operational dashboards and directories.
+
+Variants: compact, status
+
+Layouts: core.stack, core.scrollX
+
+Slots:
+
+- `title`: string required
+- `description`: text
+- `columns`: array
+- `rows`: array
+
 ### core.decisionHero
 
 Compact decision-framed hero for pricing, comparison, and conversion pages.
@@ -174,6 +189,36 @@ Slots:
 - `description`: text
 - `items`: array required
 
+### core.productMockup
+
+A bounded product UI artifact card for showing workflow state, schedules, lists, and product chrome.
+
+Variants: calendar, workflow, dashboard
+
+Layouts: core.stack, core.gridAuto
+
+Slots:
+
+- `title`: string required
+- `description`: text
+- `toolbar`: array
+- `panels`: array required
+- `activity`: array
+
+### core.settingsList
+
+Grouped settings rows with visible states and actions.
+
+Variants: account, product
+
+Layouts: core.stack, core.sidebar
+
+Slots:
+
+- `title`: string required
+- `description`: text
+- `groups`: array
+
 ### core.siteShell
 
 Compiler-owned site shell marker.
@@ -200,6 +245,37 @@ Slots:
 - `description`: text
 - `action`: action
 
+### core.stepperFlow
+
+Step-based flow for onboarding, checkout, intake, and setup screens.
+
+Variants: checkout, onboarding, intake
+
+Layouts: core.stack, core.split
+
+Slots:
+
+- `title`: string required
+- `description`: text
+- `steps`: array
+- `summary`: object
+- `primaryAction`: action
+
+### core.supportPanel
+
+Support triage panel with help paths and current system state.
+
+Variants: triage, helpCenter
+
+Layouts: core.stack, core.gridTwo
+
+Slots:
+
+- `title`: string required
+- `description`: text
+- `options`: array
+- `status`: array
+
 ### core.themeToggle
 
 Theme toggle primitive used by the shell.
@@ -211,7 +287,27 @@ Layouts: core.cluster
 Slots:
 
 
+### core.timelineFeed
+
+Narrative timeline or activity feed for editorial and product history pages.
+
+Variants: editorial, activity
+
+Layouts: core.stack
+
+Slots:
+
+- `title`: string required
+- `description`: text
+- `items`: array
+
 ## Layouts
+
+### core.appShell
+
+Operational app shell layout for dashboard-like pages.
+
+Overflow: forbidden
 
 ### core.cardGrid
 
@@ -249,6 +345,12 @@ Hero proof composition layout.
 
 Overflow: forbidden
 
+### core.inspectorSidebar
+
+Main content plus inspector/sidebar layout.
+
+Overflow: forbidden
+
 ### core.scrollX
 
 Approved horizontal scroll wrapper for wide artifacts.
@@ -267,9 +369,33 @@ Responsive two-column split that collapses on mobile.
 
 Overflow: forbidden
 
+### core.splitForm
+
+Form or intake layout with a summary rail.
+
+Overflow: forbidden
+
 ### core.stack
 
 Vertical stack layout with controlled gaps.
+
+Overflow: forbidden
+
+### core.stepper
+
+Progressive flow layout for checkout and onboarding.
+
+Overflow: forbidden
+
+### core.tableList
+
+Dense table/list layout for record review pages.
+
+Overflow: conditional
+
+### core.timeline
+
+Timeline or activity layout for editorial and history pages.
 
 Overflow: forbidden
 
@@ -293,6 +419,12 @@ Present long-form narrative content.
 
 Required primitives: none
 
+### checkout
+
+Guide a user through review, confirmation, or purchase steps.
+
+Required primitives: core.stepperFlow
+
 ### comparison
 
 Help a user compare a product against an alternative.
@@ -309,7 +441,13 @@ Required primitives: core.modalForm
 
 Explain one feature, use case, integration, or industry.
 
-Required primitives: core.heroProof
+Required primitives: core.heroProof, core.productMockup
+
+### directory
+
+Help users browse, filter, and compare a set of entries.
+
+Required primitives: core.filterableList
 
 ### docs
 
@@ -317,11 +455,17 @@ Explain usage or implementation.
 
 Required primitives: core.codePanel
 
+### editorial
+
+Present narrative content with proof, timeline, or related references.
+
+Required primitives: core.timelineFeed
+
 ### home
 
 Introduce product/category, show proof, and drive the primary action.
 
-Required primitives: core.heroProof, core.finalCta
+Required primitives: core.heroProof, core.productMockup, core.finalCta
 
 ### hub
 
@@ -339,7 +483,7 @@ Required primitives: none
 
 Guide a user through first setup.
 
-Required primitives: core.statePanel
+Required primitives: core.stepperFlow
 
 ### pricing
 
@@ -351,7 +495,13 @@ Required primitives: core.decisionHero, core.pricingTable
 
 Configure product or account behavior.
 
-Required primitives: core.statePanel
+Required primitives: core.settingsList
+
+### support
+
+Let users diagnose an issue and choose a help path.
+
+Required primitives: core.supportPanel
 
 ### utility
 

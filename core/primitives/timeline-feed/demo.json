@@ -1,0 +1,8 @@
+{
+  "title": "How it changed",
+  "description": "A timeline makes narrative pages structurally different from grids.",
+  "items": [
+    { "label": "First", "title": "Baseline", "body": "The initial state is established." },
+    { "label": "Next", "title": "Decision", "body": "The main tradeoff becomes visible." }
+  ]
+}
