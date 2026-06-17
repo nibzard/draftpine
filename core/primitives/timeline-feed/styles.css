@@ -1,6 +1,6 @@
 [data-primitive="core.timelineFeed"] .dp-timeline-layout {
   display: grid;
-  grid-template-columns: minmax(14rem, 0.35fr) minmax(0, 1fr);
+  grid-template-columns: minmax(13rem, 0.34fr) minmax(0, 1fr);
   gap: var(--dp-space-5);
   align-items: start;
 }
@@ -12,13 +12,22 @@
   list-style: none;
 }
 [data-primitive="core.timelineFeed"] .dp-timeline li {
-  border-inline-start: 2px solid var(--dp-line);
-  padding-inline-start: var(--dp-space-4);
+  position: relative;
+  border: 1px solid var(--dp-line);
+  border-radius: var(--dp-radius-lg);
+  background: var(--dp-card);
+  padding: var(--dp-space-3) var(--dp-space-4);
+  box-shadow: var(--dp-shadow-sm);
 }
 [data-primitive="core.timelineFeed"] .dp-timeline span {
   color: var(--dp-muted);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 600;
+}
+[data-primitive="core.timelineFeed"] .dp-timeline strong {
+  display: block;
+  color: var(--dp-ink);
+  margin-block: var(--dp-space-1);
 }
 [data-primitive="core.timelineFeed"] .dp-timeline p {
   margin-block: var(--dp-space-1) 0;

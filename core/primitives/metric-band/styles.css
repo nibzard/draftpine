@@ -1,5 +1,10 @@
-[data-primitive="core.metricBand"] strong { display: block; font-size: 1.1rem; }
-[data-primitive="core.metricBand"] span { color: var(--dp-muted); }
+[data-primitive="core.metricBand"] strong { display: block; color: var(--dp-ink); font-size: 1.05rem; }
+[data-primitive="core.metricBand"] span { color: var(--dp-muted); font-size: 0.78rem; }
 [data-primitive="core.metricBand"] .dp-container {
-  max-width: 64rem;
+  max-width: var(--dp-container-lg);
+  --dp-grid-min: 11.5rem;
+}
+[data-primitive="core.metricBand"] .dp-panel {
+  padding: var(--dp-space-3);
+  background: var(--dp-card);
 }

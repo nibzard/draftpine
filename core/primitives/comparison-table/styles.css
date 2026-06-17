@@ -1,9 +1,17 @@
 [data-primitive="core.comparisonTable"] table { min-width: 42rem; }
 [data-primitive="core.comparisonTable"] .dp-scroll-x {
-  background: var(--pico-background-color);
+  background: var(--dp-card);
   border: 1px solid var(--dp-line);
   border-radius: var(--dp-radius-lg);
-  padding: var(--dp-space-3);
+  padding: 0;
+  box-shadow: var(--dp-shadow-sm);
+}
+[data-primitive="core.comparisonTable"] table {
+  margin: 0;
+}
+[data-primitive="core.comparisonTable"] th,
+[data-primitive="core.comparisonTable"] td {
+  padding: 0.72rem 0.85rem;
 }
 :root[data-theme="dark"] [data-primitive="core.comparisonTable"] .dp-scroll-x {
   background: var(--dp-surface);

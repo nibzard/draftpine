@@ -1,6 +1,6 @@
 [data-primitive="core.stepperFlow"] .dp-stepper-shell {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(16rem, 0.45fr);
+  grid-template-columns: minmax(0, 1fr) minmax(15rem, 0.42fr);
   gap: var(--dp-space-4);
   align-items: start;
 }
@@ -21,7 +21,8 @@
   border: 1px solid var(--dp-line);
   border-radius: var(--dp-radius-lg);
   padding: var(--dp-space-3);
-  background: var(--pico-background-color);
+  background: var(--dp-card);
+  box-shadow: var(--dp-shadow-sm);
 }
 [data-primitive="core.stepperFlow"] .dp-step-list li::before {
   content: counter(step);
@@ -30,7 +31,7 @@
   width: 1.6rem;
   height: 1.6rem;
   border-radius: var(--dp-radius-pill);
-  background: var(--dp-surface-card);
+  background: var(--dp-muted-bg);
   color: var(--dp-ink);
   font-size: 0.8rem;
   font-weight: 700;
@@ -38,10 +39,11 @@
 [data-primitive="core.stepperFlow"] .dp-step-list span {
   display: block;
   color: var(--dp-muted);
-  font-size: 0.875rem;
+  font-size: 0.82rem;
   margin-top: var(--dp-space-1);
 }
 [data-primitive="core.stepperFlow"] .dp-step-list strong {
+  color: var(--dp-ink);
   white-space: nowrap;
 }
 [data-primitive="core.stepperFlow"] .dp-step-summary {
@@ -49,6 +51,7 @@
   border-radius: var(--dp-radius-lg);
   background: var(--dp-surface-card);
   padding: var(--dp-space-4);
+  box-shadow: var(--dp-shadow-sm);
 }
 [data-primitive="core.stepperFlow"] small {
   color: var(--dp-muted);

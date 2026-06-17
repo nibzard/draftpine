@@ -1,20 +1,40 @@
 [data-primitive="core.heroProof"] .dp-proof-artifact {
-  background: var(--pico-background-color);
+  display: grid;
+  gap: var(--dp-space-3);
+  background: var(--dp-card);
+  border: 1px solid var(--dp-line);
   border-radius: var(--dp-radius-xl);
   padding: var(--dp-space-4);
-  box-shadow: 0 8px 20px rgba(17, 17, 17, 0.05);
+  box-shadow: var(--dp-shadow-md);
 }
 :root[data-theme="dark"] [data-primitive="core.heroProof"] .dp-proof-artifact {
   background: var(--dp-surface);
   box-shadow: none;
 }
+[data-primitive="core.heroProof"] .dp-proof-artifact > strong {
+  color: var(--dp-ink);
+  font-size: 0.88rem;
+}
 [data-primitive="core.heroProof"] .dp-proof-artifact pre {
   max-width: 100%;
+  margin: 0;
   overflow-x: auto;
+  border: 1px solid var(--dp-line);
   background: var(--dp-surface-soft);
   border-radius: var(--dp-radius-md);
   padding: var(--dp-space-3);
+  color: var(--dp-ink);
+  font-size: 0.78rem;
 }
 [data-primitive="core.heroProof"] .dp-proof-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr)); gap: var(--dp-space-2); margin-top: var(--dp-space-3); }
-[data-primitive="core.heroProof"] .dp-proof-metrics span { display: grid; gap: var(--dp-space-1); color: var(--dp-muted); }
-[data-primitive="core.heroProof"] .dp-proof-metrics b { color: var(--dp-ink); font-size: 1rem; }
+[data-primitive="core.heroProof"] .dp-proof-metrics span {
+  display: grid;
+  gap: var(--dp-space-1);
+  border: 1px solid var(--dp-line);
+  border-radius: var(--dp-radius-md);
+  background: var(--dp-card-subtle);
+  color: var(--dp-muted);
+  padding: var(--dp-space-3);
+  font-size: 0.77rem;
+}
+[data-primitive="core.heroProof"] .dp-proof-metrics b { color: var(--dp-ink); font-size: 0.98rem; }
