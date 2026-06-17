@@ -1,0 +1,1 @@
+{"schemaVersion":"2.0","name":"cluster","namespace":"core","description":"Wrapping inline cluster for chips, actions, and meta rows.","parameters":{},"responsive":{"mobile":"wrap"},"overflow":"forbidden"}

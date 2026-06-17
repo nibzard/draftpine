@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "2.0",
+  "routeId": "pricing",
+  "routeType": "pricing",
+  "profile": "productMarketing",
+  "sections": [
+    {
+      "id": "hero",
+      "primitive": "core.decisionHero",
+      "layout": "core.stack",
+      "variant": "compact",
+      "content": "hero"
+    },
+    {
+      "id": "plans",
+      "primitive": "core.pricingTable",
+      "layout": "core.gridAuto",
+      "variant": "threePlan",
+      "content": "plans"
+    },
+    {
+      "id": "faq",
+      "primitive": "core.faq",
+      "layout": "core.stack",
+      "variant": "default",
+      "content": "faq"
+    }
+  ],
+  "states": ["default"],
+  "interactions": ["theme"]
+}

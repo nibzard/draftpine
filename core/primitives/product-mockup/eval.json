@@ -1,0 +1,4 @@
+{
+  "viewports": ["mobile", "desktop"],
+  "expected": "pass"
+}

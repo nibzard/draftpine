@@ -1,0 +1,8 @@
+[data-primitive="core.cardGrid"] article { min-width: 0; }
+[data-primitive="core.cardGrid"] h3 { margin-bottom: var(--dp-space-2); }
+[data-primitive="core.cardGrid"] .dp-container {
+  max-width: 70rem;
+}
+[data-primitive="core.cardGrid"] .dp-grid-auto {
+  --dp-grid-min: 16rem;
+}

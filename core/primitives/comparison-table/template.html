@@ -1,0 +1,11 @@
+<section class="dp-section dp-comparison-table" data-primitive="core.comparisonTable" data-variant="{{variant}}">
+  <div class="dp-container dp-stack">
+    {{#if title}}<header><h2>{{title}}</h2>{{#if description}}<p>{{description}}</p>{{/if}}</header>{{/if}}
+    <div class="dp-scroll-x" data-draftpine-overflow="allowed">
+      <table>
+        <thead><tr>{{#each columns}}<th>{{label}}</th>{{/each}}</tr></thead>
+        <tbody>{{#each rows}}<tr><th>{{label}}</th><td>{{first}}</td><td>{{second}}</td></tr>{{/each}}</tbody>
+      </table>
+    </div>
+  </div>
+</section>

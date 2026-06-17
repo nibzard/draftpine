@@ -1,0 +1,1 @@
+{"schemaVersion":"2.0","name":"metricBand","namespace":"core","type":"primitive","description":"Metric strip for dashboards and proof.","slots":{"items":{"type":"array","required":true}},"variants":["compact"],"layouts":["core.gridAuto"],"interactions":[],"states":["default"],"accessibility":{},"responsive":{"mobile":"auto"}}

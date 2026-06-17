@@ -1,0 +1,1 @@
+{"schemaVersion":"2.0","name":"badOverflow","namespace":"project","type":"primitive","description":"Intentionally bad overflow primitive.","slots":{"title":{"type":"string","required":true}},"variants":["default"],"layouts":["core.stack"],"interactions":[],"states":["default"],"accessibility":{},"responsive":{"mobile":"broken"}}

@@ -1,0 +1,18 @@
+<section class="dp-section dp-hero-proof-primitive" data-primitive="core.heroProof" data-variant="{{variant}}">
+  <div class="dp-container dp-split">
+    <div class="dp-stack">
+      {{#if eyebrow}}<p class="dp-eyebrow">{{eyebrow}}</p>{{/if}}
+      <h1>{{title}}</h1>
+      <p>{{description}}</p>
+      <div class="dp-actions">
+        <a role="button" data-draftpine-action="primary" href="{{primaryAction.href}}">{{primaryAction.label}}</a>
+        {{#if secondaryAction.label}}<a href="{{secondaryAction.href}}">{{secondaryAction.label}}</a>{{/if}}
+      </div>
+    </div>
+    <article class="dp-panel dp-proof-artifact" data-draftpine-proof="true">
+      <strong>{{proof.title}}</strong>
+      {{#if proof.code}}<pre><code>{{proof.code}}</code></pre>{{/if}}
+      {{#if proof.metrics}}<div class="dp-proof-metrics">{{#each proof.metrics}}<span><b>{{value}}</b>{{label}}</span>{{/each}}</div>{{/if}}
+    </article>
+  </div>
+</section>

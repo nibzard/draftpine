@@ -1,0 +1,23 @@
+{
+  "eyebrow": "Demo",
+  "title": "heroProof demo",
+  "description": "Demo content.",
+  "primaryAction": {
+    "label": "Continue",
+    "href": "#"
+  },
+  "secondaryAction": {
+    "label": "Learn more",
+    "href": "#"
+  },
+  "proof": {
+    "title": "Proof",
+    "code": "draftpine eval --strict",
+    "metrics": [
+      {
+        "label": "Status",
+        "value": "Pass"
+      }
+    ]
+  }
+}

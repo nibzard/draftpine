@@ -1,0 +1,10 @@
+<section class="dp-section dp-final-cta" data-primitive="core.finalCta" data-variant="{{variant}}">
+  <div class="dp-container dp-panel dp-stack">
+    <h2>{{title}}</h2>
+    {{#if description}}<p>{{description}}</p>{{/if}}
+    <div class="dp-actions">
+      <a role="button" data-draftpine-action="primary" href="{{primaryAction.href}}">{{primaryAction.label}}</a>
+      {{#if secondaryAction.label}}<a href="{{secondaryAction.href}}">{{secondaryAction.label}}</a>{{/if}}
+    </div>
+  </div>
+</section>

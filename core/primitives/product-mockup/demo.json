@@ -1,0 +1,42 @@
+{
+  "title": "Product workflow",
+  "description": "A compact product artifact used inside marketing pages.",
+  "toolbar": [
+    {
+      "label": "Today"
+    },
+    {
+      "label": "Open"
+    },
+    {
+      "label": "Assigned"
+    }
+  ],
+  "panels": [
+    {
+      "title": "Request",
+      "body": "Customer asks for a booking slot.",
+      "meta": "2 min ago"
+    },
+    {
+      "title": "Match",
+      "body": "System finds available windows.",
+      "meta": "3 options"
+    },
+    {
+      "title": "Confirm",
+      "body": "Primary action commits the workflow.",
+      "meta": "Ready"
+    }
+  ],
+  "activity": [
+    {
+      "time": "09:10",
+      "label": "Request created"
+    },
+    {
+      "time": "09:12",
+      "label": "Confirmation sent"
+    }
+  ]
+}

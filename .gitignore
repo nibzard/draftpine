@@ -1,5 +1,8 @@
 .DS_Store
-__pycache__/
-*.py[cod]
-.python-version
-work/visual-qa/
+node_modules/
+dist/
+prototype/
+reports/
+*.log
+.env
+.env.*

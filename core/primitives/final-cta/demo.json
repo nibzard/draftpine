@@ -1,0 +1,12 @@
+{
+  "title": "finalCta demo",
+  "description": "Demo content.",
+  "primaryAction": {
+    "label": "Continue",
+    "href": "#"
+  },
+  "secondaryAction": {
+    "label": "Learn more",
+    "href": "#"
+  }
+}

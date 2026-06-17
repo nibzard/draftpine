@@ -1,0 +1,24 @@
+{
+  "title": "faq demo",
+  "items": [
+    {
+      "title": "Demo item",
+      "body": "Demo body.",
+      "name": "Demo",
+      "price": "$0",
+      "description": "Demo description.",
+      "features": [
+        "One",
+        "Two"
+      ],
+      "action": {
+        "label": "Choose",
+        "href": "#"
+      },
+      "question": "Question?",
+      "answer": "Answer.",
+      "value": "42",
+      "label": "Metric"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+[data-primitive="core.faq"] details {
+  border: 1px solid var(--dp-line);
+  border-radius: var(--dp-radius-lg);
+  padding: var(--dp-space-3) var(--dp-space-4);
+  background: var(--pico-background-color);
+}
+:root[data-theme="dark"] [data-primitive="core.faq"] details {
+  background: var(--dp-surface);
+}

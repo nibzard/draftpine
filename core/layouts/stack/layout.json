@@ -1,0 +1,1 @@
+{"schemaVersion":"2.0","name":"stack","namespace":"core","description":"Vertical stack layout with controlled gaps.","parameters":{},"responsive":{"mobile":"stack"},"overflow":"forbidden"}

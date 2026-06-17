@@ -1,0 +1,22 @@
+{
+  "title": "comparisonTable demo",
+  "description": "Demo content.",
+  "columns": [
+    {
+      "label": "Feature"
+    },
+    {
+      "label": "A"
+    },
+    {
+      "label": "B"
+    }
+  ],
+  "rows": [
+    {
+      "label": "Speed",
+      "first": "Fast",
+      "second": "Faster"
+    }
+  ]
+}

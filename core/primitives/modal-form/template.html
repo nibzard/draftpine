@@ -1,0 +1,14 @@
+<section class="dp-section dp-modal-form" data-primitive="core.modalForm" data-variant="{{variant}}" x-data="draftpineModal()">
+  <div class="dp-container dp-stack">
+    <h1>{{title}}</h1>
+    {{#if description}}<p>{{description}}</p>{{/if}}
+    <button type="button" data-draftpine-action="primary" @click="show()">{{buttonLabel}}</button>
+    <dialog data-draftpine-interaction="modal" :open="open">
+      <article>
+        <header><button aria-label="Close" rel="prev" @click="close()"></button><h2>{{buttonLabel}}</h2></header>
+        <form><label>Name<input name="name" /></label><label>Email<input type="email" name="email" /></label><button type="button" @click="close()">{{buttonLabel}}</button></form>
+        <section data-draftpine-state="success"><p>{{success}}</p></section>
+      </article>
+    </dialog>
+  </div>
+</section>

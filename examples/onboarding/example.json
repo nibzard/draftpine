@@ -1,8 +1,0 @@
-{
-  "name": "onboarding",
-  "label": "Onboarding Checklist",
-  "bestFor": ["onboarding", "setup", "checklist", "activation", "workspace"],
-  "sections": ["progress header", "checklist cards", "invite modal", "summary panel"],
-  "states": ["default", "empty", "success"],
-  "interactions": ["modal", "toggle", "theme"]
-}

@@ -1,13 +1,36 @@
 {
-  "screen": "Prototype brief workspace",
-  "audience": "product builder",
-  "userGoal": "Turn a rough product idea into the first Draftpine screen packet",
-  "primaryAction": "Start first screen",
-  "prototypeMode": "single-screen",
-  "contentMode": "json",
-  "designProfile": "app",
-  "contentFiles": ["content/pages/prototype-brief-workspace.json"],
-  "patterns": ["app shell", "outcome hero", "brief checklist", "tabs", "filter bar", "theme switcher", "modal", "state callouts"],
-  "requiredStates": ["default", "empty", "success"],
-  "requiredInteractions": ["tabs", "modal", "filter", "theme"]
+  "schemaVersion": "2.0",
+  "project": {
+    "name": "Draftpine v2",
+    "description": "Internal dogfood prototype for the Draftpine v2 compiler."
+  },
+  "source": {
+    "routes": "routes.json",
+    "contentDir": "content",
+    "recipesDir": "recipes",
+    "primitivesDir": "primitives",
+    "layoutsDir": "layouts"
+  },
+  "output": {
+    "dir": "prototype",
+    "clean": true,
+    "assetsDir": "assets"
+  },
+  "theme": {
+    "profile": "productMarketing",
+    "defaultMode": "light",
+    "allowThemeToggle": true
+  },
+  "routeBudget": {
+    "defaultMaxRoutes": 7,
+    "largePrototypeRequiresApproval": true,
+    "representativeRoutesRequired": true
+  },
+  "eval": {
+    "required": true,
+    "strict": true,
+    "viewports": ["mobile", "desktop"],
+    "aiReview": "off",
+    "sampleStrategy": "route-type-plus-changed"
+  }
 }

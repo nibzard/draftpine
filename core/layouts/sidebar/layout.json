@@ -1,0 +1,1 @@
+{"schemaVersion":"2.0","name":"sidebar","namespace":"core","description":"Sidebar and content layout that collapses on mobile.","parameters":{},"responsive":{"mobile":"stack"},"overflow":"forbidden"}

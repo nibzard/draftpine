@@ -1,0 +1,8 @@
+<section class="dp-section dp-filterable-list" data-primitive="core.filterableList" data-variant="{{variant}}" x-data="draftpineFilter()">
+  <div class="dp-container dp-stack">
+    <h2>{{title}}</h2>
+    <div data-draftpine-interaction="filter"><label for="{{sectionId}}-filter">Filter</label><input id="{{sectionId}}-filter" type="search" x-model="query" /></div>
+    <div class="dp-grid-auto">{{#each items}}<article class="dp-panel" x-show="matches('{{title}} {{body}}')"><h3>{{title}}</h3><p>{{body}}</p></article>{{/each}}</div>
+    <section data-draftpine-state="empty" x-show="query && !$el.previousElementSibling.querySelector('[style*=block]')"><p>{{empty.message}}</p></section>
+  </div>
+</section>

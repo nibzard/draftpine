@@ -1,0 +1,28 @@
+{
+  "routes": [
+    {
+      "id": "home",
+      "path": "/",
+      "title": "Home",
+      "file": "index.html",
+      "routeType": "home",
+      "profile": "productMarketing",
+      "recipe": "recipes/home.json",
+      "content": "content/pages/home.json",
+      "priority": 1,
+      "status": "ready"
+    },
+    {
+      "id": "pricing",
+      "path": "/pricing/",
+      "title": "Pricing",
+      "file": "pricing/index.html",
+      "routeType": "pricing",
+      "profile": "productMarketing",
+      "recipe": "recipes/pricing.json",
+      "content": "content/pages/pricing.json",
+      "priority": 2,
+      "status": "ready"
+    }
+  ]
+}

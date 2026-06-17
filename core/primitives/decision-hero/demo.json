@@ -1,0 +1,14 @@
+{
+  "eyebrow": "Demo",
+  "title": "decisionHero demo",
+  "description": "Demo content.",
+  "primaryAction": {
+    "label": "Continue",
+    "href": "#"
+  },
+  "secondaryAction": {
+    "label": "Learn more",
+    "href": "#"
+  },
+  "signal": "Demo"
+}

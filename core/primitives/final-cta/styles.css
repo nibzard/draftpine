@@ -1,0 +1,6 @@
+[data-primitive="core.finalCta"] .dp-panel {
+  background: var(--dp-surface-card);
+  border-color: var(--dp-line);
+  border-radius: var(--dp-radius-lg);
+  padding: clamp(2rem, 5vw, 3rem);
+}

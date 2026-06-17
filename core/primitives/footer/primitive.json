@@ -1,0 +1,1 @@
+{"schemaVersion":"2.0","name":"footer","namespace":"core","type":"primitive","description":"Footer primitive used by generated shells.","slots":{},"variants":["default"],"layouts":["core.stack"],"interactions":[],"states":["default"],"accessibility":{},"responsive":{"mobile":"stack"}}

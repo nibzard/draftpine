@@ -1,0 +1,5 @@
+[data-primitive="core.metricBand"] strong { display: block; font-size: 1.75rem; }
+[data-primitive="core.metricBand"] span { color: var(--dp-muted); }
+[data-primitive="core.metricBand"] .dp-container {
+  max-width: 64rem;
+}

@@ -1,0 +1,20 @@
+[data-primitive="core.pricingTable"] .dp-price { font-size: 2rem; font-weight: 700; color: var(--dp-ink); }
+[data-primitive="core.pricingTable"] ul { padding-left: 1.2rem; }
+[data-primitive="core.pricingTable"] .dp-price-card {
+  background: var(--pico-background-color);
+  border-color: var(--dp-line);
+}
+:root[data-theme="dark"] [data-primitive="core.pricingTable"] .dp-price-card {
+  background: var(--dp-surface);
+  border-color: var(--dp-line);
+}
+[data-primitive="core.pricingTable"] .dp-price-card:nth-child(2) {
+  background: var(--dp-surface-dark);
+  color: #ffffff;
+}
+[data-primitive="core.pricingTable"] .dp-price-card:nth-child(2) h3,
+[data-primitive="core.pricingTable"] .dp-price-card:nth-child(2) .dp-price,
+[data-primitive="core.pricingTable"] .dp-price-card:nth-child(2) p,
+[data-primitive="core.pricingTable"] .dp-price-card:nth-child(2) li {
+  color: #ffffff;
+}

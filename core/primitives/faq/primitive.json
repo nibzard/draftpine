@@ -1,0 +1,1 @@
+{"schemaVersion":"2.0","name":"faq","namespace":"core","type":"primitive","description":"FAQ disclosure list.","slots":{"title":{"type":"string","required":true},"items":{"type":"array","required":true}},"variants":["default"],"layouts":["core.stack"],"interactions":[],"states":["default"],"accessibility":{},"responsive":{"mobile":"stack"}}

@@ -1,0 +1,66 @@
+{
+  "description": "Pricing route example.",
+  "hero": {
+    "eyebrow": "Pricing",
+    "title": "Start with static prototypes, scale into route evaluation.",
+    "description": "Use the same compiler and evaluator loop for one screen or representative routes.",
+    "signal": "Plan signal visible in the first viewport.",
+    "primaryAction": {
+      "label": "Start free",
+      "href": "#"
+    },
+    "secondaryAction": {
+      "label": "Talk to product",
+      "href": "#"
+    }
+  },
+  "plans": {
+    "title": "Plans",
+    "description": "Representative pricing content for eval coverage.",
+    "items": [
+      {
+        "name": "Prototype",
+        "price": "$0",
+        "description": "For single-screen exploration.",
+        "features": ["One route", "Core primitives", "Local eval"],
+        "action": {
+          "label": "Start",
+          "href": "#"
+        }
+      },
+      {
+        "name": "Product",
+        "price": "$19",
+        "description": "For browsable route sets.",
+        "features": ["Route contracts", "Reports", "Extension tests"],
+        "action": {
+          "label": "Choose Product",
+          "href": "#"
+        }
+      },
+      {
+        "name": "Team",
+        "price": "$49",
+        "description": "For regression corpuses and AI review hooks.",
+        "features": ["Fixtures", "Screenshots", "Strict gates"],
+        "action": {
+          "label": "Choose Team",
+          "href": "#"
+        }
+      }
+    ]
+  },
+  "faq": {
+    "title": "Questions",
+    "items": [
+      {
+        "question": "Does generated output require Node?",
+        "answer": "No. The compiler uses Node, but generated prototypes are static files."
+      },
+      {
+        "question": "Can agents add primitives?",
+        "answer": "Yes. Extensions must include manifests, templates, styles, docs, demos, and eval fixtures."
+      }
+    ]
+  }
+}

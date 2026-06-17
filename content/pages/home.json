@@ -1,0 +1,98 @@
+{
+  "description": "Draftpine v2 compiler and evaluator overview.",
+  "hero": {
+    "eyebrow": "Draftpine v2",
+    "title": "A compiler and evaluator for agent-built wireframes.",
+    "description": "Agents write structured product intent, Draftpine renders static pages, then deterministic evals produce concrete repair actions.",
+    "primaryAction": {
+      "label": "Run eval",
+      "href": "#"
+    },
+    "secondaryAction": {
+      "label": "View pricing route",
+      "href": "./pricing/"
+    },
+    "proof": {
+      "title": "First build slice",
+      "code": "draftpine generate\ndraftpine eval --strict",
+      "metrics": [
+        {
+          "label": "Runtime",
+          "value": "Static"
+        },
+        {
+          "label": "Eval",
+          "value": "Playwright"
+        }
+      ]
+    }
+  },
+  "features": {
+    "title": "Compiler-owned output",
+    "description": "The source model stays small and explicit.",
+    "items": [
+      {
+        "title": "Routes",
+        "body": "Every public page has a route type, content file, and recipe."
+      },
+      {
+        "title": "Primitives",
+        "body": "Reusable blocks carry slot contracts, templates, styles, fixtures, and docs."
+      },
+      {
+        "title": "Eval reports",
+        "body": "Findings point agents to source files and repair actions instead of vague screenshots."
+      }
+    ]
+  },
+  "workflow": {
+    "title": "Compiler report workflow",
+    "description": "A concrete product artifact shows how source turns into findings.",
+    "toolbar": [
+      {
+        "label": "Source"
+      },
+      {
+        "label": "Compile"
+      },
+      {
+        "label": "Evaluate"
+      }
+    ],
+    "panels": [
+      {
+        "title": "Recipe",
+        "body": "Sections reference primitives and content slots.",
+        "meta": "recipes/home.json"
+      },
+      {
+        "title": "Static output",
+        "body": "HTML, CSS, and runtime helpers are generated.",
+        "meta": "prototype/"
+      },
+      {
+        "title": "Findings",
+        "body": "Eval results become repair actions.",
+        "meta": "reports/latest.json"
+      }
+    ],
+    "activity": [
+      {
+        "time": "00:01",
+        "label": "Route contracts validated"
+      },
+      {
+        "time": "00:03",
+        "label": "Screenshots captured"
+      }
+    ]
+  },
+  "cta": {
+    "title": "Static output, strict feedback.",
+    "description": "Generated files live in prototype/ and reports live in reports/.",
+    "primaryAction": {
+      "label": "Generate prototype",
+      "href": "#"
+    }
+  }
+}

@@ -1,0 +1,12 @@
+<section class="dp-section dp-decision-hero" data-primitive="core.decisionHero" data-variant="{{variant}}">
+  <div class="dp-container dp-stack">
+    {{#if eyebrow}}<p class="dp-eyebrow">{{eyebrow}}</p>{{/if}}
+    <h1>{{title}}</h1>
+    <p>{{description}}</p>
+    {{#if signal}}<p class="dp-decision-signal">{{signal}}</p>{{/if}}
+    <div class="dp-actions">
+      <a role="button" data-draftpine-action="primary" href="{{primaryAction.href}}">{{primaryAction.label}}</a>
+      {{#if secondaryAction.label}}<a href="{{secondaryAction.href}}">{{secondaryAction.label}}</a>{{/if}}
+    </div>
+  </div>
+</section>

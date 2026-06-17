@@ -1,0 +1,2 @@
+[data-primitive="core.decisionHero"] .dp-container { max-width: var(--dp-container-md); }
+[data-primitive="core.decisionHero"] .dp-decision-signal { color: var(--dp-accent); font-weight: 700; }
