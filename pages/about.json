@@ -1,0 +1,104 @@
+{
+  "schemaVersion": "3.0",
+  "id": "about",
+  "path": "/about/",
+  "title": "About",
+  "type": "about",
+  "description": "Company-style public page for Draftpine.",
+  "primaryAction": {
+    "label": "Contact us",
+    "href": "../contact/"
+  },
+  "priority": 3,
+  "status": "ready",
+  "sections": [
+    {
+      "id": "hero",
+      "block": "hero",
+      "props": {
+        "eyebrow": "About Draftpine",
+        "headline": "A public website starter for fast review loops.",
+        "body": "Draftpine turns rough website prompts into static, browsable pages that teams can critique before implementation.",
+        "primaryAction": "Contact us",
+        "primaryHref": "../contact/",
+        "secondaryAction": "View pricing",
+        "secondaryHref": "../pricing/"
+      }
+    },
+    {
+      "id": "values",
+      "block": "values",
+      "props": {
+        "title": "Principles",
+        "body": "The default website system is intentionally compact, neutral, and content-first.",
+        "items": [
+          { "number": "01", "title": "Public by default", "body": "Starter routes model websites, not internal tools." },
+          { "number": "02", "title": "Concrete enough to review", "body": "Every block carries real copy, state, or proof instead of placeholder boxes." },
+          { "number": "03", "title": "Portable output", "body": "Generated pages remain plain HTML, CSS, and static assets." }
+        ]
+      }
+    },
+    {
+      "id": "team",
+      "block": "team",
+      "props": {
+        "title": "Review team",
+        "body": "Use the team block for founders, authors, advisors, departments, or service teams.",
+        "people": [
+          { "initials": "PD", "name": "Product Design", "role": "Layout and interaction review" },
+          { "initials": "MK", "name": "Marketing", "role": "Message and proof review" },
+          { "initials": "EN", "name": "Engineering", "role": "Static output review" }
+        ]
+      }
+    },
+    {
+      "id": "careers",
+      "block": "careers",
+      "props": {
+        "title": "Careers and culture sections",
+        "body": "Use this block for public hiring pages, studio pages, or team-culture sections.",
+        "perks": [
+          { "title": "Focused review loops", "body": "Prototype the public page story before production design starts." },
+          { "title": "Static collaboration", "body": "Share pages that anyone can open, review, and annotate." },
+          { "title": "Clear ownership", "body": "Keep website copy and block structure in page JSON." }
+        ]
+      }
+    },
+    {
+      "id": "jobs",
+      "block": "job-list",
+      "props": {
+        "title": "Open roles",
+        "body": "Job rows model public careers content without adding hiring workflow logic.",
+        "jobs": [
+          { "title": "Website Design Lead", "team": "Design", "location": "Remote", "action": "View role", "href": "#" },
+          { "title": "Content Systems Editor", "team": "Marketing", "location": "Remote", "action": "View role", "href": "#" }
+        ]
+      }
+    },
+    {
+      "id": "rich-text",
+      "block": "rich-text",
+      "props": {
+        "title": "Why this starter exists",
+        "paragraphs": [
+          "Most early website work fails because the team debates implementation details before agreeing on the page story.",
+          "Draftpine keeps the first pass static and disposable. The goal is to make layout, copy, proof, and conversion paths easy to inspect."
+        ]
+      }
+    },
+    {
+      "id": "article",
+      "block": "article",
+      "props": {
+        "eyebrow": "Editorial block",
+        "title": "Design notes for website prototypes",
+        "dek": "Use article blocks for announcements, essays, policy pages, or long-form public content.",
+        "paragraphs": [
+          "A website prototype should make the public promise clear in the first viewport and provide enough proof for a skeptical visitor.",
+          "Compact sections, restrained borders, and direct copy keep the review focused on whether the page works."
+        ]
+      }
+    }
+  ]
+}

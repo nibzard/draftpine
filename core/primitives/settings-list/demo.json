@@ -1,8 +1,0 @@
-{
-  "title": "Workspace settings",
-  "description": "Grouped rows make configuration review compact.",
-  "groups": [
-    { "title": "Access", "rows": [{ "label": "Default role", "value": "Editor" }, { "label": "Invites", "value": "Allowed" }] },
-    { "title": "Notifications", "rows": [{ "label": "Digest", "value": "Weekly" }, { "label": "Alerts", "value": "Critical" }] }
-  ]
-}

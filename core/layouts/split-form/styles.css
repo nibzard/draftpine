@@ -1,8 +1,0 @@
-.dp-split-form {
-  grid-template-columns: minmax(0, 1fr) minmax(14rem, 0.4fr);
-}
-@media (max-width: 760px) {
-  .dp-split-form {
-    grid-template-columns: 1fr;
-  }
-}

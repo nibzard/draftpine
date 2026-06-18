@@ -8,8 +8,7 @@ export function finding(input: {
   route?: string;
   file?: string;
   selector?: string;
-  primitive?: string;
-  layout?: string;
+  block?: string;
   viewport?: string;
   evidence?: Record<string, unknown>;
   repair?: RepairAction;

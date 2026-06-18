@@ -1,0 +1,11 @@
+<section class="dp-section" data-block="comparison">
+  <div class="dp-container dp-stack">
+    <h2>{{title}}</h2>
+    <div class="dp-table-wrap" data-draftpine-overflow="allowed">
+      <table>
+        <thead><tr>{{#columns}}<th>{{value}}</th>{{/columns}}</tr></thead>
+        <tbody>{{#rows}}<tr>{{#.}}<td>{{value}}</td>{{/.}}</tr>{{/rows}}</tbody>
+      </table>
+    </div>
+  </div>
+</section>

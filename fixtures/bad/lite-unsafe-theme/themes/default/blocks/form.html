@@ -1,0 +1,9 @@
+<section class="dp-section" data-block="form">
+  <div class="dp-container dp-panel">
+    <form class="dp-stack">
+      <h2>{{title}}</h2>
+      {{#fields}}<label>{{label}}<input name="{{name}}" placeholder="{{placeholder}}" /></label>{{/fields}}
+      <button data-draftpine-action="primary">{{submitLabel}}</button>
+    </form>
+  </div>
+</section>

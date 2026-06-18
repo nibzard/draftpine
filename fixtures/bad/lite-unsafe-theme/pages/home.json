@@ -1,0 +1,61 @@
+{
+  "schemaVersion": "3.0",
+  "id": "home",
+  "path": "/",
+  "title": "Home",
+  "type": "home",
+  "description": "Unsafe Theme static prototype.",
+  "audience": "Product team",
+  "userGoal": "Understand the prototype shape and choose a path.",
+  "primaryAction": {
+    "label": "Open dashboard",
+    "href": "#"
+  },
+  "priority": 1,
+  "status": "ready",
+  "sections": [
+    {
+      "id": "hero",
+      "block": "hero",
+      "props": {
+        "eyebrow": "Draftpine v3",
+        "headline": "Unsafe Theme prototype",
+        "body": "A static prototype generated from page JSON and editable HTML theme blocks.",
+        "primaryAction": "Open dashboard",
+        "primaryHref": "#",
+        "secondaryAction": "View pricing",
+        "secondaryHref": "#"
+      }
+    },
+    {
+      "id": "metrics",
+      "block": "metrics",
+      "props": {
+        "title": "Prototype health",
+        "items": [
+          {
+            "label": "Source model",
+            "value": "Pages"
+          },
+          {
+            "label": "Theme",
+            "value": "Default"
+          },
+          {
+            "label": "Runtime",
+            "value": "Static"
+          }
+        ]
+      }
+    },
+    {
+      "id": "proof",
+      "block": "proof",
+      "props": {
+        "title": "Editable source",
+        "body": "Open pages/home.json and themes/default/blocks/hero.html to change this screen.",
+        "code": "pages/*.json -> themes/default/*.html -> prototype/"
+      }
+    }
+  ]
+}

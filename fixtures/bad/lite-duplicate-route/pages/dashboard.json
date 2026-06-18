@@ -1,0 +1,74 @@
+{
+  "schemaVersion": "3.0",
+  "id": "dashboard",
+  "path": "/dashboard/",
+  "title": "Dashboard",
+  "type": "dashboard",
+  "primaryAction": {
+    "label": "Export report",
+    "href": "#"
+  },
+  "priority": 3,
+  "status": "ready",
+  "sections": [
+    {
+      "id": "hero",
+      "block": "hero",
+      "props": {
+        "eyebrow": "Duplicate Route",
+        "headline": "Review prototype readiness.",
+        "body": "A compact dashboard for routes, reports, and findings.",
+        "primaryAction": "Export report",
+        "primaryHref": "#"
+      }
+    },
+    {
+      "id": "table",
+      "block": "table",
+      "props": {
+        "title": "Recent checks",
+        "columns": [
+          "Route",
+          "Status",
+          "Finding"
+        ],
+        "rows": [
+          [
+            "/",
+            "Pass",
+            "None"
+          ],
+          [
+            "/pricing/",
+            "Pass",
+            "None"
+          ],
+          [
+            "/dashboard/",
+            "Review",
+            "Screenshot ready"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "timeline",
+      "block": "timeline",
+      "props": {
+        "title": "Activity",
+        "items": [
+          {
+            "time": "09:10",
+            "title": "Generated pages",
+            "body": "Compiler wrote static output."
+          },
+          {
+            "time": "09:12",
+            "title": "Strict eval",
+            "body": "Browser checks completed."
+          }
+        ]
+      }
+    }
+  ]
+}

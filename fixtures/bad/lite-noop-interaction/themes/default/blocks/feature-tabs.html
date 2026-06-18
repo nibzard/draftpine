@@ -1,0 +1,21 @@
+<section class="dp-section" data-block="feature-tabs">
+  <div class="dp-container dp-stack">
+    <div class="dp-section-heading">
+      {{#eyebrow}}<span class="dp-badge">{{eyebrow}}</span>{{/eyebrow}}
+      <h2>{{title}}</h2>
+      {{#body}}<p>{{body}}</p>{{/body}}
+    </div>
+    <div class="dp-feature-tabs" data-draftpine-interaction="tabs">
+      <div class="dp-tab-list" role="tablist" aria-label="{{title}}">
+        {{#tabs}}<button type="button">{{label}}</button>{{/tabs}}
+      </div>
+      <div class="dp-tab-panels">
+        {{#tabs}}<article>
+          <span>{{kicker}}</span>
+          <h3>{{title}}</h3>
+          <p>{{body}}</p>
+        </article>{{/tabs}}
+      </div>
+    </div>
+  </div>
+</section>

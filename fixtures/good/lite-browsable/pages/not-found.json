@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "3.0",
+  "id": "not-found",
+  "path": "/404/",
+  "title": "404",
+  "type": "not-found",
+  "description": "Public not found page.",
+  "primaryAction": {
+    "label": "Return home",
+    "href": "../"
+  },
+  "priority": 6,
+  "status": "ready",
+  "sections": [
+    {
+      "id": "not-found",
+      "block": "not-found",
+      "props": {
+        "code": "404",
+        "title": "This public page is not in the prototype.",
+        "body": "Return to the homepage or add the route to pages/ when the sitemap needs it.",
+        "action": "Return home",
+        "href": "../"
+      }
+    }
+  ]
+}

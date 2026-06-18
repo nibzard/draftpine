@@ -1,9 +1,12 @@
 # Architecture
 
-Draftpine v2 has three hard boundaries:
+Draftpine v3 has four hard boundaries:
 
-- Source files are JSON, primitive manifests, templates, and scoped styles.
-- Generated files live in `prototype/` and are owned by the compiler.
-- Reports live in `reports/` and are written for agents first.
+- Source files live in `pages/` and `themes/`.
+- Generated prototype files live in `prototype/` and are owned by the compiler.
+- Reports and screenshots live in `reports/` and are owned by eval.
+- The runtime is static JavaScript copied into generated output.
 
-The compiler loads config, route maps, recipes, content, layouts, and primitives into a normalized project model. The evaluator runs source checks plus Playwright browser checks against generated output.
+The compiler loads `draftpine.config.json`, discovers `pages/*.json`, loads the selected theme from `themes/<theme>/theme.json`, renders each section through its block HTML partial, wraps the route in `shell.html`, writes static output, and records a manifest.
+
+The evaluator runs source checks, theme safety checks, generated-output checks, route/link checks, and Playwright browser checks. Findings point back to editable source files whenever possible.

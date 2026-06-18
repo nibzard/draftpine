@@ -1,1 +1,0 @@
-{"schemaVersion":"2.0","name":"gridThree","namespace":"core","description":"Three-column grid that collapses to one column on mobile.","parameters":{},"responsive":{"mobile":"stack"},"overflow":"forbidden"}

@@ -1,28 +1,72 @@
 # Authoring
 
-Edit these files:
-
-- `draftpine.config.json`
-- `routes.json`
-- `recipes/*.json`
-- `content/**/*.json`
-- `primitives/*`
-- `layouts/*`
-
-Do not hand-edit files in `prototype/`; they are generated.
-
-## Project CSS Overrides
-
-For small project-level visual adjustments, configure a safe override file:
+Draftpine v3 authoring starts with page JSON.
 
 ```json
 {
-  "source": {
-    "overrides": "overrides.css"
-  }
+  "schemaVersion": "3.0",
+  "id": "pricing",
+  "path": "/pricing/",
+  "title": "Pricing",
+  "type": "pricing",
+  "primaryAction": { "label": "Contact sales", "href": "../contact/" },
+  "sections": [
+    {
+      "id": "hero",
+      "block": "hero",
+      "props": {
+        "headline": "Choose the right website prototype path.",
+        "primaryAction": "Contact sales",
+        "primaryHref": "../contact/"
+      }
+    }
+  ]
 }
 ```
 
-Override CSS is bundled after core layouts and primitives. It is checked for common overflow hazards such as `width: 100vw`, negative margins, and large fixed `width` values. Unlike reusable primitives, an override file does not need a manifest, demo, eval fixture, or README.
+Each section names a block registered in `themes/<theme>/theme.json` and passes `props` to that block.
 
-Use overrides for scoped project polish. Use `primitives/` or `layouts/` when the behavior should become a reusable component.
+## Theme Blocks
+
+Blocks are ordinary HTML partials:
+
+```html
+<section class="dp-section">
+  <div class="dp-container">
+    <h1>{{headline}}</h1>
+    <a href="{{primaryHref}}" data-draftpine-action="primary">{{primaryAction}}</a>
+  </div>
+</section>
+```
+
+Supported template syntax:
+
+- `{{value}}` for escaped values
+- `{{nested.value}}` for dotted paths
+- `{{#items}}...{{/items}}` for truthy values or arrays
+- `{{^items}}...{{/items}}` for empty states
+- `{{! comment }}` for comments
+
+Raw HTML insertion and JavaScript expressions are not supported in blocks.
+
+## Add A Block
+
+```bash
+pnpm draftpine new block timeline
+```
+
+This creates `themes/default/blocks/timeline.html` and registers it in `themes/default/theme.json`.
+
+## Public Website Blocks
+
+The default theme is website-first. Start with public page blocks such as `hero`, `logo-cloud`, `feature-icons`, `feature-showcase`, `pricing`, `comparison`, `faq`, `contact`, `blog-list`, `article`, `team`, and `values`.
+
+See `docs/website-blocks.md` for the block families, page coverage matrix, and starter route model.
+
+## Validate
+
+```bash
+pnpm draftpine generate --json
+pnpm draftpine check --json
+pnpm draftpine eval --strict --json
+```

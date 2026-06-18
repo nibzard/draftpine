@@ -1,8 +1,8 @@
 import path from "node:path";
 import { createHash } from "node:crypto";
-import type { CompileArtifact, Finding, Project, Recipe } from "../domain/types.js";
+import type { CompileArtifact, Finding, Project } from "../domain/types.js";
 import { finding } from "../domain/findings.js";
-import { cleanDir, listFilesRecursive, pathExists, readText, toPosix, writeJson, writeText } from "../io/fs.js";
+import { cleanDir, listFilesRecursive, readText, toPosix, writeJson, writeText } from "../io/fs.js";
 import { loadProject } from "../io/workspace.js";
 import { renderRouteHtml, routeOutputPath } from "./html.js";
 import { runtimeJs, siteDataJs } from "../runtime/runtime.js";
@@ -20,39 +20,48 @@ export async function generate(configPath = "draftpine.config.json"): Promise<{ 
   const routesRendered = [];
   const outputFiles: string[] = [];
   if (!findings.some((item) => item.blocking)) {
-    for (const route of project.routes.filter((item) => item.status !== "hidden" && item.status !== "deprecated")) {
-      const recipe = project.recipes.get(route.id);
-      if (!recipe) continue;
-      const html = renderRouteHtml(project, route, recipe);
+    for (const route of project.routes) {
+      const page = project.pages.find((item) => item.id === route.id);
+      if (!page) continue;
+      const rendered = renderRouteHtml(project, page);
+      for (const error of rendered.templateErrors) {
+        findings.push(
+          finding({
+            id: "theme.templateSyntax",
+            severity: "error",
+            category: "theme",
+            route: page.path,
+            file: page.sourceFile,
+            message: error,
+            repair: { priority: 1, type: "fix-template", message: "Fix the unmatched or unsupported template marker." }
+          })
+        );
+      }
+      if (rendered.templateErrors.length) continue;
       const outputPath = routeOutputPath(outputDir, route);
-      await writeText(outputPath, html);
+      await writeText(outputPath, rendered.html);
       outputFiles.push(toPosix(path.relative(project.workspace.root, outputPath)));
       routesRendered.push(route);
     }
   }
 
   const css = await bundleCss(project);
-  const nav = project.routes
-    .filter((route) => route.status !== "hidden" && route.status !== "deprecated")
-    .map((route) => ({ label: route.title, path: route.path }));
+  const nav = project.routes.map((route) => ({ label: route.navLabel ?? route.title, path: route.path }));
   await writeText(path.join(assetsDir, "draftpine.css"), css);
   await writeText(path.join(assetsDir, "draftpine.js"), `${siteDataJs(nav)}\n${runtimeJs}`);
   outputFiles.push(toPosix(path.relative(project.workspace.root, path.join(assetsDir, "draftpine.css"))));
   outputFiles.push(toPosix(path.relative(project.workspace.root, path.join(assetsDir, "draftpine.js"))));
 
   const sourceFiles = await listFilesRecursive(project.workspace.root);
+  const blocksUsed = unique(project.pages.flatMap((page) => page.sections.map((section) => section.block)));
   const manifest = {
-    compileTimestamp: new Date().toISOString(),
-    draftpineVersion: "2.0.0",
+    draftpineVersion: "3.0.0",
+    sourceMode: "pages",
+    activeTheme: project.theme.id,
     sourceHashes: await hashSources(project.workspace.root, sourceFiles),
     routesRendered: routesRendered.map((route) => route.path),
-    primitivesUsed: unique([...project.recipes.values()].flatMap((recipe) => recipe.sections.map((section) => section.primitive))),
-    layoutsUsed: unique(
-      [...project.recipes.values()].flatMap((recipe) => [
-        ...recipe.sections.map((section) => section.layout),
-        ...(recipe.pageLayout ? [recipe.pageLayout] : [])
-      ])
-    ),
+    pagesRendered: routesRendered.map((route) => route.sourceFile),
+    blocksUsed,
     cssAssets: ["assets/draftpine.css"],
     jsAssets: ["assets/draftpine.js"],
     warnings: findings.filter((item) => item.severity === "warning"),
@@ -77,206 +86,43 @@ export async function generate(configPath = "draftpine.config.json"): Promise<{ 
 
 export function validateProjectContracts(project: Project): Finding[] {
   const findings: Finding[] = [];
-
-  if (
-    project.workspace.config.routeBudget.largePrototypeRequiresApproval &&
-    project.routes.filter((route) => route.status !== "hidden" && route.status !== "deprecated").length >
-      project.workspace.config.routeBudget.defaultMaxRoutes
-  ) {
-    findings.push(
-      finding({
-        id: "route.budgetExceeded",
-        severity: "error",
-        category: "route",
-        message: `Route count exceeds defaultMaxRoutes (${project.workspace.config.routeBudget.defaultMaxRoutes}).`,
-        repair: {
-          priority: 1,
-          type: "reduce-routes",
-          file: project.workspace.config.source.routes,
-          message: "Generate representative routes first or increase the route budget intentionally."
-        }
-      })
-    );
-  }
-
   for (const route of project.routes) {
-    const recipe = project.recipes.get(route.id);
-    const contract = project.registry.routeTypes.get(route.routeType);
-    if (!recipe || !contract) continue;
-    if (recipe.routeId !== route.id || recipe.routeType !== route.routeType) {
+    const page = project.pages.find((item) => item.id === route.id);
+    if (!page) continue;
+    const visibleSections = page.sections.filter((section) => section.visibility !== "hidden");
+    if (!visibleSections.length) {
       findings.push(
         finding({
-          id: "source.recipeRouteMismatch",
+          id: "source.noVisibleSections",
           severity: "error",
           category: "source",
-          route: route.path,
-          file: route.recipe,
-          message: `Recipe for ${route.id} does not match the route id/type.`,
-          repair: {
-            priority: 1,
-            type: "edit-json",
-            file: route.recipe,
-            message: "Set routeId and routeType to match routes.json."
-          }
+          file: page.sourceFile,
+          route: page.path,
+          message: "Page has no visible sections."
         })
       );
     }
-
-    const primitiveIds = recipe.sections.map((section) => section.primitive);
-    for (const primitiveId of primitiveIds) {
-      if (!project.registry.primitives.has(primitiveId)) {
-        findings.push(
-          finding({
-            id: "registry.missingPrimitive",
-            severity: "error",
-            category: "primitive",
-            route: route.path,
-            file: route.recipe,
-            primitive: primitiveId,
-            message: `Primitive ${primitiveId} does not exist in the registry.`
-          })
-        );
-      }
-    }
-    for (const section of recipe.sections) {
-      if (!project.registry.layouts.has(section.layout)) {
-        findings.push(
-          finding({
-            id: "registry.missingLayout",
-            severity: "error",
-            category: "layout",
-            route: route.path,
-            file: route.recipe,
-            layout: section.layout,
-            message: `Layout ${section.layout} does not exist in the registry.`
-          })
-        );
-      }
-    }
-    if (recipe.pageLayout && !project.registry.layouts.has(recipe.pageLayout)) {
+    if (page.primaryAction && !visibleSections.some((section) => JSON.stringify(section.props).includes(page.primaryAction?.label ?? ""))) {
       findings.push(
         finding({
-          id: "registry.missingLayout",
-          severity: "error",
-          category: "layout",
-          route: route.path,
-          file: route.recipe,
-          layout: recipe.pageLayout,
-          message: `Page layout ${recipe.pageLayout} does not exist in the registry.`
-        })
-      );
-    }
-    for (const requiredPrimitive of contract.requiredPrimitives) {
-      if (!primitiveIds.includes(requiredPrimitive)) {
-        findings.push(
-          finding({
-            id: "route.missingRequiredPrimitive",
-            severity: "error",
-            category: "composition",
-            route: route.path,
-            file: route.recipe,
-            primitive: requiredPrimitive,
-            message: `${route.routeType} routes require ${requiredPrimitive}.`,
-            repair: {
-              priority: 1,
-              type: "change-recipe",
-              file: route.recipe,
-              message: `Add a section that uses ${requiredPrimitive}.`
-            }
-          })
-        );
-      }
-    }
-    for (const forbiddenPrimitive of contract.forbiddenPrimitives) {
-      if (primitiveIds.includes(forbiddenPrimitive)) {
-        findings.push(
-          finding({
-            id: "route.forbiddenPrimitive",
-            severity: "error",
-            category: "composition",
-            route: route.path,
-            file: route.recipe,
-            primitive: forbiddenPrimitive,
-            message: `${route.routeType} routes must not use ${forbiddenPrimitive}.`
-          })
-        );
-      }
-    }
-  }
-
-  const fingerprints = new Map<string, string[]>();
-  for (const route of project.routes) {
-    const recipe = project.recipes.get(route.id);
-    if (!recipe || route.status === "hidden" || route.status === "deprecated") continue;
-    const fingerprint = [
-      route.routeType,
-      recipe.sections.map((section) => section.primitive).join(">"),
-      recipe.sections.map((section) => section.layout).join(">"),
-      recipe.pageLayout ?? "",
-      (recipe.interactions ?? []).sort().join(",")
-    ].join("|");
-    fingerprints.set(fingerprint, [...(fingerprints.get(fingerprint) ?? []), route.path]);
-  }
-  for (const routes of fingerprints.values()) {
-    if (routes.length > 2) {
-      findings.push(
-        finding({
-          id: "route.repetitiveFingerprint",
+          id: "composition.primaryActionNotRendered",
           severity: "warning",
-          category: "differentiation",
-          message: `Multiple routes share the same route type, primitive sequence, layout sequence, and interaction set: ${routes.join(", ")}.`,
-          evidence: { routes },
-          blocking: false,
-          repair: {
-            priority: 3,
-            type: "change-recipe",
-            message: "Vary route recipes by route type and purpose instead of duplicating the same shell."
-          }
+          category: "composition",
+          file: page.sourceFile,
+          route: page.path,
+          message: "Page declares a primary action, but no section props include the action label.",
+          blocking: false
         })
       );
     }
   }
-
   return findings;
 }
 
 async function bundleCss(project: Project): Promise<string> {
-  const usedPrimitiveIds = unique([...project.recipes.values()].flatMap((recipe: Recipe) => recipe.sections.map((section) => section.primitive)));
-  const usedLayoutIds = unique(
-    [...project.recipes.values()].flatMap((recipe: Recipe) => [
-      ...recipe.sections.map((section) => section.layout),
-      ...(recipe.pageLayout ? [recipe.pageLayout] : [])
-    ])
-  );
-  const chunks = [await readText(path.resolve((await findPackageCoreDir()), "tokens/draftpine.css"))];
-  for (const layoutId of usedLayoutIds) {
-    const layout = project.registry.layouts.get(layoutId);
-    if (layout?.styles) chunks.push(layout.styles);
-  }
-  for (const primitiveId of usedPrimitiveIds) {
-    const primitive = project.registry.primitives.get(primitiveId);
-    if (primitive?.styles) chunks.push(primitive.styles);
-  }
-  const overrides = project.workspace.config.source.overrides;
-  if (overrides) {
-    const overridesPath = path.resolve(project.workspace.root, overrides);
-    if (await pathExists(overridesPath)) {
-      chunks.push(await readText(overridesPath));
-    }
-  }
+  const chunks = [baseCss];
+  if (project.theme.styles) chunks.push(project.theme.styles);
   return `${chunks.join("\n\n")}\n`;
-}
-
-async function findPackageCoreDir(): Promise<string> {
-  let current = path.resolve(import.meta.dirname);
-  for (let index = 0; index < 8; index += 1) {
-    const candidate = path.resolve(current, "core");
-    if (await pathExists(candidate)) return candidate;
-    const parent = path.dirname(current);
-    if (parent === current) break;
-    current = parent;
-  }
-  return path.resolve(process.cwd(), "core");
 }
 
 async function hashSources(root: string, files: string[]): Promise<Record<string, string>> {
@@ -284,7 +130,6 @@ async function hashSources(root: string, files: string[]): Promise<Record<string
   for (const file of files) {
     if (file.includes(`${path.sep}.git${path.sep}`) || file.includes(`${path.sep}node_modules${path.sep}`)) continue;
     if (file.includes(`${path.sep}prototype${path.sep}`) || file.includes(`${path.sep}reports${path.sep}`)) continue;
-    if (!(await pathExists(file))) continue;
     const hash = createHash("sha256").update(await readText(file)).digest("hex");
     hashes[toPosix(path.relative(root, file))] = hash;
   }
@@ -294,3 +139,50 @@ async function hashSources(root: string, files: string[]): Promise<Record<string
 function unique<T>(values: T[]): T[] {
   return [...new Set(values)];
 }
+
+const baseCss = `:root {
+  --dp-font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --dp-bg: #ffffff;
+  --dp-surface: #ffffff;
+  --dp-surface-muted: #fafafa;
+  --dp-text: #09090b;
+  --dp-muted: #71717a;
+  --dp-line: #e4e4e7;
+  --dp-accent: #0070f3;
+  --dp-accent-strong: #005bd1;
+  --dp-radius: 8px;
+  --pico-font-family: var(--dp-font);
+  --pico-primary: var(--dp-accent);
+  --pico-primary-hover: var(--dp-accent-strong);
+  --pico-border-radius: var(--dp-radius);
+}
+[data-theme="dark"] {
+  --dp-bg: #050505;
+  --dp-surface: #0a0a0a;
+  --dp-surface-muted: #111113;
+  --dp-text: #fafafa;
+  --dp-muted: #a1a1aa;
+  --dp-line: #27272a;
+  --dp-accent: #52a8ff;
+  --dp-accent-strong: #8cc8ff;
+}
+html { font-family: var(--dp-font); background: var(--dp-bg); color: var(--dp-text); }
+body { margin: 0; background: var(--dp-bg); color: var(--dp-text); }
+.dp-container { width: min(1180px, calc(100% - 32px)); margin-inline: auto; }
+.dp-site-header { border-bottom: 1px solid var(--dp-line); background: color-mix(in srgb, var(--dp-bg) 94%, transparent); position: sticky; top: 0; z-index: 10; }
+.dp-site-header nav { min-height: 58px; }
+.dp-site-footer { border-top: 1px solid var(--dp-line); padding: 28px 0; color: var(--dp-muted); }
+.dp-site-footer nav, .dp-site-footer ul, .dp-site-footer li { display: block; margin: 0; padding: 0; }
+.dp-site-footer ul { list-style: none; display: flex; gap: 14px; flex-wrap: wrap; }
+.dp-section { padding: clamp(36px, 6vw, 76px) 0; }
+.dp-panel, .dp-card, .dp-metric, .dp-price, .dp-callout { background: var(--dp-surface); border: 1px solid var(--dp-line); border-radius: var(--dp-radius); }
+.dp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 16px; }
+.dp-stack { display: grid; gap: 16px; }
+.dp-eyebrow { color: var(--dp-accent); font-weight: 700; margin-bottom: 8px; }
+.dp-muted { color: var(--dp-muted); }
+table { min-width: 100%; }
+@media (max-width: 720px) {
+  .dp-site-header nav, .dp-site-header ul { align-items: flex-start; }
+  .dp-site-nav-links { max-width: 100%; overflow-x: auto; }
+}
+`;

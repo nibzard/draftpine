@@ -1,1 +1,0 @@
-{"schemaVersion":"2.0","name":"gridAuto","namespace":"core","description":"Auto-fit responsive grid using safe minmax constraints.","parameters":{"min":{"type":"string","default":"18rem"}},"responsive":{"mobile":"auto"},"overflow":"forbidden"}

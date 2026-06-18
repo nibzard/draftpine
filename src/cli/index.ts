@@ -5,14 +5,12 @@ import { check } from "../eval/check.js";
 import { evalProject } from "../eval/browserEval.js";
 import { printFindings, printReport } from "../report/format.js";
 import { parseArgs, flagBoolean, flagString } from "./args.js";
-import { initProject, scaffoldLayout, scaffoldPrimitive } from "./scaffold.js";
+import { initProject, scaffoldBlock } from "./scaffold.js";
 import { dev } from "../dev/dev.js";
 import { generateDocs } from "../docs/docs.js";
-import { migrateV1 } from "./migrate.js";
-import { testLayout, testPrimitive } from "./testExtension.js";
 
 async function main() {
-  const parsed = parseArgs(process.argv.slice(2));
+  const parsed = parseArgs(normalizeWorkspaceFirstArgs(process.argv.slice(2)));
   const key = parsed.command.join(" ");
   const json = flagBoolean(parsed.flags, "json");
 
@@ -76,37 +74,11 @@ async function main() {
     return;
   }
 
-  if (key === "new primitive") {
+  if (key === "new block") {
     const name = parsed.positionals[0];
-    if (!name) throw new Error("Usage: draftpine new primitive <name>");
-    await scaffoldPrimitive(name, flagString(parsed.flags, "namespace", "project") ?? "project", flagString(parsed.flags, "variant", "default") ?? "default");
-    console.log(`Created primitive ${name}.`);
-    return;
-  }
-
-  if (key === "new layout") {
-    const name = parsed.positionals[0];
-    if (!name) throw new Error("Usage: draftpine new layout <name>");
-    await scaffoldLayout(name, flagString(parsed.flags, "namespace", "project") ?? "project");
-    console.log(`Created layout ${name}.`);
-    return;
-  }
-
-  if (key === "test primitive") {
-    const name = parsed.positionals[0];
-    if (!name) throw new Error("Usage: draftpine test primitive <name>");
-    const findings = await testPrimitive(name);
-    printFindings(findings, json);
-    process.exitCode = findings.some((item) => item.severity === "error") ? 1 : 0;
-    return;
-  }
-
-  if (key === "test layout") {
-    const name = parsed.positionals[0];
-    if (!name) throw new Error("Usage: draftpine test layout <name>");
-    const findings = await testLayout(name);
-    printFindings(findings, json);
-    process.exitCode = findings.some((item) => item.severity === "error") ? 1 : 0;
+    if (!name) throw new Error("Usage: draftpine new block <name>");
+    await scaffoldBlock(name, flagString(parsed.flags, "theme", "default") ?? "default");
+    console.log(`Created block ${name}.`);
     return;
   }
 
@@ -116,13 +88,15 @@ async function main() {
     return;
   }
 
-  if (key === "migrate v1") {
-    await migrateV1(parsed.positionals[0] ?? ".", flagString(parsed.flags, "out", "wireframe-v2") ?? "wireframe-v2");
-    console.log("Created v1 migration workspace.");
-    return;
-  }
-
   throw new Error(`Unknown command: ${key}`);
+}
+
+function normalizeWorkspaceFirstArgs(args: string[]): string[] {
+  const commands = new Set(["init", "generate", "check", "eval", "dev", "new", "docs", "help"]);
+  if (args.length >= 2 && !args[0].startsWith("-") && !commands.has(args[0]) && commands.has(args[1])) {
+    return [args[1], args[0], ...args.slice(2)];
+  }
+  return args;
 }
 
 function applyWorkspaceOperand(positionals: string[]): void {
@@ -132,7 +106,7 @@ function applyWorkspaceOperand(positionals: string[]): void {
 }
 
 function printHelp() {
-  console.log(`Draftpine v2
+  console.log(`Draftpine v3
 
 Commands:
   draftpine init [path] [--starter single-screen|browsable|docs] [--prompt "..."] [--force]
@@ -140,12 +114,8 @@ Commands:
   draftpine check [--json] [--scope source|generated|all]
   draftpine eval [--json] [--strict] [--ai-review] [--routes /,/pricing/]
   draftpine dev [--port 5173] [--report-port 5174]
-  draftpine new primitive <name>
-  draftpine new layout <name>
-  draftpine test primitive <name>
-  draftpine test layout <name>
+  draftpine new block <name> [--theme default]
   draftpine docs [--out docs/generated]
-  draftpine migrate v1 [path] [--out wireframe-v2]
 `);
 }
 

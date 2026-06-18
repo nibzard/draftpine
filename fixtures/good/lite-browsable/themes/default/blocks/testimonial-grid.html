@@ -1,0 +1,17 @@
+<section class="dp-section" data-block="testimonial-grid">
+  <div class="dp-container dp-stack">
+    <div class="dp-section-heading">
+      <h2>{{title}}</h2>
+      {{#body}}<p>{{body}}</p>{{/body}}
+    </div>
+    <div class="dp-testimonial-grid">
+      {{#items}}<figure>
+        <blockquote>{{quote}}</blockquote>
+        <figcaption>
+          <span class="dp-avatar">{{initials}}</span>
+          <span><strong>{{author}}</strong><small>{{role}}</small></span>
+        </figcaption>
+      </figure>{{/items}}
+    </div>
+  </div>
+</section>

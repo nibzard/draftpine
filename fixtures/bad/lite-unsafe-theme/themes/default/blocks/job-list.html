@@ -1,0 +1,14 @@
+<section class="dp-section" data-block="job-list">
+  <div class="dp-container dp-stack">
+    <div class="dp-section-heading">
+      <h2>{{title}}</h2>
+      {{#body}}<p>{{body}}</p>{{/body}}
+    </div>
+    <div class="dp-job-list">
+      {{#jobs}}<article>
+        <div><h3>{{title}}</h3><p>{{team}} · {{location}}</p></div>
+        <a href="{{href}}">{{action}}</a>
+      </article>{{/jobs}}
+    </div>
+  </div>
+</section>

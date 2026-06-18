@@ -1,1 +1,0 @@
-{"schemaVersion":"2.0","name":"badAlpine","namespace":"project","type":"primitive","description":"Throws an Alpine expression error on init to exercise the runtime console-error gate.","slots":{"title":{"type":"string","required":true}},"variants":["default"],"layouts":["core.stack"],"interactions":[],"states":["default"],"accessibility":{},"responsive":{"mobile":"stack"}}

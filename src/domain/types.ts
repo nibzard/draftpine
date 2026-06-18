@@ -9,26 +9,25 @@ export type FindingCategory =
   | "composition"
   | "differentiation"
   | "content"
-  | "primitive"
+  | "theme"
   | "visual"
   | "performance";
 
 export type Status = "pass" | "fail" | "pass-with-review" | "review-required";
+export type ViewportName = "mobileSmall" | "mobile" | "tablet" | "desktop" | "desktopWide";
 
 export interface DraftpineConfig {
-  schemaVersion: string;
+  schemaVersion: "3.0";
   project: {
     name: string;
     description?: string;
     owner?: string;
   };
   source: {
-    routes: string;
-    contentDir: string;
-    recipesDir: string;
-    primitivesDir: string;
-    layoutsDir: string;
-    overrides?: string;
+    mode: "pages";
+    pagesDir: string;
+    theme: string;
+    themesDir: string;
   };
   output: {
     dir: string;
@@ -36,173 +35,112 @@ export interface DraftpineConfig {
     assetsDir: string;
   };
   theme: {
-    profile: string;
-    tokens?: string;
     defaultMode: "light" | "dark" | "system";
     allowThemeToggle: boolean;
-  };
-  routeBudget: {
-    defaultMaxRoutes: number;
-    largePrototypeRequiresApproval: boolean;
-    representativeRoutesRequired: boolean;
   };
   eval: {
     required: boolean;
     strict: boolean;
     viewports: ViewportName[];
     aiReview: "off" | "manual" | "auto";
-    sampleStrategy: "all" | "changed" | "route-type-plus-changed";
   };
 }
 
-export type ViewportName = "mobileSmall" | "mobile" | "tablet" | "desktop" | "desktopWide";
+export interface PrimaryAction {
+  label: string;
+  href: string;
+}
 
-export interface RoutesFile {
-  routes: Route[];
+export interface PageSection {
+  id: string;
+  block: string;
+  props: Record<string, unknown>;
+  slot?: string;
+  visibility?: "visible" | "hidden";
+  states?: string[];
+  interactions?: string[];
+  evalHints?: Record<string, unknown>;
+}
+
+export interface Page {
+  schemaVersion: "3.0";
+  id: string;
+  path: string;
+  title: string;
+  type: string;
+  description?: string;
+  audience?: string;
+  userGoal?: string;
+  primaryAction?: PrimaryAction;
+  status: "draft" | "ready" | "hidden" | "deprecated";
+  priority: number;
+  tags?: string[];
+  navLabel?: string;
+  theme?: string;
+  layout?: string;
+  sections: PageSection[];
+  sourceFile: string;
+  outputFile: string;
+}
+
+export interface BlockMetadata {
+  file: string;
+  description?: string;
+  requires?: string[];
+  optional?: string[];
+  markers?: string[];
+  states?: string[];
+  interactions?: string[];
+  allowedRawHtml?: string[];
+  overflow?: "forbidden" | "allowed" | "conditional";
+  accessibility?: {
+    requiresHeading?: boolean;
+    requiresLabels?: boolean;
+  };
+}
+
+export interface ThemeConfig {
+  schemaVersion: "3.0";
+  name: string;
+  description?: string;
+  shell?: string;
+  styles?: string;
+  scripts?: string[];
+  tokens?: Record<string, unknown>;
+  supportsDarkMode?: boolean;
+  requiredRuntime?: string[];
+  blocks: Record<string, BlockMetadata>;
+}
+
+export interface LoadedBlock {
+  name: string;
+  metadata: BlockMetadata;
+  sourceFile: string;
+  template: string;
+}
+
+export interface LoadedTheme {
+  id: string;
+  root: string;
+  sourceFile: string;
+  config: ThemeConfig;
+  shellFile?: string;
+  shell?: string;
+  stylesFile?: string;
+  styles?: string;
+  blocks: Map<string, LoadedBlock>;
 }
 
 export interface Route {
   id: string;
   path: string;
   title: string;
+  type: string;
   file: string;
-  routeType: RouteTypeName;
-  profile: string;
-  recipe?: string;
-  content?: string;
+  sourceFile: string;
   priority: number;
-  status: "draft" | "ready" | "hidden" | "deprecated";
-  tags?: string[];
-}
-
-export type RouteTypeName =
-  | "home"
-  | "hub"
-  | "detail"
-  | "pricing"
-  | "comparison"
-  | "directory"
-  | "docs"
-  | "editorial"
-  | "article"
-  | "legal"
-  | "contact"
-  | "support"
-  | "appDashboard"
-  | "settings"
-  | "checkout"
-  | "onboarding"
-  | "utility";
-
-export interface Recipe {
-  schemaVersion: string;
-  routeId: string;
-  routeType: RouteTypeName;
-  profile: string;
-  sections: Section[];
-  /**
-   * Optional page-level layout. When set, the rendered sections are grouped by
-   * their `slot` and placed into the named slots of this layout's template
-   * (e.g. `{{{main}}}`, `{{{aside}}}`). When unset, sections stack vertically —
-   * the original behavior.
-   */
-  pageLayout?: string;
-  states?: string[];
-  interactions?: string[];
-}
-
-export interface Section {
-  id: string;
-  primitive: string;
-  layout: string;
-  variant?: string;
-  content: string | Record<string, unknown>;
-  visibility?: "visible" | "hidden";
-  /**
-   * Which page-layout slot this section belongs to (default `"main"`). Only
-   * meaningful when the recipe declares a `pageLayout`.
-   */
-  slot?: string;
-  states?: string[];
-  interactions?: string[];
-  evalHints?: Record<string, unknown>;
-}
-
-export interface SlotDefinition {
-  type:
-    | "string"
-    | "text"
-    | "richText"
-    | "number"
-    | "boolean"
-    | "enum"
-    | "action"
-    | "link"
-    | "image"
-    | "icon"
-    | "code"
-    | "metric"
-    | "table"
-    | "array"
-    | "object"
-    | "reference";
-  required?: boolean;
-  values?: string[];
-  variants?: string[];
-  items?: SlotDefinition;
-}
-
-export interface PrimitiveManifest {
-  schemaVersion: string;
-  name: string;
-  namespace: string;
-  type: "primitive";
-  description: string;
-  slots: Record<string, SlotDefinition>;
-  variants: string[];
-  layouts: string[];
-  interactions: string[];
-  states: string[];
-  accessibility?: {
-    requiresHeading?: boolean;
-    requiresPrimaryAction?: boolean;
-  };
-  responsive?: Record<string, string>;
-}
-
-export interface LayoutManifest {
-  schemaVersion: string;
-  name: string;
-  namespace: string;
-  description: string;
-  parameters?: Record<string, SlotDefinition & { default?: unknown }>;
-  responsive?: Record<string, string>;
-  overflow: "forbidden" | "allowed" | "conditional";
-  /** `"page"` layouts frame the whole route via named slots; `"section"` (default) wrap a single section. */
-  scope?: "page" | "section";
-}
-
-export interface RouteTypeContract {
-  name: RouteTypeName;
-  purpose: string;
-  requiredPrimitives: string[];
-  forbiddenPrimitives: string[];
-  firstViewport: string[];
-  requiredInteractions: string[];
-}
-
-export interface RegistryEntry<T> {
-  id: string;
-  manifest: T;
-  dir: string;
-  template?: string;
-  styles?: string;
-}
-
-export interface Registry {
-  primitives: Map<string, RegistryEntry<PrimitiveManifest>>;
-  layouts: Map<string, RegistryEntry<LayoutManifest>>;
-  routeTypes: Map<string, RouteTypeContract>;
+  status: Page["status"];
+  navLabel?: string;
 }
 
 export interface Workspace {
@@ -213,10 +151,9 @@ export interface Workspace {
 
 export interface Project {
   workspace: Workspace;
+  pages: Page[];
   routes: Route[];
-  recipes: Map<string, Recipe>;
-  content: Map<string, Record<string, unknown>>;
-  registry: Registry;
+  theme: LoadedTheme;
   findings: Finding[];
 }
 
@@ -228,8 +165,7 @@ export interface Finding {
   route?: string;
   file?: string;
   selector?: string;
-  primitive?: string;
-  layout?: string;
+  block?: string;
   viewport?: string;
   evidence?: Record<string, unknown>;
   repair?: RepairAction;
@@ -240,12 +176,12 @@ export interface RepairAction {
   priority: number;
   type:
     | "edit-json"
-    | "change-recipe"
-    | "change-primitive"
+    | "change-page"
+    | "change-block"
     | "wrap-overflow"
     | "choose-layout"
     | "reduce-routes"
-    | "add-demo"
+    | "add-block"
     | "fix-template"
     | "fix-css"
     | "manual-review";
@@ -267,6 +203,8 @@ export interface CompileArtifact {
 
 export interface EvalReport {
   draftpineVersion: string;
+  sourceMode: "pages";
+  activeTheme: string;
   status: Status;
   deterministicStatus: "pass" | "fail";
   manualReviewRequired: boolean;

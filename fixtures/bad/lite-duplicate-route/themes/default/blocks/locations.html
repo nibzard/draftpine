@@ -1,0 +1,15 @@
+<section class="dp-section" data-block="locations">
+  <div class="dp-container dp-stack">
+    <div class="dp-section-heading">
+      <h2>{{title}}</h2>
+      {{#body}}<p>{{body}}</p>{{/body}}
+    </div>
+    <div class="dp-location-grid">
+      {{#locations}}<article>
+        <h3>{{city}}</h3>
+        <p>{{address}}</p>
+        <span>{{meta}}</span>
+      </article>{{/locations}}
+    </div>
+  </div>
+</section>

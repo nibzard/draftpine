@@ -1,78 +1,101 @@
 import path from "node:path";
-import type { Project, Recipe, Route } from "../domain/types.js";
+import type { Page, Project, Route } from "../domain/types.js";
 import { relativeAssetPrefix } from "../io/fs.js";
-import { renderTemplate, resolveSectionContent } from "../renderer/template.js";
+import { renderShellTemplate, renderTemplateWithDiagnostics } from "../renderer/template.js";
 
 const themeInit =
   "(function(){var t=localStorage.getItem('draftpine-theme');if(!t)t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;})();";
 
-export function renderRouteHtml(project: Project, route: Route, recipe: Recipe): string {
-  const content = project.content.get(route.id);
-  const assetPrefix = relativeAssetPrefix(route.file);
-  const depth = Math.max(0, route.file.split("/").filter(Boolean).length - 1);
-  const renderedSections = recipe.sections
+export function renderRouteHtml(project: Project, page: Page): { html: string; templateErrors: string[] } {
+  const assetPrefix = relativeAssetPrefix(page.outputFile);
+  const depth = Math.max(0, page.outputFile.split("/").filter(Boolean).length - 1);
+  const templateErrors: string[] = [];
+  const sections = page.sections
     .filter((section) => section.visibility !== "hidden")
     .map((section) => {
-      const primitive = project.registry.primitives.get(section.primitive);
-      const slot = section.slot ?? "main";
-      if (!primitive?.template) return { slot, html: "" };
-      const sectionContent = resolveSectionContent(section, content);
-      const html = renderTemplate(primitive.template, {
-        ...sectionContent,
+      const block = project.theme.blocks.get(section.block);
+      if (!block) return "";
+      const result = renderTemplateWithDiagnostics(block.template, {
+        ...section.props,
+        page,
+        section,
         sectionId: section.id,
-        primitive: section.primitive,
-        layout: section.layout,
-        variant: section.variant ?? "default"
+        block: section.block
       });
-      return { slot, html };
-    });
-
-  const sections = renderPageFrame(project, recipe, renderedSections);
-
-  const description =
-    typeof content?.description === "string"
-      ? content.description
-      : `${route.title} static Draftpine prototype for ${project.workspace.config.project.name}.`;
-
-  const navLinks = project.routes
-    .filter((item) => item.status !== "hidden" && item.status !== "deprecated")
-    .map((item) => {
-      const href = item.path === "/" ? assetPrefix : `${assetPrefix}${item.path.replace(/^\//, "")}`;
-      return `<li><a href="${href}">${escapeText(item.title)}</a></li>`;
+      templateErrors.push(...result.errors.map((error) => `${block.sourceFile}: ${error}`));
+      return result.html;
     })
-    .join("");
+    .filter(Boolean)
+    .join("\n");
 
+  const nav = project.routes
+    .filter((route) => route.type !== "not-found")
+    .map((route) => ({
+      label: route.navLabel ?? route.title,
+      path: route.path,
+      href: routeHref(page.outputFile, route.path),
+      active: route.path === page.path
+    }));
   const themeToggle = project.workspace.config.theme.allowThemeToggle
     ? `<button type="button" class="dp-theme-toggle" data-draftpine-interaction="theme" aria-label="Toggle theme" @click="toggleTheme()"><span x-text="theme === 'dark' ? 'Light' : 'Dark'"></span></button>`
     : "";
+  const context = {
+    project: project.workspace.config.project,
+    page,
+    theme: { name: project.theme.config.name },
+    nav,
+    footer: nav,
+    sections,
+    assetPrefix,
+    depth,
+    themeInit,
+    themeToggle,
+    styleHref: `${assetPrefix}${project.workspace.config.output.assetsDir}/draftpine.css`,
+    runtimeHref: `${assetPrefix}${project.workspace.config.output.assetsDir}/draftpine.js`,
+    picoHref: "https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css",
+    alpineHref: "https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+  };
 
-  const bodyClass = `dp-route dp-route-${toClassName(route.routeType)} dp-route-id-${toClassName(route.id)}`;
+  const html = project.theme.shell
+    ? renderShellTemplate(project.theme.shell, context, ["sections", "themeInit", "themeToggle"])
+    : defaultShell(context);
+  return { html, templateErrors };
+}
 
+export function routeOutputPath(outputDir: string, route: Route): string {
+  return path.join(outputDir, route.file);
+}
+
+function defaultShell(context: Record<string, unknown>): string {
+  const nav = context.nav as Array<{ label: string; href: string; active: boolean }>;
+  const navLinks = nav.map((item) => `<li><a href="${escapeAttr(item.href)}"${item.active ? ' aria-current="page"' : ""}>${escapeText(item.label)}</a></li>`).join("");
+  const page = context.page as Page;
+  const project = context.project as { name: string; description?: string };
+  const depth = Number(context.depth ?? 0);
   return `<!doctype html>
 <html lang="en" x-data="{...createDraftpineShell({depth:${depth}})}" x-init="init()">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
-    <title>${escapeText(route.title)} · ${escapeText(project.workspace.config.project.name)}</title>
-    <meta name="description" content="${escapeText(description)}" />
+    <title>${escapeText(page.title)} · ${escapeText(project.name)}</title>
+    <meta name="description" content="${escapeText(page.description ?? project.description ?? `${page.title} static Draftpine prototype.`)}" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" />
-    <script>${themeInit}</script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
-    <link rel="stylesheet" href="${assetPrefix}assets/draftpine.css?v=2" />
+    <script>${context.themeInit}</script>
+    <link rel="stylesheet" href="${context.picoHref}" />
+    <link rel="stylesheet" href="${context.styleHref}" />
   </head>
-  <body class="${bodyClass}" data-route="${escapeText(route.id)}" data-route-type="${escapeText(route.routeType)}">
+  <body class="dp-route dp-route-${toClassName(page.type)} dp-route-id-${toClassName(page.id)}" data-route="${escapeAttr(page.id)}" data-route-type="${escapeAttr(page.type)}">
     <header class="dp-site-header">
       <nav class="dp-container">
-        <ul><li><strong>${escapeText(project.workspace.config.project.name)}</strong></li></ul>
-        <ul class="dp-site-nav-links" data-draftpine-overflow="allowed">${navLinks}<li>${themeToggle}</li></ul>
+        <ul><li><strong>${escapeText(project.name)}</strong></li></ul>
+        <ul class="dp-site-nav-links" data-draftpine-overflow="allowed">${navLinks}<li>${context.themeToggle}</li></ul>
       </nav>
     </header>
     <main>
-${sections}
+${context.sections}
     </main>
     <footer class="dp-site-footer">
       <div class="dp-container">
@@ -82,42 +105,17 @@ ${sections}
         <p>Generated by Draftpine.</p>
       </div>
     </footer>
-    <script src="${assetPrefix}assets/draftpine.js?v=2"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="${context.runtimeHref}"></script>
+    <script defer src="${context.alpineHref}"></script>
   </body>
 </html>
 `;
 }
 
-export function routeOutputPath(outputDir: string, route: Route): string {
-  return path.join(outputDir, route.file);
-}
-
-type RenderedSection = { slot: string; html: string };
-
-/**
- * Arrange rendered sections into the page. When the recipe declares a
- * `pageLayout`, sections are grouped by their `slot` (default `"main"`) and
- * injected into that layout's named slots (e.g. `{{{main}}}`, `{{{aside}}}`).
- * Otherwise sections stack in order — the original behavior.
- */
-export function renderPageFrame(
-  project: Project,
-  recipe: Recipe,
-  rendered: RenderedSection[]
-): string {
-  const stacked = rendered.map((item) => item.html).filter(Boolean).join("\n");
-  if (!recipe.pageLayout) return stacked;
-
-  const layout = project.registry.layouts.get(recipe.pageLayout);
-  if (!layout?.template) return stacked;
-
-  const slots: Record<string, string> = {};
-  for (const { slot, html } of rendered) {
-    if (!html) continue;
-    slots[slot] = slots[slot] ? `${slots[slot]}\n${html}` : html;
-  }
-  return renderTemplate(layout.template, slots);
+function routeHref(fromFile: string, targetPath: string): string {
+  const prefix = relativeAssetPrefix(fromFile);
+  if (targetPath === "/") return prefix;
+  return `${prefix}${targetPath.replace(/^\//, "")}`;
 }
 
 function escapeText(value: unknown): string {
@@ -126,6 +124,10 @@ function escapeText(value: unknown): string {
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;");
+}
+
+function escapeAttr(value: unknown): string {
+  return escapeText(value);
 }
 
 function toClassName(value: unknown): string {

@@ -1,0 +1,16 @@
+<section class="dp-section" data-block="resource-list">
+  <div class="dp-container dp-stack">
+    <div class="dp-section-heading">
+      <h2>{{title}}</h2>
+      {{#body}}<p>{{body}}</p>{{/body}}
+    </div>
+    <div class="dp-resource-list">
+      {{#items}}<article>
+        <span>{{type}}</span>
+        <h3>{{title}}</h3>
+        <p>{{body}}</p>
+        {{#href}}<a href="{{href}}">{{action}}</a>{{/href}}
+      </article>{{/items}}
+    </div>
+  </div>
+</section>

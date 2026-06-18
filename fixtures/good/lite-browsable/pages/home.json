@@ -1,0 +1,291 @@
+{
+  "schemaVersion": "3.0",
+  "id": "home",
+  "path": "/",
+  "title": "Home",
+  "type": "home",
+  "description": "Draftpine V3 public website prototype.",
+  "audience": "Website team",
+  "userGoal": "Review a public-facing website starter and choose the next route.",
+  "primaryAction": {
+    "label": "View pricing",
+    "href": "./pricing/"
+  },
+  "priority": 1,
+  "status": "ready",
+  "sections": [
+    {
+      "id": "hero",
+      "block": "hero",
+      "props": {
+        "eyebrow": "Draftpine v3",
+        "headline": "Public website prototypes without internal tool clutter.",
+        "body": "A compact static website starter with reusable blocks for landing pages, pricing, about pages, contact, proof, content, and conversion.",
+        "primaryAction": "View pricing",
+        "primaryHref": "./pricing/",
+        "secondaryAction": "Contact sales",
+        "secondaryHref": "./contact/"
+      }
+    },
+    {
+      "id": "banner",
+      "block": "banner",
+      "props": {
+        "label": "Website kit",
+        "body": "The default block range now focuses on public-facing SaaS, agency, product, and content websites.",
+        "action": "See about",
+        "href": "./about/"
+      }
+    },
+    {
+      "id": "logo-cloud",
+      "block": "logo-cloud",
+      "props": {
+        "title": "Familiar public-site proof patterns",
+        "body": "Use neutral logo rows for customers, partners, integrations, press, or internal credibility without decorative noise.",
+        "logos": [
+          { "mark": "VC", "name": "Vercel" },
+          { "mark": "CL", "name": "Cal.com" },
+          { "mark": "LN", "name": "Linear" },
+          { "mark": "SB", "name": "Supabase" }
+        ]
+      }
+    },
+    {
+      "id": "metrics",
+      "block": "metrics",
+      "props": {
+        "title": "Website coverage",
+        "items": [
+          { "label": "Public blocks", "value": "30+" },
+          { "label": "Starter routes", "value": "5" },
+          { "label": "Runtime", "value": "Static" }
+        ]
+      }
+    },
+    {
+      "id": "section-header",
+      "block": "section-header",
+      "props": {
+        "eyebrow": "Block library",
+        "title": "Everything a public website needs.",
+        "body": "The system covers conversion, trust, pricing, content, company, contact, and utility routes.",
+        "action": "Browse contact",
+        "href": "./contact/"
+      }
+    },
+    {
+      "id": "feature-icons",
+      "block": "feature-icons",
+      "props": {
+        "eyebrow": "Core sections",
+        "title": "Distinct blocks for distinct website jobs",
+        "body": "Avoid one repeated card pattern. Each section carries a different public-site role.",
+        "items": [
+          { "icon": "CV", "title": "Conversion", "body": "Hero, CTA, banner, newsletter, contact, and pricing sections." },
+          { "icon": "TR", "title": "Trust", "body": "Logo clouds, social proof, testimonials, stats, and case-study summaries." },
+          { "icon": "CT", "title": "Content", "body": "Article, rich text, resource lists, steps, values, and team sections." }
+        ]
+      }
+    },
+    {
+      "id": "feature-tabs",
+      "block": "feature-tabs",
+      "props": {
+        "eyebrow": "Page patterns",
+        "title": "Prototype the common public page flow",
+        "body": "Use tabbed sections to compare content angles while keeping the first pass compact.",
+        "tabs": [
+          { "label": "Landing", "kicker": "Homepage", "title": "Lead with value and proof", "body": "Combine hero, proof, feature, CTA, and FAQ sections for first-impression review." },
+          { "label": "Company", "kicker": "About", "title": "Show credibility with public pages", "body": "Use values, team, resources, and rich text to shape public company pages." },
+          { "label": "Conversion", "kicker": "Pricing", "title": "Answer decision questions", "body": "Pair pricing, comparison, FAQ, testimonial, and contact blocks." }
+        ]
+      }
+    },
+    {
+      "id": "showcase",
+      "block": "feature-showcase",
+      "props": {
+        "eyebrow": "Website-first",
+        "title": "A product artifact can still support a public page",
+        "body": "Public pages need concrete proof, but the proof should serve the buying story.",
+        "items": [
+          { "title": "No app shell required", "body": "Default routes are Home, Pricing, About, Contact, and 404." },
+          { "title": "Content stays editable", "body": "Page JSON owns copy and sample data for each public section." },
+          { "title": "Static output stays simple", "body": "Generated HTML remains portable and GitHub Pages friendly." }
+        ],
+        "artifactTitle": "Public Route Map",
+        "artifactStatus": "Ready",
+        "rows": [
+          { "label": "Home", "value": "Landing page" },
+          { "label": "Pricing", "value": "Decision page" },
+          { "label": "About", "value": "Company page" },
+          { "label": "Contact", "value": "Lead capture" }
+        ]
+      }
+    },
+    {
+      "id": "social-proof",
+      "block": "social-proof",
+      "props": {
+        "eyebrow": "Proof",
+        "title": "Use quantified trust without visual noise",
+        "body": "A public-facing prototype should make credibility easy to scan in the first review.",
+        "stats": [
+          { "value": "12", "label": "website section types" },
+          { "value": "5", "label": "starter routes" },
+          { "value": "0", "label": "backend dependencies" }
+        ]
+      }
+    },
+    {
+      "id": "testimonial",
+      "block": "testimonial",
+      "props": {
+        "quote": "The starter now feels like a real public website system.",
+        "initials": "DP",
+        "author": "Draftpine reviewer",
+        "role": "Website quality pass"
+      }
+    },
+    {
+      "id": "testimonial-grid",
+      "block": "testimonial-grid",
+      "props": {
+        "title": "Public proof variants",
+        "body": "Use single quotes for emphasis or grids when the page needs multiple audience signals.",
+        "items": [
+          { "quote": "We can review the homepage story before touching production code.", "initials": "PM", "author": "Product lead", "role": "SaaS team" },
+          { "quote": "The pricing and FAQ sections make decision pages easier to critique.", "initials": "GT", "author": "Growth lead", "role": "Marketing team" },
+          { "quote": "The about page blocks keep company content structured.", "initials": "BR", "author": "Brand lead", "role": "Studio team" }
+        ]
+      }
+    },
+    {
+      "id": "integrations",
+      "block": "integrations-grid",
+      "props": {
+        "title": "Integration and ecosystem grids",
+        "body": "Use this for partners, tools, platforms, marketplaces, or public compatibility pages.",
+        "items": [
+          { "mark": "GH", "name": "GitHub", "body": "Source-linked prototypes and public deploy previews." },
+          { "mark": "NP", "name": "npm", "body": "Package and command documentation examples." },
+          { "mark": "GP", "name": "Pages", "body": "Static hosting with relative assets." }
+        ]
+      }
+    },
+    {
+      "id": "resources",
+      "block": "resource-list",
+      "props": {
+        "title": "Content and resource blocks",
+        "body": "Round out public websites with articles, guides, changelogs, and resource cards.",
+        "items": [
+          { "type": "Guide", "title": "Landing page review checklist", "body": "Evaluate hierarchy, proof, offer, FAQ, and conversion paths.", "action": "Read guide", "href": "#" },
+          { "type": "Changelog", "title": "Website block system", "body": "New public-facing sections for company and marketing sites.", "action": "View update", "href": "#" },
+          { "type": "Template", "title": "Pricing page starter", "body": "Plans, comparison, proof, FAQ, and contact handoff.", "action": "Open pricing", "href": "./pricing/" }
+        ]
+      }
+    },
+    {
+      "id": "case-study",
+      "block": "case-study",
+      "props": {
+        "eyebrow": "Customer story",
+        "title": "Launch teams can review the public story first",
+        "body": "Use a featured case-study block when a homepage needs one concrete customer narrative before the final CTA.",
+        "action": "Read story",
+        "href": "./resources/",
+        "stats": [
+          { "label": "Routes reviewed", "value": "5" },
+          { "label": "Cycles saved", "value": "3" },
+          { "label": "Backend calls", "value": "0" }
+        ]
+      }
+    },
+    {
+      "id": "case-study-grid",
+      "block": "case-study-grid",
+      "props": {
+        "title": "Case study grids",
+        "body": "Use grids when the page needs multiple public examples without full long-form stories.",
+        "items": [
+          { "company": "SaaS", "title": "Pricing review", "body": "A team aligned on plans, FAQ, and contact routing before implementation.", "result": "2 fewer review cycles" },
+          { "company": "Studio", "title": "Launch page", "body": "A service business tested offer, proof, and inquiry flow in a static prototype.", "result": "1 clearer CTA" },
+          { "company": "Content", "title": "Resource hub", "body": "A publisher mapped article and guide cards before writing final copy.", "result": "6 reusable cards" }
+        ]
+      }
+    },
+    {
+      "id": "press",
+      "block": "press-logos",
+      "props": {
+        "title": "Press and quote strips",
+        "body": "Short external proof works best when it is compact and scannable.",
+        "items": [
+          { "source": "Design Weekly", "quote": "A focused static pass for public-site reviews." },
+          { "source": "Frontend Notes", "quote": "Plain HTML output keeps the prototype easy to inspect." },
+          { "source": "Launch Journal", "quote": "The route model makes sitemap conversations concrete." }
+        ]
+      }
+    },
+    {
+      "id": "steps",
+      "block": "steps",
+      "props": {
+        "title": "From prompt to public prototype",
+        "body": "Keep the workflow oriented around website review, not internal tool state.",
+        "items": [
+          { "step": "1", "title": "Describe the offer", "body": "Name the audience, promise, proof, and primary conversion action." },
+          { "step": "2", "title": "Choose public blocks", "body": "Assemble hero, proof, features, pricing, FAQ, and contact." },
+          { "step": "3", "title": "Review static routes", "body": "Generate the site, inspect desktop and mobile, then iterate on content." }
+        ]
+      }
+    },
+    {
+      "id": "faq",
+      "block": "faq",
+      "props": {
+        "title": "Public website starter questions",
+        "body": "These are the decisions a website prototype should clarify early.",
+        "items": [
+          { "question": "Can I still build app screens?", "answer": "Yes. Generic app-like blocks remain available, but the default starter focuses on public websites." },
+          { "question": "What routes should a public starter include?", "answer": "Home, Pricing, About, Contact, and a 404 route cover most website review flows." },
+          { "question": "Can content-heavy pages be represented?", "answer": "Yes. Article, rich text, resources, values, team, and steps cover public content pages." }
+        ]
+      }
+    },
+    {
+      "id": "cta-split",
+      "block": "cta-split",
+      "props": {
+        "title": "Need to map more public pages?",
+        "body": "Add resources, careers, changelog, legal, or customer story routes when the website needs them.",
+        "primaryAction": "Open resources",
+        "primaryHref": "./resources/",
+        "secondaryAction": "Contact sales",
+        "secondaryHref": "./contact/"
+      }
+    },
+    {
+      "id": "newsletter",
+      "block": "newsletter",
+      "props": {
+        "title": "Prototype the public site before the build",
+        "body": "Use the website-first starter as a shared review surface for product, design, and marketing.",
+        "placeholder": "team@example.com",
+        "action": "Request Review"
+      }
+    },
+    {
+      "id": "callout",
+      "block": "callout",
+      "props": {
+        "title": "Start with a public page, then add only what the site needs.",
+        "body": "The default block range is broad enough for modern product sites without pulling the prototype toward internal tools.",
+        "action": "Open contact",
+        "href": "./contact/"
+      }
+    }
+  ]
+}

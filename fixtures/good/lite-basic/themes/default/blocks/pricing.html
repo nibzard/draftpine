@@ -1,0 +1,11 @@
+<section class="dp-section" data-block="pricing">
+  <div class="dp-container dp-grid">
+    {{#plans}}<article class="dp-price">
+      <h2>{{name}}</h2>
+      <strong>{{price}}</strong>
+      <p>{{description}}</p>
+      <a href="{{href}}" role="button" data-draftpine-action="primary">{{action}}</a>
+      <ul>{{#features}}<li>{{value}}</li>{{/features}}</ul>
+    </article>{{/plans}}
+  </div>
+</section>

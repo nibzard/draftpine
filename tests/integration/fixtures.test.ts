@@ -1,4 +1,5 @@
 import path from "node:path";
+import { readFile } from "node:fs/promises";
 import { afterEach, describe, expect, it } from "vitest";
 import { evalProject } from "../../src/eval/browserEval.js";
 
@@ -9,18 +10,53 @@ afterEach(() => {
   process.chdir(originalCwd);
 });
 
-// Each bad fixture must fail strict eval for exactly the expected hard gate.
-// good/basic and fixtures/bad/mobile-overflow are covered by cli.test.ts.
 const badFixtures: Array<{ dir: string; finding: string }> = [
-  { dir: "fixtures/bad/route-explosion", finding: "route.budgetExceeded" },
-  { dir: "fixtures/bad/generic-card-dump", finding: "route.missingRequiredPrimitive" },
-  { dir: "fixtures/bad/unlabeled-controls", finding: "accessibility.unlabeledControl" },
-  { dir: "fixtures/bad/alpine-runtime-error", finding: "runtime.consoleError" }
+  { dir: "fixtures/bad/lite-unknown-block", finding: "theme.unknownBlock" },
+  { dir: "fixtures/bad/lite-duplicate-route", finding: "source.duplicatePagePath" },
+  { dir: "fixtures/bad/lite-unsafe-theme", finding: "theme.scriptTag" },
+  { dir: "fixtures/bad/lite-noop-interaction", finding: "runtime.themeToggleNoop" }
 ];
 
-const goodFixtures = ["fixtures/good/pricing-basic", "fixtures/good/docs-quickstart"];
+const goodFixtures = ["fixtures/good/lite-basic", "fixtures/good/lite-browsable", "fixtures/good/lite-custom-block"];
+const defaultBlocks = [
+  "hero",
+  "banner",
+  "logo-cloud",
+  "metrics",
+  "section-header",
+  "feature-icons",
+  "feature-tabs",
+  "feature-showcase",
+  "social-proof",
+  "testimonial",
+  "testimonial-grid",
+  "case-study",
+  "case-study-grid",
+  "press-logos",
+  "integrations-grid",
+  "resource-list",
+  "steps",
+  "cta-split",
+  "faq",
+  "newsletter",
+  "callout",
+  "pricing",
+  "comparison",
+  "values",
+  "team",
+  "careers",
+  "job-list",
+  "rich-text",
+  "article",
+  "blog-list",
+  "author-bio",
+  "changelog",
+  "contact",
+  "locations",
+  "not-found"
+];
 
-describe("regression corpus — bad fixtures fail for the expected reason", () => {
+describe("v3 regression corpus — bad fixtures fail for the expected reason", () => {
   for (const { dir, finding } of badFixtures) {
     it(`${dir} -> ${finding}`, async () => {
       process.chdir(path.join(repoRoot, dir));
@@ -31,7 +67,7 @@ describe("regression corpus — bad fixtures fail for the expected reason", () =
   }
 });
 
-describe("regression corpus — good fixtures pass strict eval", () => {
+describe("v3 regression corpus — good fixtures pass strict eval", () => {
   for (const dir of goodFixtures) {
     it(`${dir} passes with zero errors`, async () => {
       process.chdir(path.join(repoRoot, dir));
@@ -40,4 +76,13 @@ describe("regression corpus — good fixtures pass strict eval", () => {
       expect(report.deterministicStatus).toBe("pass");
     });
   }
+
+  it("lite-browsable renders every default block in the regression corpus", async () => {
+    const fixtureRoot = path.join(repoRoot, "fixtures/good/lite-browsable");
+    process.chdir(fixtureRoot);
+    const report = await evalProject({ strict: true });
+    const manifest = JSON.parse(await readFile(path.join(fixtureRoot, "prototype/draftpine.manifest.json"), "utf8")) as { blocksUsed: string[] };
+    expect(report.deterministicStatus).toBe("pass");
+    expect(new Set(manifest.blocksUsed)).toEqual(new Set(defaultBlocks));
+  });
 });

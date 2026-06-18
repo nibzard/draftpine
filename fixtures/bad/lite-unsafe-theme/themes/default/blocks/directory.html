@@ -1,0 +1,16 @@
+<section class="dp-section" data-block="directory" x-data="draftpineFilter()" data-draftpine-interaction="filter">
+  <div class="dp-container dp-stack">
+    <div class="dp-directory-tools">
+      <h2>{{title}}</h2>
+      <label>Filter <input x-model="query" placeholder="Search records" /></label>
+    </div>
+    <ul class="dp-directory-list">
+      {{#items}}<li x-show="matches('{{title}} {{body}}')">
+        <span class="dp-badge">Available</span>
+        <strong>{{title}}</strong>
+        <p>{{body}}</p>
+      </li>{{/items}}
+    </ul>
+    {{^items}}<p data-draftpine-state="empty">No items yet.</p>{{/items}}
+  </div>
+</section>

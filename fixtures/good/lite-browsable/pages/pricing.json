@@ -1,0 +1,91 @@
+{
+  "schemaVersion": "3.0",
+  "id": "pricing",
+  "path": "/pricing/",
+  "title": "Pricing",
+  "type": "pricing",
+  "description": "Public pricing page for Draftpine.",
+  "primaryAction": {
+    "label": "Start with Pro",
+    "href": "#"
+  },
+  "priority": 2,
+  "status": "ready",
+  "sections": [
+    {
+      "id": "hero",
+      "block": "hero",
+      "props": {
+        "eyebrow": "Pricing",
+        "headline": "Choose the right website prototype path.",
+        "body": "Public pricing pages need clear plans, direct comparison, proof, FAQ, and a contact handoff.",
+        "primaryAction": "Start with Pro",
+        "primaryHref": "#",
+        "secondaryAction": "Contact sales",
+        "secondaryHref": "../contact/"
+      }
+    },
+    {
+      "id": "plans",
+      "block": "pricing",
+      "props": {
+        "plans": [
+          { "name": "Explore", "price": "$0", "description": "One public page.", "action": "Start", "href": "#", "features": ["Homepage draft", "Default website theme", "Static output"] },
+          { "name": "Pro", "price": "$29", "description": "Linked public site.", "action": "Start with Pro", "href": "#", "features": ["Multiple public routes", "Strict browser eval", "Screenshot reports"] },
+          { "name": "Studio", "price": "$99", "description": "Custom website system.", "action": "Contact sales", "href": "../contact/", "features": ["Custom public blocks", "Shared theme CSS", "Review-ready routes"] }
+        ]
+      }
+    },
+    {
+      "id": "comparison",
+      "block": "comparison",
+      "props": {
+        "title": "Plan comparison",
+        "columns": ["Capability", "Explore", "Pro", "Studio"],
+        "rows": [
+          ["Public routes", "1", "5", "Custom"],
+          ["Pricing and FAQ", "Manual", "Included", "Included"],
+          ["Custom website blocks", "No", "Limited", "Included"],
+          ["Strict eval", "Manual", "Included", "Included"]
+        ]
+      }
+    },
+    {
+      "id": "social-proof",
+      "block": "social-proof",
+      "props": {
+        "eyebrow": "Decision support",
+        "title": "A pricing page should answer risk fast",
+        "body": "Use stats to show scope, confidence, or operational constraints before a visitor reaches FAQ.",
+        "stats": [
+          { "value": "5", "label": "starter public routes" },
+          { "value": "30+", "label": "website blocks" },
+          { "value": "AA", "label": "contrast target" }
+        ]
+      }
+    },
+    {
+      "id": "faq",
+      "block": "faq",
+      "props": {
+        "title": "Pricing questions",
+        "body": "Keep objections close to the decision point.",
+        "items": [
+          { "question": "Is the pricing real?", "answer": "No. It is sample content shaped like a real public pricing page." },
+          { "question": "Can plans link to contact?", "answer": "Yes. Static links route to the contact page or placeholder actions." },
+          { "question": "Can comparison rows change?", "answer": "Yes. Edit pages/pricing.json and regenerate the prototype." }
+        ]
+      }
+    },
+    {
+      "id": "callout",
+      "block": "callout",
+      "props": {
+        "title": "Need a custom public site structure?",
+        "body": "Use the contact page to model sales handoff, project intake, or launch planning.",
+        "action": "Contact sales",
+        "href": "../contact/"
+      }
+    }
+  ]
+}

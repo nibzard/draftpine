@@ -1,0 +1,73 @@
+{
+  "schemaVersion": "3.0",
+  "id": "contact",
+  "path": "/contact/",
+  "title": "Contact",
+  "type": "contact",
+  "description": "Public contact page for Draftpine.",
+  "primaryAction": {
+    "label": "Send request",
+    "href": "#"
+  },
+  "priority": 4,
+  "status": "ready",
+  "sections": [
+    {
+      "id": "hero",
+      "block": "hero",
+      "props": {
+        "eyebrow": "Contact",
+        "headline": "Talk through the public site you want to prototype.",
+        "body": "Use this page to model lead capture, sales handoff, support routing, or project inquiry flows.",
+        "primaryAction": "Send request",
+        "primaryHref": "#",
+        "secondaryAction": "Back home",
+        "secondaryHref": "../"
+      }
+    },
+    {
+      "id": "contact",
+      "block": "contact",
+      "props": {
+        "eyebrow": "Contact form",
+        "title": "Tell us what should be on the site",
+        "body": "The form block keeps public lead capture separate from generic forms.",
+        "items": [
+          { "label": "Response", "value": "Within one business day" },
+          { "label": "Best for", "value": "Website, pricing, about, and launch pages" },
+          { "label": "Output", "value": "Static prototype routes" }
+        ],
+        "fields": [
+          { "label": "Name", "name": "name", "type": "text", "placeholder": "Alex Morgan" },
+          { "label": "Email", "name": "email", "type": "email", "placeholder": "alex@example.com" },
+          { "label": "Website goal", "name": "goal", "type": "text", "placeholder": "Launch a new pricing page" }
+        ],
+        "submitLabel": "Send request"
+      }
+    },
+    {
+      "id": "faq",
+      "block": "faq",
+      "props": {
+        "title": "Contact questions",
+        "items": [
+          { "question": "Does this form submit?", "answer": "No. Draftpine prototypes stay static, so the form models layout and copy only." },
+          { "question": "Can this become a sales page?", "answer": "Yes. Pair contact with pricing, FAQ, testimonial, and social proof blocks." }
+        ]
+      }
+    },
+    {
+      "id": "locations",
+      "block": "locations",
+      "props": {
+        "title": "Where public requests land",
+        "body": "Use locations for offices, service regions, event pages, or support coverage.",
+        "locations": [
+          { "city": "Remote", "address": "Review teams across product, design, and marketing.", "meta": "Primary" },
+          { "city": "Launch desk", "address": "Static website prototypes and route planning.", "meta": "Website support" },
+          { "city": "Partner studio", "address": "Custom public-site block systems and audits.", "meta": "By request" }
+        ]
+      }
+    }
+  ]
+}

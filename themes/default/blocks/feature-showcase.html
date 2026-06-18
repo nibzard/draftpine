@@ -1,0 +1,29 @@
+<section class="dp-section" data-block="feature-showcase">
+  <div class="dp-container">
+    <div class="dp-showcase">
+      <div class="dp-stack">
+        {{#eyebrow}}<span class="dp-badge">{{eyebrow}}</span>{{/eyebrow}}
+        <h2>{{title}}</h2>
+        {{#body}}<p>{{body}}</p>{{/body}}
+        <ul class="dp-check-list">
+          {{#items}}<li>
+            <strong>{{title}}</strong>
+            <span>{{body}}</span>
+          </li>{{/items}}
+        </ul>
+      </div>
+      <div class="dp-showcase-panel" aria-label="{{artifactTitle}}">
+        <div class="dp-artifact-header">
+          <strong>{{artifactTitle}}</strong>
+          <span class="dp-badge dp-badge-live">{{artifactStatus}}</span>
+        </div>
+        <div class="dp-showcase-body">
+          {{#rows}}<div class="dp-showcase-row">
+            <span>{{label}}</span>
+            <strong>{{value}}</strong>
+          </div>{{/rows}}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

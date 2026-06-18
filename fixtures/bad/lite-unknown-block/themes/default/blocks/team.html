@@ -1,0 +1,15 @@
+<section class="dp-section" data-block="team">
+  <div class="dp-container dp-stack">
+    <div class="dp-section-heading">
+      <h2>{{title}}</h2>
+      {{#body}}<p>{{body}}</p>{{/body}}
+    </div>
+    <div class="dp-team-grid">
+      {{#people}}<article>
+        <span class="dp-avatar">{{initials}}</span>
+        <h3>{{name}}</h3>
+        <p>{{role}}</p>
+      </article>{{/people}}
+    </div>
+  </div>
+</section>

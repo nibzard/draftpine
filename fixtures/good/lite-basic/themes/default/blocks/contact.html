@@ -1,0 +1,18 @@
+<section class="dp-section" data-block="contact">
+  <div class="dp-container">
+    <div class="dp-contact">
+      <div class="dp-stack">
+        {{#eyebrow}}<span class="dp-badge">{{eyebrow}}</span>{{/eyebrow}}
+        <h2>{{title}}</h2>
+        {{#body}}<p>{{body}}</p>{{/body}}
+        <ul class="dp-contact-list">
+          {{#items}}<li><strong>{{label}}</strong><span>{{value}}</span></li>{{/items}}
+        </ul>
+      </div>
+      <form class="dp-contact-form">
+        {{#fields}}<label>{{label}}<input type="{{type}}" name="{{name}}" placeholder="{{placeholder}}" /></label>{{/fields}}
+        <button type="button" data-draftpine-action="primary">{{submitLabel}}</button>
+      </form>
+    </div>
+  </div>
+</section>

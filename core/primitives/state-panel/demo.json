@@ -1,9 +1,0 @@
-{
-  "state": "success",
-  "title": "statePanel demo",
-  "description": "Demo content.",
-  "action": {
-    "label": "Continue",
-    "href": "#"
-  }
-}

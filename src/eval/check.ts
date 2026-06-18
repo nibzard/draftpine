@@ -8,31 +8,40 @@ import { validateProjectContracts } from "../compiler/compiler.js";
 export async function check(configPath = "draftpine.config.json", scope: "source" | "generated" | "all" = "all"): Promise<{ project: Project; findings: Finding[] }> {
   const project = await loadProject(configPath);
   const findings = [...project.findings, ...validateProjectContracts(project)];
-  findings.push(...(await checkProjectOverrides(project)));
+  findings.push(...(await checkThemeSafety(project)));
   if (scope !== "source") {
     findings.push(...(await checkGenerated(project)));
   }
-  findings.push(...(await checkExtensionFixtures(project)));
   return { project, findings };
 }
 
-async function checkProjectOverrides(project: Project): Promise<Finding[]> {
-  const overrides = project.workspace.config.source.overrides;
-  if (!overrides) return [];
-  const overridesPath = path.resolve(project.workspace.root, overrides);
-  if (!(await pathExists(overridesPath))) {
-    return [
-      finding({
-        id: "source.missingOverrides",
-        severity: "error",
-        category: "source",
-        file: overrides,
-        message: `Configured project CSS overrides file ${overrides} is missing.`
-      })
-    ];
+async function checkThemeSafety(project: Project): Promise<Finding[]> {
+  const findings: Finding[] = [];
+  const htmlFiles: Array<{ file: string; html: string; block?: string }> = [
+    ...(project.theme.shellFile ? [{ file: project.theme.shellFile, html: project.theme.shell ?? "" }] : []),
+    ...[...project.theme.blocks.values()].map((block) => ({ file: block.sourceFile, html: block.template, block: block.name }))
+  ];
+
+  for (const item of htmlFiles) {
+    if (item.block && /<script[\s>]/i.test(item.html)) {
+      findings.push(themeFinding("theme.scriptTag", item.file, "Theme shell and blocks must not include script tags.", item.block));
+    }
+    if (/\son[a-z]+\s*=/i.test(item.html)) {
+      findings.push(themeFinding("theme.inlineEventHandler", item.file, "Inline event handlers are disallowed in theme HTML.", item.block));
+    }
+    if (/(?:href|src)=["']\/(?!\/)/i.test(item.html)) {
+      findings.push(themeFinding("theme.rootAbsoluteLocalPath", item.file, "Theme HTML must use relative local paths for GitHub Pages safety.", item.block));
+    }
+    if (/\bfetch\s*\(/i.test(item.html)) {
+      findings.push(themeFinding("theme.remoteFetch", item.file, "Theme HTML must not call fetch or remote APIs.", item.block));
+    }
   }
-  const css = await readText(overridesPath);
-  return checkCssRestrictions(project, css, overridesPath, "override", "project.overrides");
+
+  if (project.theme.styles) {
+    findings.push(...checkCssRestrictions(project, project.theme.styles, project.theme.stylesFile ?? project.theme.sourceFile));
+  }
+
+  return findings;
 }
 
 async function checkGenerated(project: Project): Promise<Finding[]> {
@@ -105,11 +114,22 @@ async function checkGenerated(project: Project): Promise<Finding[]> {
           })
         );
       }
+      if (/\{\{[#/^!]?\s*[\w.]+\s*}}/.test(html)) {
+        findings.push(
+          finding({
+            id: "content.unresolvedTemplateMarker",
+            severity: "error",
+            category: "content",
+            file: relative,
+            message: "Generated output contains unresolved template markers."
+          })
+        );
+      }
       findings.push(...(await checkLocalLinks(project, file, html)));
     }
   }
 
-  for (const route of project.routes.filter((item) => item.status !== "hidden" && item.status !== "deprecated")) {
+  for (const route of project.routes) {
     const routeFile = path.join(outputDir, route.file);
     if (!(await pathExists(routeFile))) {
       findings.push(
@@ -119,7 +139,8 @@ async function checkGenerated(project: Project): Promise<Finding[]> {
           category: "compile",
           route: route.path,
           file: toPosix(path.relative(project.workspace.root, routeFile)),
-          message: `Route file for ${route.path} is missing.`
+          message: `Route file for ${route.path} is missing.`,
+          repair: { priority: 1, type: "edit-json", file: route.sourceFile, message: "Run generate and fix any source errors for this page." }
         })
       );
     }
@@ -155,84 +176,40 @@ async function checkLocalLinks(project: Project, htmlFile: string, html: string)
   return findings;
 }
 
-async function checkExtensionFixtures(project: Project): Promise<Finding[]> {
-  const findings: Finding[] = [];
-  for (const primitive of project.registry.primitives.values()) {
-    if (primitive.manifest.namespace === "core") continue;
-    for (const required of ["demo.json", "eval.json", "README.md", "template.html", "styles.css"]) {
-      if (!(await pathExists(path.join(primitive.dir, required)))) {
-        findings.push(
-          finding({
-            id: "extension.missingPrimitiveFixture",
-            severity: "error",
-            category: "primitive",
-            primitive: primitive.id,
-            file: toPosix(path.relative(project.workspace.root, path.join(primitive.dir, required))),
-            message: `Primitive extension ${primitive.id} is missing ${required}.`
-          })
-        );
-      }
-    }
-    if (primitive.styles) {
-      findings.push(...checkCssRestrictions(project, primitive.styles, primitive.dir, "primitive", primitive.id));
-    }
-  }
-  for (const layout of project.registry.layouts.values()) {
-    if (layout.manifest.namespace === "core") continue;
-    for (const required of ["demo.json", "eval.json", "README.md", "template.html", "styles.css"]) {
-      if (!(await pathExists(path.join(layout.dir, required)))) {
-        findings.push(
-          finding({
-            id: "extension.missingLayoutFixture",
-            severity: "error",
-            category: "layout",
-            layout: layout.id,
-            file: toPosix(path.relative(project.workspace.root, path.join(layout.dir, required))),
-            message: `Layout extension ${layout.id} is missing ${required}.`
-          })
-        );
-      }
-    }
-    if (layout.styles) {
-      findings.push(...checkCssRestrictions(project, layout.styles, layout.dir, "layout", layout.id));
-    }
-  }
-  return findings;
-}
-
-function checkCssRestrictions(project: Project, css: string, fileOrDir: string, category: "primitive" | "layout" | "override", id: string): Finding[] {
+function checkCssRestrictions(project: Project, css: string, file: string): Finding[] {
   const findings: Finding[] = [];
   const rules = [
-    { id: "css.width100vw", pattern: /width\s*:\s*100vw\b/, message: "CSS must not use width: 100vw because it commonly creates mobile overflow." },
-    { id: "css.negativeMargin", pattern: /margin(?:-[\w-]+)?\s*:\s*-[\d.]/, message: "CSS must not use negative margins without an explicit exception." },
-    { id: "css.fixedWideWidth", pattern: /(^|[;{\s])width\s*:\s*(?:[4-9]\d{2,}|\d{4,})px\b/, message: "CSS must not use fixed widths above mobile viewport without max-width containment." }
+    { id: "css.width100vw", pattern: /width\s*:\s*100vw\b/, message: "Theme CSS must not use width: 100vw because it commonly creates mobile overflow." },
+    { id: "css.negativeMargin", pattern: /margin(?:-[\w-]+)?\s*:\s*-[\d.]/, message: "Theme CSS must not use negative margins without an explicit exception." },
+    { id: "css.fixedWideWidth", pattern: /(^|[;{\s])width\s*:\s*(?:[4-9]\d{2,}|\d{4,})px\b/, message: "Theme CSS must not use fixed widths above mobile viewport without max-width containment." },
+    { id: "css.rootAbsoluteAsset", pattern: /url\(["']?\/(?!\/)/, message: "Theme CSS must not use root-absolute local asset URLs." }
   ];
-  if (category === "primitive") {
-    rules.push({ id: "css.rawGridTemplateColumns", pattern: /grid-template-columns\s*:/, message: "Primitive CSS must use layout primitives instead of raw grid-template-columns." });
-  }
-  if (category === "override") {
-    rules.push({ id: "css.overrideGlobalElement", pattern: /(^|})\s*(body|html|section|article|main|header|footer)\s*\{/m, message: "Project override CSS must target Draftpine classes or data attributes, not global elements." });
-  }
-  const file = category === "override" ? fileOrDir : path.join(fileOrDir, "styles.css");
   for (const rule of rules) {
     if (rule.pattern.test(css)) {
       findings.push(
         finding({
           id: rule.id,
           severity: "error",
-          category: category === "override" ? "compile" : category,
-          file: toPosix(path.relative(project.workspace.root, file)),
-          ...(category === "override" ? {} : { [category]: id }),
+          category: "theme",
+          file,
           message: rule.message,
-          repair: {
-            priority: 2,
-            type: "fix-css",
-            file: toPosix(path.relative(project.workspace.root, file)),
-            message: "Move spatial behavior into a layout primitive or add a scoped exception when truly necessary."
-          }
+          repair: { priority: 2, type: "fix-css", file, message: "Constrain the CSS with responsive max-widths and relative assets." }
         })
       );
     }
   }
+  void project;
   return findings;
+}
+
+function themeFinding(id: string, file: string, message: string, block?: string): Finding {
+  return finding({
+    id,
+    severity: "error",
+    category: "theme",
+    file,
+    block,
+    message,
+    repair: { priority: 1, type: "fix-template", file, message: "Edit this theme file to use static, relative, declarative HTML." }
+  });
 }

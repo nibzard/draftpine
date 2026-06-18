@@ -1,9 +1,0 @@
-{
-  "schemaVersion": "2.0",
-  "name": "stepper",
-  "namespace": "core",
-  "description": "Progressive flow layout for checkout and onboarding.",
-  "parameters": {},
-  "responsive": { "mobile": "stack" },
-  "overflow": "forbidden"
-}

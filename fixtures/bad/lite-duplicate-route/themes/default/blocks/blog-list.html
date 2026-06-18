@@ -1,0 +1,16 @@
+<section class="dp-section" data-block="blog-list">
+  <div class="dp-container dp-stack">
+    <div class="dp-section-heading">
+      <h2>{{title}}</h2>
+      {{#body}}<p>{{body}}</p>{{/body}}
+    </div>
+    <div class="dp-blog-list">
+      {{#posts}}<article>
+        <span>{{category}}</span>
+        <h3>{{title}}</h3>
+        <p>{{excerpt}}</p>
+        <a href="{{href}}">{{action}}</a>
+      </article>{{/posts}}
+    </div>
+  </div>
+</section>

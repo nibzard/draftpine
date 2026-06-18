@@ -64,7 +64,9 @@ export async function evalProject(options: { configPath?: string; strict?: boole
   const deterministicStatus = errors > 0 ? "fail" : "pass";
   const manualReviewRequired = errors === 0 && project.workspace.config.eval.aiReview === "manual";
   const report: EvalReport = {
-    draftpineVersion: "2.0.0",
+    draftpineVersion: "3.0.0",
+    sourceMode: "pages",
+    activeTheme: project.theme.id,
     status: errors > 0 ? "fail" : manualReviewRequired ? "pass-with-review" : "pass",
     deterministicStatus,
     manualReviewRequired,
@@ -172,8 +174,8 @@ async function evalRoute(project: Project, browser: Browser, baseUrl: string, ro
         repair: {
           priority: 1,
           type: "choose-layout",
-          file: route.recipe,
-          message: "Use a deterministic responsive layout or wrap approved wide content in data-draftpine-overflow=\"allowed\"."
+          file: route.sourceFile,
+          message: "Use responsive theme block markup or wrap approved wide content in data-draftpine-overflow=\"allowed\"."
         }
       })
     );
