@@ -1,0 +1,1 @@
+{"schemaVersion":"2.0","routeId":"home","routeType":"home","profile":"productMarketing","sections":[{"id":"cards","primitive":"core.cardGrid","layout":"core.gridAuto","variant":"compact","content":"cards"}],"states":["default"],"interactions":["theme"]}

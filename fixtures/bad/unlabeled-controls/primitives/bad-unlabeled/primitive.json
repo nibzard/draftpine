@@ -1,0 +1,1 @@
+{"schemaVersion":"2.0","name":"badUnlabeled","namespace":"project","type":"primitive","description":"Renders an icon-only button with no accessible name to exercise the accessibility gate.","slots":{"title":{"type":"string","required":true}},"variants":["default"],"layouts":["core.stack"],"interactions":[],"states":["default"],"accessibility":{},"responsive":{"mobile":"stack"}}

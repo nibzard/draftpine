@@ -11,6 +11,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:e2e": "vitest run tests/integration",
+    "test:corpus": "vitest run tests/integration/fixtures.test.ts",
+    "check:fixtures": "tsx src/cli/index.ts check fixtures/good/basic",
     "draftpine": "tsx src/cli/index.ts",
     "prepack": "pnpm build"
   },

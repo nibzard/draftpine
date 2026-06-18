@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "2.0",
+  "project": { "name": "Unlabeled Controls Fixture" },
+  "source": { "routes": "routes.json", "contentDir": "content", "recipesDir": "recipes", "primitivesDir": "primitives", "layoutsDir": "layouts" },
+  "output": { "dir": "prototype", "clean": true, "assetsDir": "assets" },
+  "theme": { "profile": "productMarketing", "defaultMode": "light", "allowThemeToggle": true },
+  "routeBudget": { "defaultMaxRoutes": 7, "largePrototypeRequiresApproval": true, "representativeRoutesRequired": true },
+  "eval": { "required": true, "strict": true, "viewports": ["mobile"], "aiReview": "off", "sampleStrategy": "all" }
+}

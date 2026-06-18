@@ -1,0 +1,10 @@
+{"routes":[
+{"id":"r1","path":"/r1/","title":"R1","file":"r1/index.html","routeType":"utility","profile":"productMarketing","recipe":"recipes/r1.json","content":"content/pages/shared.json","priority":1,"status":"ready"},
+{"id":"r2","path":"/r2/","title":"R2","file":"r2/index.html","routeType":"utility","profile":"productMarketing","recipe":"recipes/r2.json","content":"content/pages/shared.json","priority":2,"status":"ready"},
+{"id":"r3","path":"/r3/","title":"R3","file":"r3/index.html","routeType":"utility","profile":"productMarketing","recipe":"recipes/r3.json","content":"content/pages/shared.json","priority":3,"status":"ready"},
+{"id":"r4","path":"/r4/","title":"R4","file":"r4/index.html","routeType":"utility","profile":"productMarketing","recipe":"recipes/r4.json","content":"content/pages/shared.json","priority":4,"status":"ready"},
+{"id":"r5","path":"/r5/","title":"R5","file":"r5/index.html","routeType":"utility","profile":"productMarketing","recipe":"recipes/r5.json","content":"content/pages/shared.json","priority":5,"status":"ready"},
+{"id":"r6","path":"/r6/","title":"R6","file":"r6/index.html","routeType":"utility","profile":"productMarketing","recipe":"recipes/r6.json","content":"content/pages/shared.json","priority":6,"status":"ready"},
+{"id":"r7","path":"/r7/","title":"R7","file":"r7/index.html","routeType":"utility","profile":"productMarketing","recipe":"recipes/r7.json","content":"content/pages/shared.json","priority":7,"status":"ready"},
+{"id":"r8","path":"/r8/","title":"R8","file":"r8/index.html","routeType":"utility","profile":"productMarketing","recipe":"recipes/r8.json","content":"content/pages/shared.json","priority":8,"status":"ready"}
+]}

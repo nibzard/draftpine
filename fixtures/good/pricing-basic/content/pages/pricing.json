@@ -1,0 +1,23 @@
+{
+  "hero": {
+    "eyebrow": "Pricing",
+    "title": "Start usage-based.",
+    "description": "Use credits for trials and early usage, then move workloads to higher limits and support.",
+    "primaryAction": { "label": "Start for free", "href": "#" },
+    "secondaryAction": { "label": "Talk to sales", "href": "#" }
+  },
+  "plans": {
+    "title": "Plans",
+    "description": "Pay for browser runtime, not team size.",
+    "items": [
+      { "name": "Free", "price": "$0", "description": "For trials and spiky workloads.", "features": ["Trial credit", "Usage-based billing"], "action": { "label": "Start free", "href": "#" } },
+      { "name": "Priority", "price": "$30", "description": "For production workloads.", "features": ["Higher limits", "Priority support"], "action": { "label": "Choose Priority", "href": "#" } },
+      { "name": "Enterprise", "price": "Custom", "description": "For scaled teams.", "features": ["SSO", "Dedicated support"], "action": { "label": "Contact sales", "href": "#" } }
+    ]
+  },
+  "cta": {
+    "title": "Ready to start?",
+    "description": "Begin with the free plan and upgrade as you grow.",
+    "primaryAction": { "label": "Start for free", "href": "#" }
+  }
+}

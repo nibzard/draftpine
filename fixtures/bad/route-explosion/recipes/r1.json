@@ -1,0 +1,1 @@
+{"schemaVersion":"2.0","routeId":"r1","routeType":"utility","profile":"productMarketing","sections":[{"id":"hero","primitive":"core.decisionHero","layout":"core.stack","variant":"compact","content":"hero"}],"states":["default"],"interactions":["theme"]}
