@@ -1,0 +1,10 @@
+# Context
+
+## Background
+This commit consolidates the Draftpine v3 page/theme architecture and expands the default system into a public-facing website block catalog inspired by modern marketing component systems.
+
+## Why This Way
+The previous primitive/layout registry and app/dashboard-oriented starter were replaced with a pages plus theme-block model. Public website blocks now cover home, pricing, about, contact, resources, and 404 routes while preserving generic blocks for compatibility.
+
+## Verification
+Before commit, the work passed typecheck, lite fixture regression tests, CLI integration tests, generation, strict browser eval, and static check. Strict eval rendered six public routes with twelve screenshots and zero errors or warnings.
