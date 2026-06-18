@@ -1,10 +1,8 @@
-.dp-split-form-layout {
-  display: grid;
+.dp-split-form {
   grid-template-columns: minmax(0, 1fr) minmax(14rem, 0.4fr);
-  gap: var(--dp-space-4);
 }
 @media (max-width: 760px) {
-  .dp-split-form-layout {
+  .dp-split-form {
     grid-template-columns: 1fr;
   }
 }

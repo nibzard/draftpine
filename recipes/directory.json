@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "2.0",
+  "routeId": "directory",
+  "routeType": "directory",
+  "profile": "productMarketing",
+  "pageLayout": "core.inspectorSidebar",
+  "sections": [
+    {
+      "id": "header",
+      "primitive": "core.decisionHero",
+      "layout": "core.stack",
+      "variant": "compact",
+      "content": "header"
+    },
+    {
+      "id": "list",
+      "primitive": "core.filterableList",
+      "layout": "core.stack",
+      "variant": "default",
+      "content": "list"
+    },
+    {
+      "id": "aside",
+      "primitive": "core.statePanel",
+      "layout": "core.stack",
+      "variant": "default",
+      "content": "aside",
+      "slot": "aside"
+    }
+  ],
+  "states": ["default", "empty"],
+  "interactions": ["theme", "filter"]
+}

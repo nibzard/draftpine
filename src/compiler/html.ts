@@ -10,21 +10,24 @@ export function renderRouteHtml(project: Project, route: Route, recipe: Recipe):
   const content = project.content.get(route.id);
   const assetPrefix = relativeAssetPrefix(route.file);
   const depth = Math.max(0, route.file.split("/").filter(Boolean).length - 1);
-  const sections = recipe.sections
+  const renderedSections = recipe.sections
     .filter((section) => section.visibility !== "hidden")
     .map((section) => {
       const primitive = project.registry.primitives.get(section.primitive);
-      if (!primitive?.template) return "";
+      const slot = section.slot ?? "main";
+      if (!primitive?.template) return { slot, html: "" };
       const sectionContent = resolveSectionContent(section, content);
-      return renderTemplate(primitive.template, {
+      const html = renderTemplate(primitive.template, {
         ...sectionContent,
         sectionId: section.id,
         primitive: section.primitive,
         layout: section.layout,
         variant: section.variant ?? "default"
       });
-    })
-    .join("\n");
+      return { slot, html };
+    });
+
+  const sections = renderPageFrame(project, recipe, renderedSections);
 
   const description =
     typeof content?.description === "string"
@@ -88,6 +91,33 @@ ${sections}
 
 export function routeOutputPath(outputDir: string, route: Route): string {
   return path.join(outputDir, route.file);
+}
+
+type RenderedSection = { slot: string; html: string };
+
+/**
+ * Arrange rendered sections into the page. When the recipe declares a
+ * `pageLayout`, sections are grouped by their `slot` (default `"main"`) and
+ * injected into that layout's named slots (e.g. `{{{main}}}`, `{{{aside}}}`).
+ * Otherwise sections stack in order — the original behavior.
+ */
+export function renderPageFrame(
+  project: Project,
+  recipe: Recipe,
+  rendered: RenderedSection[]
+): string {
+  const stacked = rendered.map((item) => item.html).filter(Boolean).join("\n");
+  if (!recipe.pageLayout) return stacked;
+
+  const layout = project.registry.layouts.get(recipe.pageLayout);
+  if (!layout?.template) return stacked;
+
+  const slots: Record<string, string> = {};
+  for (const { slot, html } of rendered) {
+    if (!html) continue;
+    slots[slot] = slots[slot] ? `${slots[slot]}\n${html}` : html;
+  }
+  return renderTemplate(layout.template, slots);
 }
 
 function escapeText(value: unknown): string {

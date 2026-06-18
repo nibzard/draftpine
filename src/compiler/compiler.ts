@@ -47,7 +47,12 @@ export async function generate(configPath = "draftpine.config.json"): Promise<{ 
     sourceHashes: await hashSources(project.workspace.root, sourceFiles),
     routesRendered: routesRendered.map((route) => route.path),
     primitivesUsed: unique([...project.recipes.values()].flatMap((recipe) => recipe.sections.map((section) => section.primitive))),
-    layoutsUsed: unique([...project.recipes.values()].flatMap((recipe) => recipe.sections.map((section) => section.layout))),
+    layoutsUsed: unique(
+      [...project.recipes.values()].flatMap((recipe) => [
+        ...recipe.sections.map((section) => section.layout),
+        ...(recipe.pageLayout ? [recipe.pageLayout] : [])
+      ])
+    ),
     cssAssets: ["assets/draftpine.css"],
     jsAssets: ["assets/draftpine.js"],
     warnings: findings.filter((item) => item.severity === "warning"),
@@ -148,6 +153,19 @@ export function validateProjectContracts(project: Project): Finding[] {
         );
       }
     }
+    if (recipe.pageLayout && !project.registry.layouts.has(recipe.pageLayout)) {
+      findings.push(
+        finding({
+          id: "registry.missingLayout",
+          severity: "error",
+          category: "layout",
+          route: route.path,
+          file: route.recipe,
+          layout: recipe.pageLayout,
+          message: `Page layout ${recipe.pageLayout} does not exist in the registry.`
+        })
+      );
+    }
     for (const requiredPrimitive of contract.requiredPrimitives) {
       if (!primitiveIds.includes(requiredPrimitive)) {
         findings.push(
@@ -194,6 +212,7 @@ export function validateProjectContracts(project: Project): Finding[] {
       route.routeType,
       recipe.sections.map((section) => section.primitive).join(">"),
       recipe.sections.map((section) => section.layout).join(">"),
+      recipe.pageLayout ?? "",
       (recipe.interactions ?? []).sort().join(",")
     ].join("|");
     fingerprints.set(fingerprint, [...(fingerprints.get(fingerprint) ?? []), route.path]);
@@ -223,7 +242,12 @@ export function validateProjectContracts(project: Project): Finding[] {
 
 async function bundleCss(project: Project): Promise<string> {
   const usedPrimitiveIds = unique([...project.recipes.values()].flatMap((recipe: Recipe) => recipe.sections.map((section) => section.primitive)));
-  const usedLayoutIds = unique([...project.recipes.values()].flatMap((recipe: Recipe) => recipe.sections.map((section) => section.layout)));
+  const usedLayoutIds = unique(
+    [...project.recipes.values()].flatMap((recipe: Recipe) => [
+      ...recipe.sections.map((section) => section.layout),
+      ...(recipe.pageLayout ? [recipe.pageLayout] : [])
+    ])
+  );
   const chunks = [await readText(path.resolve((await findPackageCoreDir()), "tokens/draftpine.css"))];
   for (const layoutId of usedLayoutIds) {
     const layout = project.registry.layouts.get(layoutId);

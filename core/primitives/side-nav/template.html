@@ -1,0 +1,10 @@
+<section class="dp-section dp-side-nav" data-primitive="core.sideNav" data-variant="{{variant}}">
+  <div class="dp-container dp-stack">
+    <strong class="dp-side-nav-title">{{title}}</strong>
+    <nav aria-label="{{title}}">
+      <ul class="dp-side-nav-list">
+        {{#each items}}<li><a href="{{href}}"{{#if active}} aria-current="page"{{/if}}>{{label}}</a></li>{{/each}}
+      </ul>
+    </nav>
+  </div>
+</section>

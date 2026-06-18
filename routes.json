@@ -23,6 +23,42 @@
       "content": "content/pages/pricing.json",
       "priority": 2,
       "status": "ready"
+    },
+    {
+      "id": "dashboard",
+      "path": "/dashboard/",
+      "title": "Dashboard",
+      "file": "dashboard/index.html",
+      "routeType": "appDashboard",
+      "profile": "productMarketing",
+      "recipe": "recipes/dashboard.json",
+      "content": "content/pages/dashboard.json",
+      "priority": 3,
+      "status": "ready"
+    },
+    {
+      "id": "directory",
+      "path": "/directory/",
+      "title": "Directory",
+      "file": "directory/index.html",
+      "routeType": "directory",
+      "profile": "productMarketing",
+      "recipe": "recipes/directory.json",
+      "content": "content/pages/directory.json",
+      "priority": 4,
+      "status": "ready"
+    },
+    {
+      "id": "settings",
+      "path": "/settings/",
+      "title": "Settings",
+      "file": "settings/index.html",
+      "routeType": "settings",
+      "profile": "productMarketing",
+      "recipe": "recipes/settings.json",
+      "content": "content/pages/settings.json",
+      "priority": 5,
+      "status": "ready"
     }
   ]
 }

@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "2.0",
+  "routeId": "dashboard",
+  "routeType": "appDashboard",
+  "profile": "productMarketing",
+  "pageLayout": "core.appShell",
+  "sections": [
+    {
+      "id": "nav",
+      "primitive": "core.sideNav",
+      "layout": "core.stack",
+      "variant": "default",
+      "content": "nav",
+      "slot": "nav"
+    },
+    {
+      "id": "header",
+      "primitive": "core.decisionHero",
+      "layout": "core.stack",
+      "variant": "compact",
+      "content": "header"
+    },
+    {
+      "id": "metrics",
+      "primitive": "core.metricBand",
+      "layout": "core.gridAuto",
+      "variant": "compact",
+      "content": "metrics"
+    },
+    {
+      "id": "routes",
+      "primitive": "core.dataTable",
+      "layout": "core.stack",
+      "variant": "status",
+      "content": "routes"
+    }
+  ],
+  "states": ["default"],
+  "interactions": ["theme"]
+}

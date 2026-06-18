@@ -73,6 +73,7 @@
   --dp-container-md: 56rem;
   --dp-container-lg: 68rem;
   --dp-container-xl: 74rem;
+  --dp-sidebar-width: 15rem;
   --dp-radius-xs: 0.25rem;
   --dp-radius-sm: 0.375rem;
   --dp-radius-md: 0.5rem;
@@ -637,4 +638,54 @@ button[data-draftpine-action="primary"]:hover {
   .dp-route-onboarding [data-primitive="core.decisionHero"] .dp-container::after {
     display: none;
   }
+}
+
+/* =========================================================================
+   Page-level frames (recipe.pageLayout)
+   A page frame bounds the whole route to the centered canvas and arranges
+   named regions (nav / main / aside / summary) side by side. Per-frame column
+   definitions live in each layout's styles.css; this block holds the shared
+   bounds, region surfaces, and section-chrome resets so framed pages keep
+   consistent containers and visible borders (including dark mode).
+   ========================================================================= */
+.dp-app-shell,
+.dp-inspector-sidebar,
+.dp-split-form {
+  width: min(100% - 2rem, var(--dp-container-xl));
+  margin-inline: auto;
+  display: grid;
+  gap: var(--dp-space-5);
+  align-items: start;
+}
+/* Inside a frame, sections fill their region instead of re-centering. */
+.dp-app-shell .dp-container,
+.dp-inspector-sidebar .dp-container,
+.dp-split-form .dp-container {
+  width: auto;
+  margin-inline: 0;
+}
+/* Reset section chrome so regions stack cleanly without double rules. */
+.dp-app-shell .dp-section,
+.dp-inspector-sidebar .dp-section,
+.dp-split-form .dp-section {
+  padding-block: 0;
+}
+.dp-app-shell .dp-section + .dp-section,
+.dp-inspector-sidebar .dp-section + .dp-section,
+.dp-split-form .dp-section + .dp-section {
+  margin-top: var(--dp-space-5);
+  border-block-start: none;
+}
+/* Region surfaces: bordered panels so content stays bounded in dark mode. */
+.dp-page-nav,
+.dp-page-aside,
+.dp-page-summary {
+  min-width: 0;
+  background: var(--dp-surface);
+  border: 1px solid var(--dp-line);
+  border-radius: var(--dp-radius-lg);
+  padding: var(--dp-space-4);
+}
+.dp-page-main {
+  min-width: 0;
 }

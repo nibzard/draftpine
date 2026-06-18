@@ -1,4 +1,8 @@
-.dp-app-shell-layout {
-  display: grid;
-  gap: var(--dp-space-4);
+.dp-app-shell {
+  grid-template-columns: var(--dp-sidebar-width) minmax(0, 1fr);
+}
+@media (max-width: 760px) {
+  .dp-app-shell {
+    grid-template-columns: 1fr;
+  }
 }

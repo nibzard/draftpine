@@ -107,6 +107,7 @@ export const sectionSchema = z.object({
   variant: z.string().optional(),
   content: z.union([z.string(), z.record(z.string(), z.unknown())]),
   visibility: z.enum(["visible", "hidden"]).optional(),
+  slot: z.string().regex(kebab).optional(),
   states: z.array(z.string()).optional(),
   interactions: z.array(z.string()).optional(),
   evalHints: z.record(z.string(), z.unknown()).optional()
@@ -127,7 +128,8 @@ export const recipeSchema = z.object({
     }
   }),
   states: z.array(z.string()).optional(),
-  interactions: z.array(z.string()).optional()
+  interactions: z.array(z.string()).optional(),
+  pageLayout: z.string().regex(qualified).optional()
 });
 
 export const slotDefinitionSchema: z.ZodTypeAny = z.lazy(() =>
@@ -185,7 +187,8 @@ export const layoutManifestSchema = z.object({
   description: z.string().min(1),
   parameters: z.record(z.string(), slotDefinitionSchema).optional(),
   responsive: z.record(z.string(), z.string()).optional(),
-  overflow: z.enum(["forbidden", "allowed", "conditional"])
+  overflow: z.enum(["forbidden", "allowed", "conditional"]),
+  scope: z.enum(["page", "section"]).optional()
 });
 
 export const exceptionsSchema = z

@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "2.0",
+  "routeId": "settings",
+  "routeType": "settings",
+  "profile": "productMarketing",
+  "pageLayout": "core.splitForm",
+  "sections": [
+    {
+      "id": "header",
+      "primitive": "core.decisionHero",
+      "layout": "core.stack",
+      "variant": "compact",
+      "content": "header"
+    },
+    {
+      "id": "groups",
+      "primitive": "core.settingsList",
+      "layout": "core.stack",
+      "variant": "account",
+      "content": "groups"
+    },
+    {
+      "id": "summary",
+      "primitive": "core.statePanel",
+      "layout": "core.stack",
+      "variant": "default",
+      "content": "summary",
+      "slot": "summary"
+    }
+  ],
+  "states": ["default", "success"],
+  "interactions": ["theme"]
+}

@@ -100,6 +100,13 @@ export interface Recipe {
   routeType: RouteTypeName;
   profile: string;
   sections: Section[];
+  /**
+   * Optional page-level layout. When set, the rendered sections are grouped by
+   * their `slot` and placed into the named slots of this layout's template
+   * (e.g. `{{{main}}}`, `{{{aside}}}`). When unset, sections stack vertically —
+   * the original behavior.
+   */
+  pageLayout?: string;
   states?: string[];
   interactions?: string[];
 }
@@ -111,6 +118,11 @@ export interface Section {
   variant?: string;
   content: string | Record<string, unknown>;
   visibility?: "visible" | "hidden";
+  /**
+   * Which page-layout slot this section belongs to (default `"main"`). Only
+   * meaningful when the recipe declares a `pageLayout`.
+   */
+  slot?: string;
   states?: string[];
   interactions?: string[];
   evalHints?: Record<string, unknown>;
@@ -166,6 +178,8 @@ export interface LayoutManifest {
   parameters?: Record<string, SlotDefinition & { default?: unknown }>;
   responsive?: Record<string, string>;
   overflow: "forbidden" | "allowed" | "conditional";
+  /** `"page"` layouts frame the whole route via named slots; `"section"` (default) wrap a single section. */
+  scope?: "page" | "section";
 }
 
 export interface RouteTypeContract {
