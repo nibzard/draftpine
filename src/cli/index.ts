@@ -8,8 +8,9 @@ import { parseArgs, flagBoolean, flagString } from "./args.js";
 import { initProject, scaffoldBlock } from "./scaffold.js";
 import { dev } from "../dev/dev.js";
 import { generateDocs } from "../docs/docs.js";
+import { renderAgentPrompt, DRAFTPINE_VERSION, type BriefStarter } from "./brief.js";
 
-const VERSION = "3.0.0";
+const VERSION = DRAFTPINE_VERSION;
 
 async function main() {
   const parsed = parseArgs(normalizeWorkspaceFirstArgs(process.argv.slice(2)));
@@ -31,7 +32,11 @@ async function main() {
       parsed.positionals[0] ?? ".",
       (flagString(parsed.flags, "starter", "single-screen") as "single-screen" | "browsable" | "docs") ?? "single-screen",
       flagBoolean(parsed.flags, "force"),
-      flagString(parsed.flags, "prompt")
+      flagString(parsed.flags, "prompt"),
+      {
+        agentFiles: !flagBoolean(parsed.flags, "noAgentFiles"),
+        agentTargets: (flagString(parsed.flags, "agentTargets") ?? "").split(",").map((token) => token.trim()).filter(Boolean)
+      }
     );
     console.log("Draftpine project initialized.");
     return;
@@ -83,7 +88,9 @@ async function main() {
 
   if (key === "new block") {
     const name = parsed.positionals[0];
-    if (!name) throw new Error("Usage: draftpine new block <name>");
+    if (!name) throw new Error("Usage: draftpine new block <name> [workspace]");
+    const workspace = parsed.positionals[1];
+    if (workspace) process.chdir(path.resolve(process.cwd(), workspace));
     await scaffoldBlock(name, flagString(parsed.flags, "theme", "default") ?? "default");
     console.log(`Created block ${name}.`);
     return;
@@ -93,6 +100,20 @@ async function main() {
     const result = await setupEvalBrowser();
     console.log(result.message);
     process.exitCode = result.ok ? 0 : 1;
+    return;
+  }
+
+  if (key === "agent" || key === "brief") {
+    const prompt = renderAgentPrompt({
+      bare: flagBoolean(parsed.flags, "bare"),
+      pin: flagBoolean(parsed.flags, "pin"),
+      starter: (flagString(parsed.flags, "starter", "browsable") as BriefStarter) ?? "browsable"
+    });
+    if (json) {
+      console.log(JSON.stringify({ version: DRAFTPINE_VERSION, prompt }, null, 2));
+    } else {
+      process.stdout.write(prompt);
+    }
     return;
   }
 
@@ -106,7 +127,7 @@ async function main() {
 }
 
 function normalizeWorkspaceFirstArgs(args: string[]): string[] {
-  const commands = new Set(["init", "generate", "check", "eval", "dev", "new", "docs", "setup", "version", "help"]);
+  const commands = new Set(["init", "generate", "check", "eval", "dev", "new", "docs", "setup", "version", "agent", "brief", "help"]);
   if (args.length >= 2 && !args[0].startsWith("-") && !commands.has(args[0]) && commands.has(args[1])) {
     return [args[1], args[0], ...args.slice(2)];
   }
@@ -129,8 +150,9 @@ Commands:
   draftpine eval [workspace] [--json] [--strict] [--ai-review] [--routes /,/pricing/]
   draftpine setup
   draftpine dev [--port 5173] [--report-port 5174]
-  draftpine new block <name> [--theme default]
+  draftpine new block <name> [workspace] [--theme default]
   draftpine docs [--out docs/generated]
+  draftpine agent [--bare] [--pin] [--starter browsable|single-screen|docs] [--json]
   draftpine --version
 `);
 }

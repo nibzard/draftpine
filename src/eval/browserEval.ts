@@ -1,5 +1,6 @@
 import http from "node:http";
 import path from "node:path";
+import pkg from "../../package.json" with { type: "json" };
 import { execFile } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { createRequire } from "node:module";
@@ -92,7 +93,7 @@ export async function evalProject(options: { configPath?: string; strict?: boole
   const deterministicStatus = errors > 0 ? "fail" : "pass";
   const manualReviewRequired = errors === 0 && project.workspace.config.eval.aiReview === "manual";
   const report: EvalReport = {
-    draftpineVersion: "3.0.0",
+    draftpineVersion: pkg.version,
     sourceMode: "pages",
     activeTheme: project.theme.id,
     status: errors > 0 ? "fail" : manualReviewRequired ? "pass-with-review" : "pass",

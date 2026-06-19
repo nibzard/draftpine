@@ -2,6 +2,7 @@ import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
+import pkg from "../../package.json" with { type: "json" };
 import { generate } from "../../src/compiler/compiler.js";
 import { check } from "../../src/eval/check.js";
 import { evalProject } from "../../src/eval/browserEval.js";
@@ -95,5 +96,45 @@ describe("Draftpine v3 CLI internals", () => {
     const checked = await check();
 
     expect(checked.findings.some((item) => item.id === "route.localLinkEscapesOutput")).toBe(true);
+  });
+
+  it("seeds AGENTS.md and CLAUDE.md into the workspace", async () => {
+    const dir = await mkdtemp(path.join(os.tmpdir(), "draftpine-v3-agent-files-"));
+    tempDirs.push(dir);
+    await initProject(dir, "browsable", true);
+    const agents = await readFile(path.join(dir, "AGENTS.md"), "utf8");
+    expect(agents).toContain("draftpine new block <name>");
+    expect(agents).toContain("draftpine eval --strict");
+    expect(agents).toContain("run from inside this workspace");
+    const claude = await readFile(path.join(dir, "CLAUDE.md"), "utf8");
+    expect(claude).toContain("AGENTS.md");
+  });
+
+  it("skips agent files when agentFiles is false", async () => {
+    const dir = await mkdtemp(path.join(os.tmpdir(), "draftpine-v3-no-agent-files-"));
+    tempDirs.push(dir);
+    await initProject(dir, "single-screen", true, "", { agentFiles: false });
+    await expect(readFile(path.join(dir, "AGENTS.md"), "utf8")).rejects.toThrow();
+    await expect(readFile(path.join(dir, "CLAUDE.md"), "utf8")).rejects.toThrow();
+  });
+
+  it("seeds cursor and copilot pointers when targeted", async () => {
+    const dir = await mkdtemp(path.join(os.tmpdir(), "draftpine-v3-agent-targets-"));
+    tempDirs.push(dir);
+    await initProject(dir, "single-screen", true, "", { agentTargets: ["cursor", "copilot"] });
+    const cursor = await readFile(path.join(dir, ".cursor/rules/draftpine.mdc"), "utf8");
+    expect(cursor).toContain("AGENTS.md");
+    const copilot = await readFile(path.join(dir, ".github/copilot-instructions.md"), "utf8");
+    expect(copilot).toContain("AGENTS.md");
+  });
+
+  it("records the package version in the generated manifest", async () => {
+    const dir = await mkdtemp(path.join(os.tmpdir(), "draftpine-v3-manifest-version-"));
+    tempDirs.push(dir);
+    await initProject(dir, "single-screen", true);
+    process.chdir(dir);
+    await generate();
+    const manifest = JSON.parse(await readFile(path.join(dir, "prototype/draftpine.manifest.json"), "utf8"));
+    expect(manifest.draftpineVersion).toBe(pkg.version);
   });
 });

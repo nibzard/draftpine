@@ -35,21 +35,9 @@ pnpm --dir /home/agent/Draftpine draftpine generate /tmp/draftpine-v3-demo --jso
 
 ## One-Prompt Paste
 
-When a user wants an agent-friendly happy path, have them paste a complete brief like this:
+The canonical one-paste agent prompt is emitted by the binary — run `draftpine agent` to print it (or `draftpine agent --bare` for placeholder fields). It bootstraps Draftpine itself (pinned `git clone` into a hidden `.draftpine/`, or `npx` once published), runs `init`, authors the site, and loops `eval --strict` to zero findings. The README ships the same prompt verbatim between sentinels, and a test keeps them identical.
 
-```text
-Create a browsable public website prototype with Draftpine.
-
-Product: <what the site is for>
-Audience: <who visits it>
-Visitor goal: <what they need to understand or decide>
-Primary action: <the main CTA>
-Routes: Home, Pricing, About, Contact, Resources, 404
-Style: compact, modern, public-facing, inspired by Vercel/Cal.com/shadcn
-Leave out: real auth, real backend calls, production integrations
-```
-
-Convert that brief directly into page JSON and theme-block edits. Do not stop at a plan unless the user asks for one. Generate, check, run strict eval, inspect screenshots, and fix every error before reporting completion.
+The prompt works from any directory — it does not assume the agent is inside the Draftpine repository. Inside a scaffolded workspace, follow the seeded `AGENTS.md` instead (it has the exact commands for that workspace).
 
 ## Theme Rules
 

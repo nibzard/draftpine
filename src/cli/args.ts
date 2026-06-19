@@ -8,7 +8,7 @@ export function parseArgs(argv: string[]): ParsedArgs {
   const command: string[] = [];
   const positionals: string[] = [];
   const flags: Record<string, string | boolean | string[]> = {};
-  const booleanFlags = new Set(["force", "json", "strict", "aiReview", "help"]);
+  const booleanFlags = new Set(["force", "json", "strict", "aiReview", "help", "bare", "pin", "noAgentFiles", "version"]);
   let commandDone = false;
 
   for (let index = 0; index < argv.length; index += 1) {

@@ -1,0 +1,38 @@
+name: release
+
+# Publishes draftpine to npm when an annotated v* tag is pushed.
+# Requires repo secret NPM_TOKEN (automation-scoped, 2FA).
+# Provenance (SLSA) needs `id-token: write` and must run on GitHub Actions.
+#
+# Until the maintainer adds NPM_TOKEN and pushes a tag, this workflow does nothing.
+# The git-tag clone path in `draftpine agent` works regardless of publishing.
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org"
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+      # prepack (pnpm build) emits dist/; the files allowlist ships dist + themes.
+      - run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
