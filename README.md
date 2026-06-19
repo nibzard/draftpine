@@ -12,6 +12,37 @@ pnpm draftpine check /tmp/draftpine-v3-demo --json
 pnpm draftpine eval /tmp/draftpine-v3-demo --strict --json
 ```
 
+## Agent One-Prompt Happy Path
+
+Paste this into a coding agent from the repository root:
+
+```text
+Use Draftpine to create a browsable public website prototype.
+
+Product: <what this website is for>
+Audience: <who visits it>
+Visitor goal: <what they need to understand or decide>
+Primary action: <the main CTA>
+Routes: Home, Pricing, About, Contact, Resources, 404
+Style: compact, modern, public-facing, inspired by Vercel/Cal.com/shadcn
+Leave out: real auth, real backend calls, real analytics, production integrations
+
+Implement it in Draftpine source files only:
+- edit pages/*.json for route content
+- use themes/default blocks where possible
+- add a theme block only if the default catalog cannot express the section
+- do not hand-edit prototype/ or reports/
+
+Then run:
+pnpm draftpine generate --json
+pnpm draftpine check --json
+pnpm draftpine eval --strict --json
+
+Fix all errors and summarize the generated routes, blocks used, and screenshots.
+```
+
+For a single landing page, change `Routes` to `Home only` and initialize with `--starter single-screen`.
+
 Users edit:
 
 - `pages/*.json`

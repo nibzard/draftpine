@@ -33,6 +33,24 @@ For another workspace, pass it as the first positional after the command, for ex
 pnpm --dir /home/agent/Draftpine draftpine generate /tmp/draftpine-v3-demo --json
 ```
 
+## One-Prompt Paste
+
+When a user wants an agent-friendly happy path, have them paste a complete brief like this:
+
+```text
+Create a browsable public website prototype with Draftpine.
+
+Product: <what the site is for>
+Audience: <who visits it>
+Visitor goal: <what they need to understand or decide>
+Primary action: <the main CTA>
+Routes: Home, Pricing, About, Contact, Resources, 404
+Style: compact, modern, public-facing, inspired by Vercel/Cal.com/shadcn
+Leave out: real auth, real backend calls, production integrations
+```
+
+Convert that brief directly into page JSON and theme-block edits. Do not stop at a plan unless the user asks for one. Generate, check, run strict eval, inspect screenshots, and fix every error before reporting completion.
+
 ## Theme Rules
 
 - Blocks are editable HTML partials under `themes/<theme>/blocks/`.
