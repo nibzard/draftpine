@@ -1,0 +1,7 @@
+# Context
+
+## Background
+Merged the completed Draftpine v3 page/theme architecture and public website block system from the feature branch into main.
+
+## Why This Way
+The feature branch had already passed typecheck, fixture regression tests, CLI integration tests, generate/check, and strict browser eval before merge. The merge commit keeps the integration point explicit on main.
