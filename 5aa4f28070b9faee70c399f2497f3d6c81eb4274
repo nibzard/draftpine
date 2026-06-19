@@ -1,0 +1,1 @@
+README quick start was shortened after verifying that strict eval already runs generation and static checks. The documented flow was validated against /tmp/draftpine-readme-quickstart with 6 routes, 12 screenshots, and no findings.
