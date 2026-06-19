@@ -53,12 +53,22 @@ function renderSections(template: string, context: Record<string, unknown>, erro
 
     if (open.kind === "normal") {
       if (Array.isArray(value)) {
-        replacement = value.map((item, index) => renderTemplateWithDiagnostics(body, childContext(context, item, index)).html).join("");
+        replacement = value
+          .map((item, index) => {
+            const result = renderTemplateWithDiagnostics(body, childContext(context, item, index));
+            errors.push(...result.errors);
+            return result.html;
+          })
+          .join("");
       } else if (isTruthy(value)) {
-        replacement = renderTemplateWithDiagnostics(body, context).html;
+        const result = renderTemplateWithDiagnostics(body, context);
+        errors.push(...result.errors);
+        replacement = result.html;
       }
     } else if (!isTruthy(value) || (Array.isArray(value) && value.length === 0)) {
-      replacement = renderTemplateWithDiagnostics(body, context).html;
+      const result = renderTemplateWithDiagnostics(body, context);
+      errors.push(...result.errors);
+      replacement = result.html;
     }
 
     output = `${before}${replacement}${after}`;

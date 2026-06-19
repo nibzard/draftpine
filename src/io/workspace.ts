@@ -2,7 +2,7 @@ import path from "node:path";
 import type { DraftpineConfig, LoadedBlock, LoadedTheme, Page, Project, Route, ThemeConfig, Workspace } from "../domain/types.js";
 import { finding } from "../domain/findings.js";
 import { configSchema, pageSchema, themeSchema } from "../schemas/sourceSchemas.js";
-import { listFilesRecursive, pathExists, readJson, readText, toPosix } from "./fs.js";
+import { isPathInside, listFilesRecursive, pathExists, readJson, readText, toPosix } from "./fs.js";
 
 export async function discoverWorkspace(configPath = "draftpine.config.json"): Promise<Workspace> {
   const root = process.cwd();
@@ -19,7 +19,7 @@ export async function loadProject(configPath = "draftpine.config.json"): Promise
   findings.push(...pageFindings);
   const { theme, findings: themeFindings } = await loadTheme(workspace);
   findings.push(...themeFindings);
-  findings.push(...validatePagesAgainstTheme(workspace, pages, theme));
+  findings.push(...validatePagesAgainstTheme(pages, theme));
 
   const routes = pages
     .filter((page) => page.status !== "hidden" && page.status !== "deprecated")
@@ -61,7 +61,20 @@ async function loadPages(workspace: Workspace): Promise<{ pages: Page[]; finding
   const pages: Page[] = [];
   for (const file of pageFiles) {
     const relative = toPosix(path.relative(workspace.root, file));
-    const raw = await readJson<unknown>(file);
+    const parsedJson = await readJsonSafely(file);
+    if (!parsedJson.success) {
+      findings.push(
+        finding({
+          id: "source.invalidPage",
+          severity: "error",
+          category: "source",
+          file: relative,
+          message: `Invalid JSON: ${parsedJson.error}`
+        })
+      );
+      continue;
+    }
+    const raw = parsedJson.value;
     const result = pageSchema.safeParse(raw);
     if (!result.success) {
       findings.push(
@@ -148,19 +161,32 @@ async function loadTheme(workspace: Workspace): Promise<{ theme: LoadedTheme; fi
       })
     );
   } else {
-    const result = themeSchema.safeParse(await readJson<unknown>(themeFile));
-    if (result.success) {
-      config = result.data;
-    } else {
+    const parsedJson = await readJsonSafely(themeFile);
+    if (!parsedJson.success) {
       findings.push(
         finding({
           id: "theme.invalidTheme",
           severity: "error",
           category: "theme",
           file: relativeThemeFile,
-          message: result.error.issues.map((issue) => `${issue.path.join(".") || "(root)"}: ${issue.message}`).join("; ")
+          message: `Invalid JSON: ${parsedJson.error}`
         })
       );
+    } else {
+      const result = themeSchema.safeParse(parsedJson.value);
+      if (result.success) {
+        config = result.data;
+      } else {
+        findings.push(
+          finding({
+            id: "theme.invalidTheme",
+            severity: "error",
+            category: "theme",
+            file: relativeThemeFile,
+            message: result.error.issues.map((issue) => `${issue.path.join(".") || "(root)"}: ${issue.message}`).join("; ")
+          })
+        );
+      }
     }
   }
 
@@ -213,7 +239,7 @@ async function loadTheme(workspace: Workspace): Promise<{ theme: LoadedTheme; fi
   return { theme, findings };
 }
 
-function validatePagesAgainstTheme(workspace: Workspace, pages: Page[], theme: LoadedTheme): ReturnType<typeof finding>[] {
+function validatePagesAgainstTheme(pages: Page[], theme: LoadedTheme): ReturnType<typeof finding>[] {
   const findings: ReturnType<typeof finding>[] = [];
   for (const page of pages) {
     for (const [sectionIndex, section] of page.sections.entries()) {
@@ -263,7 +289,6 @@ function validatePagesAgainstTheme(workspace: Workspace, pages: Page[], theme: L
       }
     }
   }
-  void workspace;
   return findings;
 }
 
@@ -274,7 +299,7 @@ function routeOutputFile(routePath: string): string {
 
 function resolveThemeFile(themeRoot: string, relativeFile: string): string {
   const resolved = path.resolve(themeRoot, relativeFile);
-  if (!resolved.startsWith(themeRoot)) return path.join(themeRoot, "__invalid__");
+  if (!isPathInside(themeRoot, resolved)) return path.join(themeRoot, "__invalid__");
   return resolved;
 }
 
@@ -288,4 +313,12 @@ function hasDottedValue(value: Record<string, unknown>, key: string): boolean {
     return undefined;
   }, value);
   return result !== undefined && result !== null && result !== "";
+}
+
+async function readJsonSafely(filePath: string): Promise<{ success: true; value: unknown } | { success: false; error: string }> {
+  try {
+    return { success: true, value: await readJson<unknown>(filePath) };
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : String(error) };
+  }
 }

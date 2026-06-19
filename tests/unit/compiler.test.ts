@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -44,5 +44,70 @@ describe("v3 compiler", () => {
     process.chdir(dir);
     const project = await loadProject();
     expect(project.findings.some((item) => item.id === "source.duplicatePagePath")).toBe(true);
+  });
+
+  it("reports malformed page JSON as a source finding", async () => {
+    const dir = await mkdtemp(path.join(os.tmpdir(), "draftpine-malformed-page-"));
+    tempDirs.push(dir);
+    await initProject(dir, "single-screen", true);
+    await writeFile(path.join(dir, "pages/broken.json"), "{not json\n");
+
+    process.chdir(dir);
+    const project = await loadProject();
+
+    expect(project.findings.some((item) => item.id === "source.invalidPage" && item.file === "pages/broken.json")).toBe(true);
+  });
+
+  it("refuses to clean the workspace root as generated output", async () => {
+    const dir = await mkdtemp(path.join(os.tmpdir(), "draftpine-unsafe-output-"));
+    tempDirs.push(dir);
+    await initProject(dir, "single-screen", true);
+    await writeFile(path.join(dir, "keep.txt"), "do not delete\n");
+    const configPath = path.join(dir, "draftpine.config.json");
+    const config = JSON.parse(await readFile(configPath, "utf8"));
+    config.output.dir = ".";
+    await writeFile(configPath, `${JSON.stringify(config, null, 2)}\n`);
+
+    process.chdir(dir);
+    const generated = await generate();
+
+    expect(generated.findings.some((item) => item.id === "config.unsafeOutputDir")).toBe(true);
+    expect(await readFile(path.join(dir, "keep.txt"), "utf8")).toBe("do not delete\n");
+  });
+
+  it("keeps generated and ignored build files out of source hashes", async () => {
+    const dir = await mkdtemp(path.join(os.tmpdir(), "draftpine-source-hashes-"));
+    tempDirs.push(dir);
+    await initProject(dir, "single-screen", true);
+    await mkdir(path.join(dir, "dist"), { recursive: true });
+    await writeFile(path.join(dir, "dist/generated.js"), "compiled\n");
+    const configPath = path.join(dir, "draftpine.config.json");
+    const config = JSON.parse(await readFile(configPath, "utf8"));
+    config.output.dir = "site";
+    await writeFile(configPath, `${JSON.stringify(config, null, 2)}\n`);
+
+    process.chdir(dir);
+    await generate();
+    const manifest = JSON.parse(await readFile(path.join(dir, "site/draftpine.manifest.json"), "utf8")) as { sourceHashes: Record<string, string> };
+
+    expect(manifest.sourceHashes["dist/generated.js"]).toBeUndefined();
+    expect(Object.keys(manifest.sourceHashes).some((file) => file.startsWith("site/"))).toBe(false);
+  });
+
+  it("emits the configured default theme mode", async () => {
+    const dir = await mkdtemp(path.join(os.tmpdir(), "draftpine-theme-mode-"));
+    tempDirs.push(dir);
+    await initProject(dir, "single-screen", true);
+    const configPath = path.join(dir, "draftpine.config.json");
+    const config = JSON.parse(await readFile(configPath, "utf8"));
+    config.theme.defaultMode = "dark";
+    await writeFile(configPath, `${JSON.stringify(config, null, 2)}\n`);
+
+    process.chdir(dir);
+    await generate();
+    const html = await readFile(path.join(dir, "prototype/index.html"), "utf8");
+
+    expect(html).toContain("var d='dark'");
+    expect(html).toContain("defaultMode:'dark'");
   });
 });

@@ -985,13 +985,15 @@ Draftpine writes reports for agents first and humans second.
 Required commands:
 
 ```bash
-draftpine init [path] [--starter single-screen|browsable|docs] [--force]
+draftpine init [path] [--starter single-screen|browsable|docs] [--prompt "..."] [--force]
 draftpine generate [workspace] [--json]
 draftpine check [workspace] [--json] [--scope source|generated|all]
 draftpine eval [workspace] [--json] [--strict] [--routes /,/pricing/]
+draftpine setup
 draftpine dev [--port 5173] [--report-port 5174]
 draftpine new block <name>
 draftpine docs
+draftpine --version
 ```
 
 ### 16.2 Init

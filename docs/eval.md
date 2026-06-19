@@ -11,6 +11,8 @@
 - theme toggle behavior checks
 - unresolved template marker checks
 
+If the Playwright Chromium binary is missing, eval installs Chromium and retries once. To do that setup explicitly before a run, use `draftpine setup`.
+
 ## Status Semantics
 
 `status: "fail"` means deterministic checks found one or more errors.

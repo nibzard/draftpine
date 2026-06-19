@@ -4,13 +4,28 @@ Draftpine v3 is a static prototype compiler where agents write page JSON, teams 
 
 ## Quick Start
 
+From this repository:
+
 ```bash
 pnpm install
 pnpm draftpine init /tmp/draftpine-v3-demo --starter browsable --prompt "customer support platform" --force
 pnpm draftpine eval /tmp/draftpine-v3-demo --strict --json
 ```
 
-That creates a six-route static prototype in `/tmp/draftpine-v3-demo`, writes generated HTML to `prototype/`, and writes screenshots plus reports to `reports/`. `eval --strict` runs generation and static checks before the browser pass.
+That creates a six-route static prototype in `/tmp/draftpine-v3-demo`, writes generated HTML to `prototype/`, and writes screenshots plus reports to `reports/`. `eval --strict` runs generation and static checks before the browser pass. If Chromium is missing, Draftpine installs it and retries once.
+
+## Use From Another Workspace
+
+Keep Draftpine separate from the prototype you are creating:
+
+```bash
+git clone https://github.com/nibzard/draftpine.git .draftpine
+pnpm --dir .draftpine install
+pnpm --dir .draftpine draftpine init "$PWD/wireframe" --starter browsable --prompt "customer support platform" --force
+pnpm --dir .draftpine draftpine eval "$PWD/wireframe" --strict --json
+```
+
+After init, edit only the generated Draftpine source files under `wireframe/`. Do not copy the Draftpine repo or hand-edit `wireframe/prototype/`.
 
 ## Agent One-Prompt Happy Path
 
@@ -30,6 +45,8 @@ Leave out: real auth, real backend calls, real analytics, production integration
 Implement it in Draftpine source files only, run `pnpm draftpine eval --strict --json`, fix every error, and summarize the generated routes, blocks used, and screenshots.
 ```
 
+If the agent is not already running inside the Draftpine repository, tell it to use the commands in "Use From Another Workspace" and pass the prototype directory as the workspace argument.
+
 For a single landing page, change `Routes` to `Home only` and initialize with `--starter single-screen`.
 
 Users edit:
@@ -48,6 +65,7 @@ Draftpine writes generated static output to `prototype/` and eval reports to `re
 - `draftpine generate [workspace] [--json]`
 - `draftpine check [workspace] [--json] [--scope source|generated|all]`
 - `draftpine eval [workspace] [--json] [--strict] [--routes /,/pricing/]`
+- `draftpine setup`
 - `draftpine dev [--port 5173] [--report-port 5174]`
 - `draftpine new block <name>`
 - `draftpine docs`

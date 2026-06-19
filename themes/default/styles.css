@@ -735,7 +735,8 @@
   line-height: 32px;
 }
 
-.dp-tab-list button:first-child {
+.dp-tab-list button.is-active,
+.dp-tab-list button[aria-selected="true"] {
   border-color: var(--dp-line-strong);
   background: var(--dp-surface);
   color: var(--dp-text);

@@ -1,9 +1,10 @@
 import http from "node:http";
 import path from "node:path";
 import { watch } from "node:fs";
+import { readFile } from "node:fs/promises";
 import { generate } from "../compiler/compiler.js";
 import { evalProject } from "../eval/browserEval.js";
-import { pathExists } from "../io/fs.js";
+import { isPathInside, pathExists } from "../io/fs.js";
 
 export async function dev(options: { port: number; reportPort: number; aiReview: "off" | "manual" | "auto" }): Promise<void> {
   await generate();
@@ -35,7 +36,12 @@ async function serve(root: string, port: number): Promise<{ url: string }> {
   const server = http.createServer(async (req, res) => {
     const requestPath = decodeURIComponent(new URL(req.url ?? "/", "http://localhost").pathname);
     const candidate = requestPath.endsWith("/") ? path.join(root, requestPath, "index.html") : path.join(root, requestPath);
-    const filePath = candidate.startsWith(root) ? candidate : path.join(root, "index.html");
+    if (!isPathInside(root, candidate)) {
+      res.statusCode = 404;
+      res.end("Not found");
+      return;
+    }
+    const filePath = candidate;
     if (!(await pathExists(filePath))) {
       res.statusCode = 404;
       res.end("Not found");
@@ -43,7 +49,7 @@ async function serve(root: string, port: number): Promise<{ url: string }> {
     }
     const ext = path.extname(filePath);
     res.setHeader("content-type", ext === ".css" ? "text/css" : ext === ".js" ? "text/javascript" : ext === ".json" ? "application/json" : "text/html");
-    res.end(await import("node:fs/promises").then((fs) => fs.readFile(filePath)));
+    res.end(await readFile(filePath));
   });
   await new Promise<void>((resolve) => server.listen(port, "127.0.0.1", resolve));
   return { url: `http://127.0.0.1:${port}` };

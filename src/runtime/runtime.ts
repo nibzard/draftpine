@@ -1,7 +1,9 @@
 export const runtimeJs = `
-function getInitialDraftpineTheme(){
+function getInitialDraftpineTheme(defaultMode){
   var t=localStorage.getItem('draftpine-theme');
-  if(!t)t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+  if(!t&&document.documentElement.dataset.theme)t=document.documentElement.dataset.theme;
+  var mode=defaultMode||'system';
+  if(!t)t=mode==='system'?(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):mode;
   return t;
 }
 function setDraftpineTheme(t){
@@ -10,11 +12,12 @@ function setDraftpineTheme(t){
 }
 function createDraftpineShell(options){
   var depth=(options&&options.depth)||0;
+  var defaultMode=(options&&options.defaultMode)||document.documentElement.dataset.theme||'system';
   var prefix=depth<=0?'./':'../'.repeat(depth);
   var nav=window.SITE_NAV||[];
   var footer=window.SITE_FOOTER||nav;
   return {
-    theme:getInitialDraftpineTheme(),
+    theme:getInitialDraftpineTheme(defaultMode),
     siteNav:nav,
     siteFooter:footer,
     routeHref:function(path){
@@ -23,7 +26,7 @@ function createDraftpineShell(options){
       return prefix+path.replace(/^\\//,'');
     },
     init:function(){
-      this.theme=getInitialDraftpineTheme();
+      this.theme=getInitialDraftpineTheme(defaultMode);
       document.documentElement.dataset.theme=this.theme;
     },
     toggleTheme:function(){

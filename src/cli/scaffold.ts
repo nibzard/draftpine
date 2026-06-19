@@ -163,7 +163,7 @@ function homePage(projectName: string, browsable: boolean) {
         props: {
           eyebrow: "Website-first",
           title: "Public proof supports the page story",
-          body: "Concrete proof should serve the buying story instead of.",
+          body: "Concrete proof should serve the buying story instead of becoming decoration.",
           items: [
             { title: "No app shell required", body: "Default routes are Home, Pricing, About, Contact, and 404." },
             { title: "Content stays editable", body: "Page JSON owns copy and sample data for each public section." },

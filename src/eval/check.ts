@@ -1,7 +1,7 @@
 import path from "node:path";
 import type { Finding, Project } from "../domain/types.js";
 import { finding } from "../domain/findings.js";
-import { listFilesRecursive, pathExists, readText, toPosix } from "../io/fs.js";
+import { isPathInside, listFilesRecursive, pathExists, readText, toPosix } from "../io/fs.js";
 import { loadProject } from "../io/workspace.js";
 import { validateProjectContracts } from "../compiler/compiler.js";
 
@@ -9,7 +9,7 @@ export async function check(configPath = "draftpine.config.json", scope: "source
   const project = await loadProject(configPath);
   const findings = [...project.findings, ...validateProjectContracts(project)];
   findings.push(...(await checkThemeSafety(project)));
-  if (scope !== "source") {
+  if (scope !== "source" && !findings.some((item) => item.id.startsWith("config.unsafeOutput"))) {
     findings.push(...(await checkGenerated(project)));
   }
   return { project, findings };
@@ -38,7 +38,7 @@ async function checkThemeSafety(project: Project): Promise<Finding[]> {
   }
 
   if (project.theme.styles) {
-    findings.push(...checkCssRestrictions(project, project.theme.styles, project.theme.stylesFile ?? project.theme.sourceFile));
+    findings.push(...checkCssRestrictions(project.theme.styles, project.theme.stylesFile ?? project.theme.sourceFile));
   }
 
   return findings;
@@ -159,8 +159,20 @@ async function checkLocalLinks(project: Project, htmlFile: string, html: string)
     const target = withoutHash.endsWith("/")
       ? path.resolve(path.dirname(htmlFile), withoutHash, "index.html")
       : path.resolve(path.dirname(htmlFile), withoutHash);
-    const resolved = target.startsWith(outputDir) ? target : path.resolve(outputDir, "index.html");
-    if (!(await pathExists(resolved))) {
+    if (!isPathInside(outputDir, target)) {
+      findings.push(
+        finding({
+          id: "route.localLinkEscapesOutput",
+          severity: "error",
+          category: "route",
+          file: toPosix(path.relative(project.workspace.root, htmlFile)),
+          message: `Local link ${href} escapes the generated output directory.`,
+          evidence: { href, resolved: toPosix(path.relative(project.workspace.root, target)) }
+        })
+      );
+      continue;
+    }
+    if (!(await pathExists(target))) {
       findings.push(
         finding({
           id: "route.brokenLocalLink",
@@ -168,7 +180,7 @@ async function checkLocalLinks(project: Project, htmlFile: string, html: string)
           category: "route",
           file: toPosix(path.relative(project.workspace.root, htmlFile)),
           message: `Local link ${href} does not resolve to a generated file.`,
-          evidence: { href, resolved: toPosix(path.relative(project.workspace.root, resolved)) }
+          evidence: { href, resolved: toPosix(path.relative(project.workspace.root, target)) }
         })
       );
     }
@@ -176,7 +188,7 @@ async function checkLocalLinks(project: Project, htmlFile: string, html: string)
   return findings;
 }
 
-function checkCssRestrictions(project: Project, css: string, file: string): Finding[] {
+function checkCssRestrictions(css: string, file: string): Finding[] {
   const findings: Finding[] = [];
   const rules = [
     { id: "css.width100vw", pattern: /width\s*:\s*100vw\b/, message: "Theme CSS must not use width: 100vw because it commonly creates mobile overflow." },
@@ -198,7 +210,6 @@ function checkCssRestrictions(project: Project, css: string, file: string): Find
       );
     }
   }
-  void project;
   return findings;
 }
 

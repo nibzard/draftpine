@@ -5,12 +5,12 @@
       <h2>{{title}}</h2>
       {{#body}}<p>{{body}}</p>{{/body}}
     </div>
-    <div class="dp-feature-tabs" data-draftpine-interaction="tabs">
+    <div class="dp-feature-tabs" x-data="draftpineTabs(0)" data-draftpine-interaction="tabs">
       <div class="dp-tab-list" role="tablist" aria-label="{{title}}">
-        {{#tabs}}<button type="button">{{label}}</button>{{/tabs}}
+        {{#tabs}}<button type="button" role="tab" :aria-selected="active === {{index}}" :class="{ 'is-active': active === {{index}} }" @click="setActive({{index}})">{{label}}</button>{{/tabs}}
       </div>
       <div class="dp-tab-panels">
-        {{#tabs}}<article>
+        {{#tabs}}<article role="tabpanel" x-show="active === {{index}}" :data-draftpine-state="active === {{index}} ? 'active' : 'inactive'">
           <span>{{kicker}}</span>
           <h3>{{title}}</h3>
           <p>{{body}}</p>

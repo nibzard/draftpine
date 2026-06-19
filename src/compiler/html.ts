@@ -3,12 +3,10 @@ import type { Page, Project, Route } from "../domain/types.js";
 import { relativeAssetPrefix } from "../io/fs.js";
 import { renderShellTemplate, renderTemplateWithDiagnostics } from "../renderer/template.js";
 
-const themeInit =
-  "(function(){var t=localStorage.getItem('draftpine-theme');if(!t)t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;})();";
-
 export function renderRouteHtml(project: Project, page: Page): { html: string; templateErrors: string[] } {
   const assetPrefix = relativeAssetPrefix(page.outputFile);
   const depth = Math.max(0, page.outputFile.split("/").filter(Boolean).length - 1);
+  const defaultMode = project.workspace.config.theme.defaultMode;
   const templateErrors: string[] = [];
   const sections = page.sections
     .filter((section) => section.visibility !== "hidden")
@@ -42,13 +40,13 @@ export function renderRouteHtml(project: Project, page: Page): { html: string; t
   const context = {
     project: project.workspace.config.project,
     page,
-    theme: { name: project.theme.config.name },
+    theme: { name: project.theme.config.name, defaultMode },
     nav,
     footer: nav,
     sections,
     assetPrefix,
     depth,
-    themeInit,
+    themeInit: themeInit(defaultMode),
     themeToggle,
     styleHref: `${assetPrefix}${project.workspace.config.output.assetsDir}/draftpine.css`,
     runtimeHref: `${assetPrefix}${project.workspace.config.output.assetsDir}/draftpine.js`,
@@ -72,8 +70,9 @@ function defaultShell(context: Record<string, unknown>): string {
   const page = context.page as Page;
   const project = context.project as { name: string; description?: string };
   const depth = Number(context.depth ?? 0);
+  const defaultMode = String((context.theme as { defaultMode?: string }).defaultMode ?? "system");
   return `<!doctype html>
-<html lang="en" x-data="{...createDraftpineShell({depth:${depth}})}" x-init="init()">
+<html lang="en" x-data="{...createDraftpineShell({depth:${depth},defaultMode:'${escapeJsString(defaultMode)}'})}" x-init="init()">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -118,12 +117,20 @@ function routeHref(fromFile: string, targetPath: string): string {
   return `${prefix}${targetPath.replace(/^\//, "")}`;
 }
 
+function themeInit(defaultMode: "light" | "dark" | "system"): string {
+  return `(function(){var d='${defaultMode}';var t=localStorage.getItem('draftpine-theme');if(!t)t=d==='system'?(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):d;document.documentElement.dataset.theme=t;})();`;
+}
+
 function escapeText(value: unknown): string {
   return String(value ?? "")
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;");
+}
+
+function escapeJsString(value: string): string {
+  return value.replaceAll("\\", "\\\\").replaceAll("'", "\\'");
 }
 
 function escapeAttr(value: unknown): string {

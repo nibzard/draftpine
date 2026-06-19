@@ -2,17 +2,24 @@
 import path from "node:path";
 import { generate } from "../compiler/compiler.js";
 import { check } from "../eval/check.js";
-import { evalProject } from "../eval/browserEval.js";
+import { evalProject, setupEvalBrowser } from "../eval/browserEval.js";
 import { printFindings, printReport } from "../report/format.js";
 import { parseArgs, flagBoolean, flagString } from "./args.js";
 import { initProject, scaffoldBlock } from "./scaffold.js";
 import { dev } from "../dev/dev.js";
 import { generateDocs } from "../docs/docs.js";
 
+const VERSION = "3.0.0";
+
 async function main() {
   const parsed = parseArgs(normalizeWorkspaceFirstArgs(process.argv.slice(2)));
   const key = parsed.command.join(" ");
   const json = flagBoolean(parsed.flags, "json");
+
+  if (key === "version" || flagBoolean(parsed.flags, "version")) {
+    console.log(VERSION);
+    return;
+  }
 
   if (!key || key === "help" || flagBoolean(parsed.flags, "help")) {
     printHelp();
@@ -82,6 +89,13 @@ async function main() {
     return;
   }
 
+  if (key === "setup") {
+    const result = await setupEvalBrowser();
+    console.log(result.message);
+    process.exitCode = result.ok ? 0 : 1;
+    return;
+  }
+
   if (key === "docs") {
     await generateDocs(flagString(parsed.flags, "out", path.join("docs", "generated")) ?? path.join("docs", "generated"));
     console.log("Generated docs.");
@@ -92,7 +106,7 @@ async function main() {
 }
 
 function normalizeWorkspaceFirstArgs(args: string[]): string[] {
-  const commands = new Set(["init", "generate", "check", "eval", "dev", "new", "docs", "help"]);
+  const commands = new Set(["init", "generate", "check", "eval", "dev", "new", "docs", "setup", "version", "help"]);
   if (args.length >= 2 && !args[0].startsWith("-") && !commands.has(args[0]) && commands.has(args[1])) {
     return [args[1], args[0], ...args.slice(2)];
   }
@@ -110,12 +124,14 @@ function printHelp() {
 
 Commands:
   draftpine init [path] [--starter single-screen|browsable|docs] [--prompt "..."] [--force]
-  draftpine generate [--json]
-  draftpine check [--json] [--scope source|generated|all]
-  draftpine eval [--json] [--strict] [--ai-review] [--routes /,/pricing/]
+  draftpine generate [workspace] [--json]
+  draftpine check [workspace] [--json] [--scope source|generated|all]
+  draftpine eval [workspace] [--json] [--strict] [--ai-review] [--routes /,/pricing/]
+  draftpine setup
   draftpine dev [--port 5173] [--report-port 5174]
   draftpine new block <name> [--theme default]
   draftpine docs [--out docs/generated]
+  draftpine --version
 `);
 }
 

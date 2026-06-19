@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -66,5 +66,34 @@ describe("Draftpine v3 CLI internals", () => {
     expect(config.project.name).toBe("Membership Portal For Urban Garden Cooperative");
     const home = JSON.parse(await readFile(path.join(dir, "pages/home.json"), "utf8"));
     expect(home.sections[0].props.headline).toContain("Membership Portal For Urban Garden Cooperative");
+  });
+
+  it("reports requested eval routes that are not generated", async () => {
+    const dir = await mkdtemp(path.join(os.tmpdir(), "draftpine-v3-unknown-route-"));
+    tempDirs.push(dir);
+    await initProject(dir, "single-screen", true);
+    process.chdir(dir);
+
+    const report = await evalProject({ strict: true, routes: ["/missing/"] });
+
+    expect(report.deterministicStatus).toBe("fail");
+    expect(report.findings.some((item) => item.id === "route.unknownEvalRoute")).toBe(true);
+    expect(report.summary.screenshots).toBe(0);
+  });
+
+  it("rejects generated local links that escape the output directory", async () => {
+    const dir = await mkdtemp(path.join(os.tmpdir(), "draftpine-v3-escaping-link-"));
+    tempDirs.push(dir);
+    await initProject(dir, "single-screen", true);
+    const homePath = path.join(dir, "pages/home.json");
+    const home = JSON.parse(await readFile(homePath, "utf8"));
+    home.sections[0].props.primaryHref = "../outside.html";
+    await writeFile(homePath, `${JSON.stringify(home, null, 2)}\n`);
+    process.chdir(dir);
+
+    await generate();
+    const checked = await check();
+
+    expect(checked.findings.some((item) => item.id === "route.localLinkEscapesOutput")).toBe(true);
   });
 });

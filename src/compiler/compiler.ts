@@ -2,7 +2,7 @@ import path from "node:path";
 import { createHash } from "node:crypto";
 import type { CompileArtifact, Finding, Project } from "../domain/types.js";
 import { finding } from "../domain/findings.js";
-import { cleanDir, listFilesRecursive, readText, toPosix, writeJson, writeText } from "../io/fs.js";
+import { cleanDir, isPathInside, listFilesRecursive, readText, toPosix, writeJson, writeText } from "../io/fs.js";
 import { loadProject } from "../io/workspace.js";
 import { renderRouteHtml, routeOutputPath } from "./html.js";
 import { runtimeJs, siteDataJs } from "../runtime/runtime.js";
@@ -12,14 +12,15 @@ export async function generate(configPath = "draftpine.config.json"): Promise<{ 
   const outputDir = path.resolve(project.workspace.root, project.workspace.config.output.dir);
   const assetsDir = path.join(outputDir, project.workspace.config.output.assetsDir);
   const findings = [...project.findings, ...validateProjectContracts(project)];
+  const canWriteOutput = !findings.some((item) => item.id.startsWith("config.unsafeOutput"));
 
-  if (project.workspace.config.output.clean) {
+  if (canWriteOutput && project.workspace.config.output.clean) {
     await cleanDir(outputDir);
   }
 
   const routesRendered = [];
   const outputFiles: string[] = [];
-  if (!findings.some((item) => item.blocking)) {
+  if (canWriteOutput && !findings.some((item) => item.blocking)) {
     for (const route of project.routes) {
       const page = project.pages.find((item) => item.id === route.id);
       if (!page) continue;
@@ -45,14 +46,14 @@ export async function generate(configPath = "draftpine.config.json"): Promise<{ 
     }
   }
 
-  const css = await bundleCss(project);
-  const nav = project.routes.map((route) => ({ label: route.navLabel ?? route.title, path: route.path }));
-  await writeText(path.join(assetsDir, "draftpine.css"), css);
-  await writeText(path.join(assetsDir, "draftpine.js"), `${siteDataJs(nav)}\n${runtimeJs}`);
-  outputFiles.push(toPosix(path.relative(project.workspace.root, path.join(assetsDir, "draftpine.css"))));
-  outputFiles.push(toPosix(path.relative(project.workspace.root, path.join(assetsDir, "draftpine.js"))));
-
-  const sourceFiles = await listFilesRecursive(project.workspace.root);
+  const ignoredSourceDirs = [
+    path.join(project.workspace.root, ".git"),
+    path.join(project.workspace.root, "node_modules"),
+    path.join(project.workspace.root, "dist"),
+    path.resolve(project.workspace.root, "reports"),
+    outputDir
+  ];
+  const sourceFiles = await listFilesRecursive(project.workspace.root, { ignoreDirs: ignoredSourceDirs });
   const blocksUsed = unique(project.pages.flatMap((page) => page.sections.map((section) => section.block)));
   const manifest = {
     draftpineVersion: "3.0.0",
@@ -67,8 +68,17 @@ export async function generate(configPath = "draftpine.config.json"): Promise<{ 
     warnings: findings.filter((item) => item.severity === "warning"),
     outputFiles
   };
-  await writeJson(path.join(outputDir, "draftpine.manifest.json"), manifest);
-  outputFiles.push(toPosix(path.relative(project.workspace.root, path.join(outputDir, "draftpine.manifest.json"))));
+  if (canWriteOutput) {
+    const css = await bundleCss(project);
+    const nav = project.routes.map((route) => ({ label: route.navLabel ?? route.title, path: route.path }));
+    await writeText(path.join(assetsDir, "draftpine.css"), css);
+    await writeText(path.join(assetsDir, "draftpine.js"), `${siteDataJs(nav)}\n${runtimeJs}`);
+    outputFiles.push(toPosix(path.relative(project.workspace.root, path.join(assetsDir, "draftpine.css"))));
+    outputFiles.push(toPosix(path.relative(project.workspace.root, path.join(assetsDir, "draftpine.js"))));
+    manifest.outputFiles = outputFiles;
+    await writeJson(path.join(outputDir, "draftpine.manifest.json"), manifest);
+    outputFiles.push(toPosix(path.relative(project.workspace.root, path.join(outputDir, "draftpine.manifest.json"))));
+  }
 
   return {
     project,
@@ -86,6 +96,56 @@ export async function generate(configPath = "draftpine.config.json"): Promise<{ 
 
 export function validateProjectContracts(project: Project): Finding[] {
   const findings: Finding[] = [];
+  const outputDir = path.resolve(project.workspace.root, project.workspace.config.output.dir);
+  const assetsDir = path.resolve(outputDir, project.workspace.config.output.assetsDir);
+  const configFile = toPosix(path.relative(project.workspace.root, project.workspace.configPath));
+  const sourceDirs = [
+    path.resolve(project.workspace.root, project.workspace.config.source.pagesDir),
+    path.resolve(project.workspace.root, project.workspace.config.source.themesDir)
+  ];
+
+  if (outputDir === project.workspace.root || !isPathInside(project.workspace.root, outputDir)) {
+    findings.push(
+      finding({
+        id: "config.unsafeOutputDir",
+        severity: "error",
+        category: "source",
+        file: configFile,
+        message: "output.dir must stay inside the workspace and cannot be the workspace root.",
+        repair: { priority: 1, type: "edit-json", file: configFile, message: "Set output.dir to a generated directory such as prototype." }
+      })
+    );
+  } else {
+    for (const sourceDir of sourceDirs) {
+      if (isPathInside(sourceDir, outputDir) || isPathInside(outputDir, sourceDir)) {
+        findings.push(
+          finding({
+            id: "config.unsafeOutputDir",
+            severity: "error",
+            category: "source",
+            file: configFile,
+            message: "output.dir must not overlap source pages or theme directories.",
+            repair: { priority: 1, type: "edit-json", file: configFile, message: "Set output.dir outside pages/ and themes/, for example prototype." }
+          })
+        );
+        break;
+      }
+    }
+  }
+
+  if (!isPathInside(outputDir, assetsDir)) {
+    findings.push(
+      finding({
+        id: "config.unsafeOutputAssetsDir",
+        severity: "error",
+        category: "source",
+        file: configFile,
+        message: "output.assetsDir must stay inside output.dir.",
+        repair: { priority: 1, type: "edit-json", file: configFile, message: "Use a relative assets directory such as assets." }
+      })
+    );
+  }
+
   for (const route of project.routes) {
     const page = project.pages.find((item) => item.id === route.id);
     if (!page) continue;

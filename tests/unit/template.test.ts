@@ -16,4 +16,9 @@ describe("renderTemplate", () => {
     const result = renderTemplateWithDiagnostics("{{#items}}<p>{{label}}</p>", { items: [{ label: "One" }] });
     expect(result.errors.some((error) => error.includes("unclosed section items"))).toBe(true);
   });
+
+  it("bubbles diagnostics from nested section renders", () => {
+    const result = renderTemplateWithDiagnostics("{{#items}}<p>{{label}}{{#broken}}</p>{{/items}}", { items: [{ label: "One" }] });
+    expect(result.errors.some((error) => error.includes("unclosed section broken"))).toBe(true);
+  });
 });

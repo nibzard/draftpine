@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" x-data="{...createDraftpineShell({depth:{{depth}}})}" x-init="init()">
+<html lang="en" x-data="{...createDraftpineShell({depth:{{depth}},defaultMode:'{{theme.defaultMode}}'})}" x-init="init()">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -18,7 +18,7 @@
       <nav class="dp-container">
         <ul><li><strong><span class="dp-brand-mark">DP</span><span class="dp-brand-name">{{project.name}}</span></strong></li></ul>
         <ul class="dp-site-nav-links" data-draftpine-overflow="allowed">
-          {{#nav}}<li><a href="{{href}}">{{label}}</a></li>{{/nav}}
+          {{#nav}}<li><a href="{{href}}"{{#active}} aria-current="page"{{/active}}>{{label}}</a></li>{{/nav}}
           <li>{{{themeToggle}}}</li>
         </ul>
       </nav>

@@ -1,6 +1,10 @@
 import { mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+export interface ListFilesOptions {
+  ignoreDirs?: string[];
+}
+
 export async function pathExists(filePath: string): Promise<boolean> {
   try {
     await stat(filePath);
@@ -38,19 +42,27 @@ export async function listDirectories(dir: string): Promise<string[]> {
   return entries.filter((entry) => entry.isDirectory()).map((entry) => path.join(dir, entry.name));
 }
 
-export async function listFilesRecursive(dir: string): Promise<string[]> {
-  if (!(await pathExists(dir))) return [];
-  const entries = await readdir(dir, { withFileTypes: true });
+export async function listFilesRecursive(dir: string, options: ListFilesOptions = {}): Promise<string[]> {
+  const resolvedDir = path.resolve(dir);
+  if (!(await pathExists(resolvedDir))) return [];
+  const ignoredDirs = (options.ignoreDirs ?? []).map((item) => path.resolve(item));
+  const entries = await readdir(resolvedDir, { withFileTypes: true });
   const files: string[] = [];
   for (const entry of entries) {
-    const fullPath = path.join(dir, entry.name);
+    const fullPath = path.join(resolvedDir, entry.name);
     if (entry.isDirectory()) {
-      files.push(...(await listFilesRecursive(fullPath)));
+      if (ignoredDirs.some((ignoredDir) => isPathInside(ignoredDir, fullPath))) continue;
+      files.push(...(await listFilesRecursive(fullPath, { ignoreDirs: ignoredDirs })));
     } else {
       files.push(fullPath);
     }
   }
   return files;
+}
+
+export function isPathInside(parentPath: string, candidatePath: string): boolean {
+  const relative = path.relative(path.resolve(parentPath), path.resolve(candidatePath));
+  return relative === "" || (!!relative && !relative.startsWith("..") && !path.isAbsolute(relative));
 }
 
 export function toPosix(filePath: string): string {
