@@ -26,9 +26,9 @@ export function parseArgs(argv: string[]): ParsedArgs {
         flags[key] = value;
       }
       commandDone = true;
-    } else if (!commandDone && command.length < 2 && ["new", "test"].includes(command[0] ?? "") || (!commandDone && command.length === 0)) {
+    } else if ((!commandDone && command.length < 2 && ["new", "test"].includes(command[0] ?? "")) || (!commandDone && command.length === 0)) {
       command.push(arg);
-    } else if (!commandDone && command.length === 1 && ["primitive", "layout", "v1"].includes(arg)) {
+    } else if (!commandDone && command.length === 1 && ["block"].includes(arg)) {
       command.push(arg);
     } else {
       commandDone = true;

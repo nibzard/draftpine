@@ -1,9 +1,0 @@
-{
-  "schemaVersion": "2.0",
-  "name": "inspectorSidebar",
-  "namespace": "core",
-  "description": "Main content plus inspector/sidebar layout.",
-  "parameters": {},
-  "responsive": { "mobile": "stack" },
-  "overflow": "forbidden"
-}

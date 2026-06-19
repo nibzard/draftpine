@@ -1,0 +1,14 @@
+<section class="dp-section" data-block="steps">
+  <div class="dp-container dp-stack">
+    <div class="dp-section-heading">
+      <h2>{{title}}</h2>
+      {{#body}}<p>{{body}}</p>{{/body}}
+    </div>
+    <ol class="dp-steps">
+      {{#items}}<li>
+        <span>{{step}}</span>
+        <div><h3>{{title}}</h3><p>{{body}}</p></div>
+      </li>{{/items}}
+    </ol>
+  </div>
+</section>

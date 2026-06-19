@@ -1,15 +1,14 @@
 {
-  "schemaVersion": "2.0",
+  "schemaVersion": "3.0",
   "project": {
-    "name": "Draftpine v2",
-    "description": "Internal dogfood prototype for the Draftpine v2 compiler."
+    "name": "Draftpine V3",
+    "description": "Static Draftpine v3 prototype."
   },
   "source": {
-    "routes": "routes.json",
-    "contentDir": "content",
-    "recipesDir": "recipes",
-    "primitivesDir": "primitives",
-    "layoutsDir": "layouts"
+    "mode": "pages",
+    "pagesDir": "pages",
+    "theme": "default",
+    "themesDir": "themes"
   },
   "output": {
     "dir": "prototype",
@@ -17,20 +16,16 @@
     "assetsDir": "assets"
   },
   "theme": {
-    "profile": "productMarketing",
     "defaultMode": "light",
     "allowThemeToggle": true
-  },
-  "routeBudget": {
-    "defaultMaxRoutes": 7,
-    "largePrototypeRequiresApproval": true,
-    "representativeRoutesRequired": true
   },
   "eval": {
     "required": true,
     "strict": true,
-    "viewports": ["mobile", "desktop"],
-    "aiReview": "off",
-    "sampleStrategy": "route-type-plus-changed"
+    "viewports": [
+      "mobile",
+      "desktop"
+    ],
+    "aiReview": "off"
   }
 }

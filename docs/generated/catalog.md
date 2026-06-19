@@ -1,511 +1,412 @@
-# Draftpine Catalog
+# Draftpine v3 Catalog
 
-## Primitives
+## Pages
 
-### core.cardGrid
+### Home
 
-Grid of linked or static cards for features, outcomes, hubs, and related links.
+- Source: `pages/home.json`
+- Path: `/`
+- Type: `home`
 
-Variants: compact, spacious
+### Pricing
 
-Layouts: core.gridAuto, core.cardGrid
+- Source: `pages/pricing.json`
+- Path: `/pricing/`
+- Type: `pricing`
 
-Slots:
+### About
 
-- `title`: string
-- `description`: text
-- `items`: array required
+- Source: `pages/about.json`
+- Path: `/about/`
+- Type: `about`
 
-### core.codePanel
+### Contact
 
-Code or command panel with approved overflow containment.
+- Source: `pages/contact.json`
+- Path: `/contact/`
+- Type: `contact`
 
-Variants: default
+### Resources
 
-Layouts: core.stack
+- Source: `pages/resources.json`
+- Path: `/resources/`
+- Type: `resources`
 
-Slots:
+### 404
 
-- `title`: string required
-- `description`: text
-- `code`: code required
-- `language`: string
+- Source: `pages/not-found.json`
+- Path: `/404/`
+- Type: `not-found`
 
-### core.comparisonTable
+## Theme
 
-At-a-glance comparison table with approved horizontal overflow containment.
+Active theme: `default`
 
-Variants: compact
+Source: `themes/default/theme.json`
 
-Layouts: core.scrollX
-
-Slots:
-
-- `title`: string
-- `description`: text
-- `columns`: array required
-- `rows`: array required
-
-### core.dataTable
-
-Compact table/list view for operational dashboards and directories.
-
-Variants: compact, status
-
-Layouts: core.stack, core.scrollX
-
-Slots:
-
-- `title`: string required
-- `description`: text
-- `columns`: array
-- `rows`: array
-
-### core.decisionHero
-
-Compact decision-framed hero for pricing, comparison, and conversion pages.
-
-Variants: compact, centered
-
-Layouts: core.stack, core.split
-
-Slots:
-
-- `eyebrow`: string
-- `title`: string required
-- `description`: text required
-- `primaryAction`: action required
-- `secondaryAction`: action
-- `signal`: string
-
-### core.faq
-
-FAQ disclosure list.
-
-Variants: default
-
-Layouts: core.stack
-
-Slots:
-
-- `title`: string required
-- `items`: array required
-
-### core.filterableList
-
-Filterable list with empty state.
-
-Variants: default
-
-Layouts: core.stack
-
-Slots:
-
-- `title`: string required
-- `items`: array required
-- `empty`: object
-
-### core.finalCta
-
-Final call-to-action section.
-
-Variants: default, compact
-
-Layouts: core.stack
-
-Slots:
-
-- `title`: string required
-- `description`: text
-- `primaryAction`: action required
-- `secondaryAction`: action
-
-### core.footer
-
-Footer primitive used by generated shells.
-
-Variants: default
-
-Layouts: core.stack
-
-Slots:
-
-
-### core.heroProof
-
-Hero with primary copy, CTA, and concrete proof artifact.
-
-Variants: developer, marketing, app
-
-Layouts: core.split, core.stack, core.heroProof
-
-Slots:
-
-- `eyebrow`: string
-- `title`: string required
-- `description`: text required
-- `primaryAction`: action required
-- `secondaryAction`: action
-- `proof`: object required
-
-### core.metricBand
-
-Metric strip for dashboards and proof.
-
-Variants: compact
-
-Layouts: core.gridAuto
-
-Slots:
-
-- `items`: array required
-
-### core.modalForm
-
-Static contact or intent form modal interaction.
-
-Variants: default
-
-Layouts: core.stack
-
-Slots:
-
-- `title`: string required
-- `description`: text
-- `buttonLabel`: string required
-- `success`: string
-
-### core.pricingTable
-
-Plan cards or table for pricing decisions.
-
-Variants: threePlan, table, usage
-
-Layouts: core.gridAuto, core.scrollX
-
-Slots:
-
-- `title`: string
-- `description`: text
-- `items`: array required
-
-### core.productMockup
-
-A bounded product UI artifact card for showing workflow state, schedules, lists, and product chrome.
-
-Variants: calendar, workflow, dashboard
-
-Layouts: core.stack, core.gridAuto
-
-Slots:
-
-- `title`: string required
-- `description`: text
-- `toolbar`: array
-- `panels`: array required
-- `activity`: array
-
-### core.settingsList
-
-Grouped settings rows with visible states and actions.
-
-Variants: account, product
-
-Layouts: core.stack, core.sidebar
-
-Slots:
-
-- `title`: string required
-- `description`: text
-- `groups`: array
-
-### core.siteShell
-
-Compiler-owned site shell marker.
-
-Variants: default
-
-Layouts: core.stack
-
-Slots:
-
-
-### core.statePanel
-
-State panel for empty, error, warning, and success states.
-
-Variants: default
-
-Layouts: core.stack
-
-Slots:
-
-- `state`: enum required
-- `title`: string required
-- `description`: text
-- `action`: action
-
-### core.stepperFlow
-
-Step-based flow for onboarding, checkout, intake, and setup screens.
-
-Variants: checkout, onboarding, intake
-
-Layouts: core.stack, core.split
-
-Slots:
-
-- `title`: string required
-- `description`: text
-- `steps`: array
-- `summary`: object
-- `primaryAction`: action
-
-### core.supportPanel
-
-Support triage panel with help paths and current system state.
-
-Variants: triage, helpCenter
-
-Layouts: core.stack, core.gridTwo
-
-Slots:
-
-- `title`: string required
-- `description`: text
-- `options`: array
-- `status`: array
-
-### core.themeToggle
-
-Theme toggle primitive used by the shell.
-
-Variants: default
-
-Layouts: core.cluster
-
-Slots:
-
-
-### core.timelineFeed
-
-Narrative timeline or activity feed for editorial and product history pages.
-
-Variants: editorial, activity
-
-Layouts: core.stack
-
-Slots:
-
-- `title`: string required
-- `description`: text
-- `items`: array
-
-## Layouts
-
-### core.appShell
-
-Operational app shell layout for dashboard-like pages.
-
-Overflow: forbidden
-
-### core.cardGrid
-
-Responsive card grid layout.
-
-Overflow: forbidden
-
-### core.cluster
-
-Wrapping inline cluster for chips, actions, and meta rows.
-
-Overflow: forbidden
-
-### core.gridAuto
-
-Auto-fit responsive grid using safe minmax constraints.
-
-Overflow: forbidden
-
-### core.gridThree
-
-Three-column grid that collapses to one column on mobile.
-
-Overflow: forbidden
-
-### core.gridTwo
-
-Two-column grid that collapses to one column on mobile.
-
-Overflow: forbidden
-
-### core.heroProof
-
-Hero proof composition layout.
-
-Overflow: forbidden
-
-### core.inspectorSidebar
-
-Main content plus inspector/sidebar layout.
-
-Overflow: forbidden
-
-### core.scrollX
-
-Approved horizontal scroll wrapper for wide artifacts.
-
-Overflow: allowed
-
-### core.sidebar
-
-Sidebar and content layout that collapses on mobile.
-
-Overflow: forbidden
-
-### core.split
-
-Responsive two-column split that collapses on mobile.
-
-Overflow: forbidden
-
-### core.splitForm
-
-Form or intake layout with a summary rail.
-
-Overflow: forbidden
-
-### core.stack
-
-Vertical stack layout with controlled gaps.
-
-Overflow: forbidden
-
-### core.stepper
-
-Progressive flow layout for checkout and onboarding.
-
-Overflow: forbidden
-
-### core.tableList
-
-Dense table/list layout for record review pages.
-
-Overflow: conditional
-
-### core.timeline
-
-Timeline or activity layout for editorial and history pages.
-
-Overflow: forbidden
-
-### core.toolbar
-
-Wrapping toolbar for controls and actions.
-
-Overflow: forbidden
-
-## Route Types
-
-### appDashboard
-
-Present operational app state and primary workflow actions.
-
-Required primitives: core.metricBand
+## Blocks
 
 ### article
 
-Present long-form narrative content.
+Long-form public article content.
 
-Required primitives: none
+File: `themes/default/blocks/article.html`
 
-### checkout
+Required props: `title`
 
-Guide a user through review, confirmation, or purchase steps.
+### author-bio
 
-Required primitives: core.stepperFlow
+Author or contributor biography strip.
+
+File: `themes/default/blocks/author-bio.html`
+
+Required props: `name`
+
+### banner
+
+Slim announcement banner.
+
+File: `themes/default/blocks/banner.html`
+
+Required props: `body`
+
+### blog-list
+
+Public blog or editorial card list.
+
+File: `themes/default/blocks/blog-list.html`
+
+Required props: `posts`
+
+### callout
+
+Callout or CTA.
+
+File: `themes/default/blocks/callout.html`
+
+Required props: `title`
+
+### card-grid
+
+Repeated cards.
+
+File: `themes/default/blocks/card-grid.html`
+
+Required props: `items`
+
+### careers
+
+Careers intro with company perks.
+
+File: `themes/default/blocks/careers.html`
+
+Required props: `perks`
+
+### case-study
+
+Featured public case study with result metrics.
+
+File: `themes/default/blocks/case-study.html`
+
+Required props: `title`
+
+### case-study-grid
+
+Grid of public customer story summaries.
+
+File: `themes/default/blocks/case-study-grid.html`
+
+Required props: `items`
+
+### changelog
+
+Public changelog or release notes list.
+
+File: `themes/default/blocks/changelog.html`
+
+Required props: `items`
 
 ### comparison
 
-Help a user compare a product against an alternative.
+Comparison table.
 
-Required primitives: core.decisionHero, core.comparisonTable
+File: `themes/default/blocks/comparison.html`
+
+Required props: `columns`, `rows`
 
 ### contact
 
-Let users choose a contact path or submit intent.
+Public contact section with form and contact details.
 
-Required primitives: core.modalForm
+File: `themes/default/blocks/contact.html`
+
+Required props: `fields`
+
+Markers: primaryAction
+
+Accessibility: requires labels
+
+### cta-split
+
+Split call-to-action band with primary and secondary actions.
+
+File: `themes/default/blocks/cta-split.html`
+
+Required props: `title`
+
+Markers: primaryAction
 
 ### detail
 
-Explain one feature, use case, integration, or industry.
+Detail summary.
 
-Required primitives: core.heroProof, core.productMockup
+File: `themes/default/blocks/detail.html`
+
+Required props: `items`
 
 ### directory
 
-Help users browse, filter, and compare a set of entries.
+Filterable directory.
 
-Required primitives: core.filterableList
+File: `themes/default/blocks/directory.html`
 
-### docs
+Required props: `items`
 
-Explain usage or implementation.
+States: empty
 
-Required primitives: core.codePanel
+Interactions: filter
 
-### editorial
+### faq
 
-Present narrative content with proof, timeline, or related references.
+Accordion FAQ section.
 
-Required primitives: core.timelineFeed
+File: `themes/default/blocks/faq.html`
 
-### home
+Required props: `items`
 
-Introduce product/category, show proof, and drive the primary action.
+### feature-icons
 
-Required primitives: core.heroProof, core.productMockup, core.finalCta
+Icon-led feature cards.
 
-### hub
+File: `themes/default/blocks/feature-icons.html`
 
-Organize and link a route group.
+Required props: `items`
 
-Required primitives: core.cardGrid
+### feature-showcase
 
-### legal
+Two-column feature narrative with product artifact.
 
-Present legal or static policy content.
+File: `themes/default/blocks/feature-showcase.html`
 
-Required primitives: none
+Required props: `title`, `rows`
 
-### onboarding
+### feature-tabs
 
-Guide a user through first setup.
+Tabbed feature narrative for public pages.
 
-Required primitives: core.stepperFlow
+File: `themes/default/blocks/feature-tabs.html`
+
+Required props: `tabs`
+
+Interactions: tabs
+
+### form
+
+Static form mockup.
+
+File: `themes/default/blocks/form.html`
+
+Required props: `fields`
+
+Markers: primaryAction
+
+### hero
+
+Page hero with proof and primary action.
+
+File: `themes/default/blocks/hero.html`
+
+Required props: `headline`
+
+Markers: primaryAction
+
+### integrations-grid
+
+Public integrations or ecosystem grid.
+
+File: `themes/default/blocks/integrations-grid.html`
+
+Required props: `items`
+
+### job-list
+
+Public job listing rows.
+
+File: `themes/default/blocks/job-list.html`
+
+Required props: `jobs`
+
+### locations
+
+Office, event, or service area cards.
+
+File: `themes/default/blocks/locations.html`
+
+Required props: `locations`
+
+### logo-cloud
+
+Compact customer or integration logo row.
+
+File: `themes/default/blocks/logo-cloud.html`
+
+Required props: `logos`
+
+### metrics
+
+Metric strip.
+
+File: `themes/default/blocks/metrics.html`
+
+Required props: `items`
+
+### newsletter
+
+Email capture or update signup CTA.
+
+File: `themes/default/blocks/newsletter.html`
+
+Required props: `title`
+
+Markers: primaryAction
+
+### not-found
+
+Public 404 or empty route page.
+
+File: `themes/default/blocks/not-found.html`
+
+Required props: `title`
+
+Markers: primaryAction
+
+### press-logos
+
+Press mentions or short external proof quotes.
+
+File: `themes/default/blocks/press-logos.html`
+
+Required props: `items`
 
 ### pricing
 
-Help a user make a buying or plan decision.
+Pricing cards.
 
-Required primitives: core.decisionHero, core.pricingTable
+File: `themes/default/blocks/pricing.html`
+
+Required props: `plans`
+
+### proof
+
+Product proof panel.
+
+File: `themes/default/blocks/proof.html`
+
+Required props: `title`
+
+### resource-list
+
+Public article, guide, or resource cards.
+
+File: `themes/default/blocks/resource-list.html`
+
+Required props: `items`
+
+### rich-text
+
+Public legal, terms, or simple content body.
+
+File: `themes/default/blocks/rich-text.html`
+
+Required props: `title`
+
+### section-header
+
+Standalone section heading with optional action.
+
+File: `themes/default/blocks/section-header.html`
+
+Required props: `title`
 
 ### settings
 
-Configure product or account behavior.
+Settings groups.
 
-Required primitives: core.settingsList
+File: `themes/default/blocks/settings.html`
 
-### support
+Required props: `groups`
 
-Let users diagnose an issue and choose a help path.
+### social-proof
 
-Required primitives: core.supportPanel
+Public proof section with compact stats.
 
-### utility
+File: `themes/default/blocks/social-proof.html`
 
-Support a narrow utility workflow.
+Required props: `title`, `stats`
 
-Required primitives: none
+### steps
+
+Process or onboarding steps.
+
+File: `themes/default/blocks/steps.html`
+
+Required props: `items`
+
+### table
+
+Static data table.
+
+File: `themes/default/blocks/table.html`
+
+Required props: `columns`, `rows`
+
+### team
+
+People grid for about or company pages.
+
+File: `themes/default/blocks/team.html`
+
+Required props: `people`
+
+### testimonial
+
+Customer quote or reviewer proof.
+
+File: `themes/default/blocks/testimonial.html`
+
+Required props: `quote`, `author`
+
+### testimonial-grid
+
+Multiple public-facing customer quotes.
+
+File: `themes/default/blocks/testimonial-grid.html`
+
+Required props: `items`
+
+### timeline
+
+Timeline feed.
+
+File: `themes/default/blocks/timeline.html`
+
+Required props: `items`
+
+### values
+
+Values or principles grid.
+
+File: `themes/default/blocks/values.html`
+
+Required props: `items`
 

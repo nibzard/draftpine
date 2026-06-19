@@ -1,7 +1,0 @@
-[data-primitive="core.statePanel"] .dp-panel {
-  max-width: var(--dp-container-sm);
-}
-[data-primitive="core.statePanel"] [data-draftpine-state="success"] {
-  border-color: color-mix(in srgb, var(--dp-success), transparent 48%);
-  background: color-mix(in srgb, var(--dp-success), var(--dp-card) 92%);
-}

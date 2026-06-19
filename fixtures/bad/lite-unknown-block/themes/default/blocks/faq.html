@@ -1,0 +1,14 @@
+<section class="dp-section" data-block="faq">
+  <div class="dp-container dp-faq">
+    <div class="dp-section-heading">
+      <h2>{{title}}</h2>
+      {{#body}}<p>{{body}}</p>{{/body}}
+    </div>
+    <div class="dp-faq-list">
+      {{#items}}<details>
+        <summary>{{question}}</summary>
+        <p>{{answer}}</p>
+      </details>{{/items}}
+    </div>
+  </div>
+</section>

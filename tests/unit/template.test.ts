@@ -1,13 +1,19 @@
 import { describe, expect, it } from "vitest";
-import { renderTemplate } from "../../src/renderer/template.js";
+import { renderTemplate, renderTemplateWithDiagnostics } from "../../src/renderer/template.js";
 
 describe("renderTemplate", () => {
-  it("renders nested blocks in the correct context", () => {
-    const html = renderTemplate("{{#if title}}<h2>{{title}}</h2>{{#each items}}{{#if body}}<p>{{body}}</p>{{/if}}{{/each}}{{/if}}", {
-      title: "Bake case",
-      items: [{ body: "Country sourdough" }, { body: "Rye boule" }]
+  it("renders escaped variables, arrays, and inverted sections", () => {
+    const html = renderTemplate("{{title}}{{#items}}<p>{{label}}</p>{{/items}}{{^empty}}<b>empty</b>{{/empty}}", {
+      title: "<Hello>",
+      items: [{ label: "One" }, { label: "Two" }],
+      empty: []
     });
 
-    expect(html).toBe("<h2>Bake case</h2><p>Country sourdough</p><p>Rye boule</p>");
+    expect(html).toBe("&lt;Hello&gt;<p>One</p><p>Two</p><b>empty</b>");
+  });
+
+  it("reports unclosed sections without evaluating JavaScript", () => {
+    const result = renderTemplateWithDiagnostics("{{#items}}<p>{{label}}</p>", { items: [{ label: "One" }] });
+    expect(result.errors.some((error) => error.includes("unclosed section items"))).toBe(true);
   });
 });

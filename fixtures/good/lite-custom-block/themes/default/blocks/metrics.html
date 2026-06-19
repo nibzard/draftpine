@@ -1,0 +1,9 @@
+<section class="dp-section" aria-label="{{title}}" data-block="metrics">
+  <div class="dp-container dp-metrics-shell">
+    {{#title}}<h2 class="dp-metrics-title">{{title}}</h2>{{/title}}
+    <div class="dp-metrics">
+      {{#items}}<article class="dp-metric"><strong>{{value}}</strong><span>{{label}}</span></article>{{/items}}
+      {{^items}}<p>No metrics yet.</p>{{/items}}
+    </div>
+  </div>
+</section>

@@ -1,3 +1,0 @@
-# badOverflow
-
-Bad fixture primitive.

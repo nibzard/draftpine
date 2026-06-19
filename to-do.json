@@ -1,0 +1,1377 @@
+{
+  "schema_version": "1.0",
+  "title": "Draftpine Lite final-shape implementation plan",
+  "objective": "Rewrite Draftpine around the v3 page JSON, editable HTML theme, static compiler, and strict eval model without preserving v2 source compatibility.",
+  "status": "complete",
+  "source_files": [
+    "README.md",
+    "SPECIFICATION.md",
+    "SPECIFICATION_v3.md",
+    "docs/architecture.md",
+    "docs/authoring.md",
+    "draftpine-work-summary.md"
+  ],
+  "created_at": "2026-06-18",
+  "updated_at": "2026-06-18",
+  "principles": [
+    "Keep the evaluator as the product differentiator; simplify authoring, not quality control.",
+    "Make the default authoring model one page JSON file per route, with sections that point at editable theme blocks.",
+    "Keep generated prototypes static, GitHub Pages safe, and free of bundlers, frontend frameworks, routers, and backends.",
+    "Make custom blocks easy to create locally, while reserving stricter manifests and fixtures for distributable theme packages.",
+    "Remove the current recipe/content/primitive/layout default model when it conflicts with the v3 page/theme/block model.",
+    "Prefer explicit files and boring data over hidden framework behavior."
+  ],
+  "assumptions": [
+    "Draftpine v3 is the default and only supported source model in this repository.",
+    "Users edit pages/*.json and themes/<theme> files; prototype/ and reports/ are generated output.",
+    "The TypeScript CLI, Zod schemas, Vitest tests, and Playwright eval harness remain the foundation.",
+    "Legacy v2 projects must be manually re-authored as v3 pages and blocks; source compatibility is not preserved."
+  ],
+  "non_goals": [
+    "Do not introduce React, Vue, Svelte, Tailwind, Bootstrap, a bundler, a router, or a backend runtime.",
+    "Do not build a visual editor.",
+    "Do not support arbitrary JavaScript execution inside block templates.",
+    "Do not preserve the v2 route/recipe/content/primitive/layout source model."
+  ],
+  "decision_log": [
+    {
+      "id": "D001",
+      "date": "2026-06-18",
+      "decision": "Use page JSON plus editable HTML themes as the default authoring model.",
+      "rationale": "The current split between routes, recipes, content, primitives, and layouts is coherent but too ceremonial for first-contact prototype work. One page file per route reduces coordination overhead while keeping output compiler-owned.",
+      "implications": [
+        "The default user journey shifts from editing several source files to editing pages/*.json and themes/default blocks.",
+        "Compiler internals can still normalize Lite pages into the current project model where useful.",
+        "Documentation and AGENTS.md must stop teaching direct root HTML editing or old Python scripts."
+      ]
+    },
+    {
+      "id": "D002",
+      "date": "2026-06-18",
+      "decision": "Keep blocks as external HTML partials with a tiny safe template language.",
+      "rationale": "HTML partials make themes obvious to inspect and edit. A constrained Mustache-like language supports text, arrays, and conditionals without turning themes into mini applications.",
+      "implications": [
+        "Block authoring can be learned by opening themes/default/blocks/*.html.",
+        "Template rendering must escape values by default and provide deliberate raw HTML escape hatches only if they are explicitly designed and checked.",
+        "Block metadata can stay light for local themes and become stricter for published theme packs."
+      ]
+    },
+    {
+      "id": "D003",
+      "date": "2026-06-18",
+      "decision": "Retain strict eval as the release gate for Lite output.",
+      "rationale": "Draftpine's strongest value is catching layout, accessibility, runtime, and route-safety issues after rendering. Simplifying authoring should not weaken that loop.",
+      "implications": [
+        "Every Lite fixture must run through generate, check, and strict eval.",
+        "Theme and block changes must be evaluated through screenshots, mobile overflow checks, console error checks, labels, primary actions, and unresolved template marker checks.",
+        "Reports should point back to page JSON and theme block files when possible."
+      ]
+    },
+    {
+      "id": "D004",
+      "date": "2026-06-18",
+      "decision": "Implement Draftpine v3 as a v3-only source model with no v2 compatibility path.",
+      "rationale": "The rewrite objective explicitly rejected source compatibility and made SPECIFICATION_v3.md the contract. Removing compatibility branches keeps the compiler and docs aligned around pages, themes, blocks, prototype output, reports, and strict eval.",
+      "implications": [
+        "draftpine init creates pages and themes by default.",
+        "draftpine generate/check/eval load pages/*.json and themes/<theme> only.",
+        "Old routes, recipes, primitive manifests, layout manifests, and v2 fixtures are removed from active implementation."
+      ]
+    }
+  ],
+  "open_questions": [
+    {
+      "id": "Q001",
+      "question": "Should Lite become schemaVersion 3.0, or should it be introduced as schemaVersion 2.1 with a source.mode field?",
+      "owner": "product-engineering",
+      "status": "answered",
+      "resolution": "Use schemaVersion 3.0 immediately."
+    },
+    {
+      "id": "Q002",
+      "question": "Should routes remain in routes.json for multi-page projects, or can pages/*.json be discovered by convention and generate the route map?",
+      "owner": "product-engineering",
+      "status": "answered",
+      "resolution": "Discover public routes from pages/*.json in stable priority/path order."
+    },
+    {
+      "id": "Q003",
+      "question": "How strict should local theme block metadata be before a block is considered valid?",
+      "owner": "product-engineering",
+      "status": "answered",
+      "resolution": "Local theme block metadata requires a file and may declare required props, markers, states, and interactions."
+    }
+  ],
+  "milestones": [
+    {
+      "id": "M01",
+      "title": "Product cut and docs alignment",
+      "description": "Lock the simpler product shape, remove stale Python/static-starter instructions from the agent path, and document the new default mental model.",
+      "outcome": "A contributor or agent can understand that Draftpine Lite means page JSON, editable HTML themes, static generation, and eval.",
+      "task_ids": [
+        "T001",
+        "T002",
+        "T003"
+      ]
+    },
+    {
+      "id": "M02",
+      "title": "Lite source model",
+      "description": "Define, validate, and load the page-first source shape without requiring separate recipes and content files.",
+      "outcome": "Draftpine can read pages/*.json and normalize them into renderable routes and sections.",
+      "task_ids": [
+        "T004",
+        "T005",
+        "T006",
+        "T007"
+      ]
+    },
+    {
+      "id": "M03",
+      "title": "Editable theme blocks",
+      "description": "Create the theme directory contract, block metadata, safe template renderer, and default block set.",
+      "outcome": "A user can edit themes/default/blocks/*.html and themes/default/styles.css, then regenerate a valid static prototype.",
+      "task_ids": [
+        "T008",
+        "T009",
+        "T010",
+        "T011",
+        "T012"
+      ]
+    },
+    {
+      "id": "M04",
+      "title": "Compiler integration",
+      "description": "Render Lite pages through the existing static output pipeline while preserving relative links, assets, shell behavior, and manifest reporting.",
+      "outcome": "draftpine generate produces prototype/ output from Lite pages and theme blocks.",
+      "task_ids": [
+        "T013",
+        "T014",
+        "T015",
+        "T016"
+      ]
+    },
+    {
+      "id": "M05",
+      "title": "Eval and repair loop",
+      "description": "Make strict eval point findings back to Lite source files and add fixtures that prove the new model catches real failures.",
+      "outcome": "draftpine check and draftpine eval remain the hard gate for Lite projects.",
+      "task_ids": [
+        "T017",
+        "T018",
+        "T019",
+        "T020"
+      ]
+    },
+    {
+      "id": "M06",
+      "title": "Migration and release readiness",
+      "description": "Provide migration tooling, compatibility guidance, docs, and release checks for the simpler default path.",
+      "outcome": "Existing v2 projects can move toward Lite intentionally, and new users start in Lite by default.",
+      "task_ids": [
+        "T021",
+        "T022",
+        "T023",
+        "T024",
+        "T025"
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "T001",
+      "title": "Write the Draftpine Lite product brief",
+      "priority": 1,
+      "status": "done",
+      "phase": "strategy",
+      "type": "design",
+      "details": "Create a short product brief that defines the final shape: pages declare intent and data, themes provide editable HTML blocks, Draftpine compiles static output, and eval remains the quality gate. The brief should explicitly state what gets simpler, what remains from v2, and what moves into an advanced layer.",
+      "rationale": "The current repository has a working v2 compiler/evaluator, but the default authoring surface is larger than necessary. A crisp product brief prevents implementation from drifting into another parallel framework.",
+      "steps": [
+        "Add a docs/lite.md or equivalent concept document.",
+        "Define the default user journey in five commands or fewer.",
+        "Describe the relationship between Lite pages, themes, blocks, generated output, and eval reports.",
+        "List what stays advanced-only: primitive manifests, layout manifests, extension fixtures, and deep route-type contracts.",
+        "Document compatibility expectations for existing v2 projects."
+      ],
+      "acceptance_criteria": [
+        "The brief contains a one-sentence product definition.",
+        "The brief includes at least one concrete page JSON example and one theme block example.",
+        "The brief names the default files users edit and the generated files users should not edit.",
+        "The brief explicitly says eval remains required for quality."
+      ],
+      "validation": [
+        "pnpm typecheck",
+        "pnpm test"
+      ],
+      "risks": [
+        "If the brief is too implementation-heavy, it will not clarify the product cut.",
+        "If it ignores current v2, the migration path will be unclear."
+      ],
+      "files": [
+        "docs/lite.md",
+        "README.md"
+      ],
+      "depends_on": [],
+      "tags": [
+        "lite",
+        "product",
+        "docs"
+      ],
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18"
+    },
+    {
+      "id": "T002",
+      "title": "Replace stale AGENTS.md workflow with the TypeScript Lite workflow",
+      "priority": 1,
+      "status": "done",
+      "phase": "docs",
+      "type": "documentation",
+      "details": "Rewrite AGENTS.md so agents no longer look for root index.html, styles.css, app.js, patterns/, examples/, scripts/check.py, scripts/visual_qa.py, or deploy_pages.py. The new instructions should teach the current TypeScript commands and the Lite source files once they exist.",
+      "rationale": "An external review found AGENTS.md to be the clearest mismatch in the repository. It currently sends agents down the old static-starter path and conflicts with README.md, package.json, and SPECIFICATION.md.",
+      "steps": [
+        "Remove old Python script references.",
+        "Replace direct root HTML editing instructions with page JSON and theme block editing instructions.",
+        "Document the correct health checks: pnpm draftpine generate, pnpm draftpine check, pnpm draftpine eval --strict, pnpm test, and pnpm typecheck.",
+        "Keep the high-level quality bar around static output, responsive layout, primary action, accessibility, and GitHub Pages-safe links.",
+        "Add a short note that generated prototype/ output should not be hand-edited."
+      ],
+      "acceptance_criteria": [
+        "AGENTS.md no longer mentions scripts/check.py or scripts/visual_qa.py.",
+        "AGENTS.md no longer instructs agents to edit root index.html as the default source.",
+        "AGENTS.md names Lite source files and TypeScript CLI checks.",
+        "The instructions remain concise enough for agents to follow."
+      ],
+      "validation": [
+        "rg -n \"scripts/check.py|visual_qa.py|root wireframe|patterns/|examples/\" AGENTS.md exits with no stale workflow hits",
+        "pnpm typecheck"
+      ],
+      "risks": [
+        "Updating AGENTS.md before Lite exists can overpromise commands or files.",
+        "Leaving both old and new workflows in AGENTS.md can make agents choose incorrectly."
+      ],
+      "files": [
+        "AGENTS.md"
+      ],
+      "depends_on": [
+        "T001"
+      ],
+      "tags": [
+        "agents",
+        "docs",
+        "cleanup"
+      ],
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18"
+    },
+    {
+      "id": "T003",
+      "title": "Define naming and compatibility strategy for Lite",
+      "priority": 1,
+      "status": "done",
+      "phase": "strategy",
+      "type": "design",
+      "details": "Decide whether the simpler model is called Lite, page mode, theme mode, or Draftpine v3, and decide how it coexists with schemaVersion 2.0 projects. This task should produce explicit rules for default init behavior and legacy support.\n\nImplementation note: Resolved as Draftpine v3 with schemaVersion 3.0 and no v2 source compatibility.",
+      "rationale": "The implementation will touch schemas, CLI init, docs, fixtures, and migration. Without a compatibility decision, every task has to guess whether it is adding a mode or replacing the product.",
+      "steps": [
+        "Compare three options: source.mode = lite in schemaVersion 2.0, schemaVersion 2.1 with Lite pages, and schemaVersion 3.0.",
+        "Choose the option that minimizes churn while keeping docs honest.",
+        "Define whether current recipes/content projects remain supported indefinitely or only through migration.",
+        "Record the decision in SPECIFICATION.md or docs/lite.md.",
+        "Update this to-do file if task scope changes."
+      ],
+      "acceptance_criteria": [
+        "The chosen compatibility strategy is documented.",
+        "The strategy answers what draftpine init creates by default.",
+        "The strategy answers whether draftpine generate supports both current v2 and Lite sources.",
+        "The strategy identifies any deprecation warnings that should exist."
+      ],
+      "validation": [
+        "pnpm typecheck"
+      ],
+      "risks": [
+        "A schemaVersion 3.0 jump may be cleaner but could make the current implementation feel abandoned.",
+        "A source.mode flag may preserve compatibility but add branching complexity."
+      ],
+      "files": [
+        "SPECIFICATION.md",
+        "docs/lite.md",
+        "draftpine.config.json"
+      ],
+      "depends_on": [
+        "T001"
+      ],
+      "tags": [
+        "compatibility",
+        "schema",
+        "product"
+      ],
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18"
+    },
+    {
+      "id": "T004",
+      "title": "Design the Lite page JSON schema",
+      "priority": 1,
+      "status": "done",
+      "phase": "source-model",
+      "type": "implementation",
+      "details": "Add a Zod schema for a page-first source file. A Lite page should include title, path, route type, optional description, optional audience, primary action, and an ordered sections array where each section names a block and passes props.",
+      "rationale": "The page schema is the core simplification. It replaces the need for users to keep routes, recipes, and content in sync for ordinary prototypes.",
+      "steps": [
+        "Add litePageSchema to src/schemas/sourceSchemas.ts or a dedicated Lite schema module.",
+        "Model section props as structured unknown data but validate the common fields used by default blocks.",
+        "Support optional section id, state, interaction, and slot fields without exposing layout manifests.",
+        "Require enough route metadata to generate a valid route and report findings against the right source file.",
+        "Add unit tests for valid and invalid Lite pages."
+      ],
+      "acceptance_criteria": [
+        "A minimal Lite page with one hero block validates.",
+        "A dashboard Lite page with repeated metric and table data validates.",
+        "Invalid paths, missing block names, duplicate section ids, and missing titles fail with clear errors.",
+        "The schema does not require recipe or content files."
+      ],
+      "validation": [
+        "pnpm typecheck",
+        "pnpm test -- tests/unit/schemas.test.ts"
+      ],
+      "risks": [
+        "If props are too loose, errors move from source validation to broken rendered HTML.",
+        "If props are too strict, custom blocks become hard to author."
+      ],
+      "files": [
+        "src/schemas/sourceSchemas.ts",
+        "src/domain/types.ts",
+        "tests/unit/schemas.test.ts"
+      ],
+      "depends_on": [
+        "T003"
+      ],
+      "tags": [
+        "lite",
+        "schema",
+        "source"
+      ],
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18"
+    },
+    {
+      "id": "T005",
+      "title": "Define Lite project configuration and page discovery",
+      "priority": 1,
+      "status": "done",
+      "phase": "source-model",
+      "type": "implementation",
+      "details": "Extend project config so a Lite project can point at a pages directory and a theme directory. Decide whether routes are discovered from pages/*.json or declared explicitly in routes.json, then implement the chosen behavior.",
+      "rationale": "Users should not need to maintain duplicate route metadata unless they are building a large or carefully ordered browsable prototype. Page discovery can make the default path much smaller.",
+      "steps": [
+        "Add config fields for source.mode, source.pagesDir, and source.themeDir if the compatibility strategy chooses a mode flag.",
+        "Implement deterministic page file discovery with stable ordering by priority, path, or file name.",
+        "Support explicit route ordering when needed so browsable prototypes remain controllable.",
+        "Emit clear findings for duplicate paths, duplicate ids, missing home page, or invalid route files.",
+        "Add tests for discovered pages and explicit routes."
+      ],
+      "acceptance_criteria": [
+        "A project with pages/home.json can generate a home route without recipes/home.json.",
+        "A project with multiple page files produces stable nav ordering.",
+        "Duplicate paths produce a source finding before rendering.",
+        "Existing v2 projects still load through the current path if compatibility requires it."
+      ],
+      "validation": [
+        "pnpm typecheck",
+        "pnpm test"
+      ],
+      "risks": [
+        "Automatic discovery can make route ordering feel magical.",
+        "Supporting both discovered and explicit routes can create ambiguous precedence rules."
+      ],
+      "files": [
+        "src/io/workspace.ts",
+        "src/domain/types.ts",
+        "src/schemas/sourceSchemas.ts",
+        "tests/unit/schemas.test.ts",
+        "tests/unit/compiler.test.ts"
+      ],
+      "depends_on": [
+        "T004"
+      ],
+      "tags": [
+        "lite",
+        "routes",
+        "config"
+      ],
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18"
+    },
+    {
+      "id": "T006",
+      "title": "Normalize Lite pages into the compiler's internal project model",
+      "priority": 1,
+      "status": "done",
+      "phase": "source-model",
+      "type": "implementation",
+      "details": "Create a normalization layer that turns Lite page files into the route and section structures the compiler can render. This can be a direct Lite render model or an adapter into the existing Project shape.",
+      "rationale": "A normalization boundary keeps the compiler from being rewritten all at once and makes it possible to support existing v2 sources beside Lite sources.",
+      "steps": [
+        "Introduce a function such as loadLiteProject or normalizeLiteProject.",
+        "Map page title, path, type, and priority into route metadata.",
+        "Map sections into renderable block references with source file provenance.",
+        "Preserve enough source location information for findings and repair actions.",
+        "Add tests that compare normalized output for one-page and multi-page projects."
+      ],
+      "acceptance_criteria": [
+        "The normalized project includes public routes, content props, theme selection, and block references.",
+        "Findings can identify the page JSON file and section id that caused an issue.",
+        "The normalization layer is covered by unit tests.",
+        "Current v2 project loading remains unchanged unless source.mode selects Lite."
+      ],
+      "validation": [
+        "pnpm typecheck",
+        "pnpm test -- tests/unit/compiler.test.ts"
+      ],
+      "risks": [
+        "Adapting Lite into the current primitive model may leak old concepts back into the user-facing model.",
+        "Creating a parallel render model may duplicate compiler behavior."
+      ],
+      "files": [
+        "src/io/workspace.ts",
+        "src/compiler/compiler.ts",
+        "src/domain/types.ts",
+        "tests/unit/compiler.test.ts"
+      ],
+      "depends_on": [
+        "T005"
+      ],
+      "tags": [
+        "lite",
+        "normalization",
+        "compiler"
+      ],
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18"
+    },
+    {
+      "id": "T007",
+      "title": "Create Lite starter fixtures",
+      "priority": 1,
+      "status": "done",
+      "phase": "source-model",
+      "type": "test",
+      "details": "Add good and bad Lite fixtures that exercise the new source model before the full theme renderer is complete. Good fixtures should include single-screen, browsable, and dashboard-like examples. Bad fixtures should cover missing primary action data, duplicate routes, unknown blocks, and malformed props.",
+      "rationale": "Fixtures make the simplification concrete and prevent regressions while implementation is still moving.",
+      "steps": [
+        "Add fixtures/good/lite-basic.",
+        "Add fixtures/good/lite-browsable.",
+        "Add fixtures/bad/lite-unknown-block.",
+        "Add fixtures/bad/lite-duplicate-route.",
+        "Add integration tests that assert expected pass/fail findings."
+      ],
+      "acceptance_criteria": [
+        "Good Lite fixtures pass source validation.",
+        "Bad Lite fixtures fail for the intended finding ids.",
+        "Fixture names and content reflect the simpler page/theme/block model.",
+        "The fixture corpus can run in CI with the current test command."
+      ],
+      "validation": [
+        "pnpm test:corpus",
+        "pnpm test"
+      ],
+      "risks": [
+        "Adding fixtures too early may require churn as the Lite schema changes.",
+        "Bad fixtures should fail for precise reasons, not incidental implementation gaps."
+      ],
+      "files": [
+        "fixtures/good/lite-basic",
+        "fixtures/good/lite-browsable",
+        "fixtures/bad/lite-unknown-block",
+        "fixtures/bad/lite-duplicate-route",
+        "tests/integration/fixtures.test.ts"
+      ],
+      "depends_on": [
+        "T006"
+      ],
+      "tags": [
+        "fixtures",
+        "lite",
+        "tests"
+      ],
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18"
+    },
+    {
+      "id": "T008",
+      "title": "Define the theme directory contract",
+      "priority": 1,
+      "status": "done",
+      "phase": "theme-system",
+      "type": "implementation",
+      "details": "Introduce a theme contract with theme.json, shell.html, styles.css, and blocks/*.html. Keep local theme metadata light: block file path, required props, optional markers, optional interactions, optional states, and a short description.",
+      "rationale": "Editable external HTML is the major simplification. The contract must be explicit enough for validation and docs, but not as heavy as current primitive/layout manifests.",
+      "steps": [
+        "Add a themeSchema and block metadata schema.",
+        "Define required theme files and their allowed locations.",
+        "Decide whether shell.html is required or whether Draftpine provides a default shell.",
+        "Validate that every registered block file exists.",
+        "Validate that registered block names are stable and safe for JSON references."
+      ],
+      "acceptance_criteria": [
+        "A theme with theme.json, shell.html, styles.css, and blocks/hero.html validates.",
+        "Missing block files produce source findings.",
+        "Unknown blocks referenced by pages produce source findings.",
+        "Theme metadata is shorter and easier to author than primitive manifests."
+      ],
+      "validation": [
+        "pnpm typecheck",
+        "pnpm test -- tests/unit/schemas.test.ts"
+      ],
+      "risks": [
+        "A too-light theme contract may make eval findings vague.",
+        "A too-heavy theme contract will recreate the primitive system under a different name."
+      ],
+      "files": [
+        "src/schemas/sourceSchemas.ts",
+        "src/registry/registry.ts",
+        "src/domain/types.ts",
+        "themes/default/theme.json"
+      ],
+      "depends_on": [
+        "T004"
+      ],
+      "tags": [
+        "theme",
+        "blocks",
+        "schema"
+      ],
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18"
+    },
+    {
+      "id": "T009",
+      "title": "Implement a safe tiny template renderer for theme blocks",
+      "priority": 1,
+      "status": "done",
+      "phase": "theme-system",
+      "type": "implementation",
+      "details": "Build or adapt a constrained Mustache-like renderer for block templates. It should support escaped variables, arrays, simple conditionals, and missing-value behavior that produces actionable findings rather than broken pages.",
+      "rationale": "HTML blocks need dynamic data, but arbitrary JavaScript in templates would make static generation harder to reason about and harder to evaluate safely.",
+      "steps": [
+        "Define supported syntax: {{value}}, {{#items}}...{{/items}}, and {{^items}}...{{/items}}.",
+        "Escape inserted text by default.",
+        "Decide whether raw HTML insertion is unsupported or requires a deliberately named syntax and a check.",
+        "Return unresolved marker findings for missing required values.",
+        "Add renderer unit tests for nested data, arrays, empty states, escaping, and unresolved markers."
+      ],
+      "acceptance_criteria": [
+        "The renderer can render hero, metrics, table, pricing, and form blocks.",
+        "Injected values are escaped by default.",
+        "Unclosed sections and unknown helpers produce deterministic errors.",
+        "No arbitrary JavaScript evaluation is supported."
+      ],
+      "validation": [
+        "pnpm typecheck",
+        "pnpm test -- tests/unit/template.test.ts"
+      ],
+      "risks": [
+        "A custom template renderer can grow into a maintenance burden.",
+        "Too few template features may make realistic blocks awkward."
+      ],
+      "files": [
+        "src/renderer/template.ts",
+        "tests/unit/template.test.ts"
+      ],
+      "depends_on": [
+        "T008"
+      ],
+      "tags": [
+        "template",
+        "security",
+        "theme"
+      ],
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18"
+    },
+    {
+      "id": "T010",
+      "title": "Build the default Lite theme block set",
+      "priority": 1,
+      "status": "done",
+      "phase": "theme-system",
+      "type": "implementation",
+      "details": "Create a useful default theme with editable HTML blocks for common wireframe work: hero, proof panel, metrics, card grid, table, pricing, comparison, form, settings panel, directory list, detail summary, timeline, and callout.",
+      "rationale": "The simplified model only works if the default blocks cover real prototype needs. The set should be small enough to learn but broad enough to avoid immediate custom block authoring.",
+      "steps": [
+        "Create themes/default/theme.json.",
+        "Create themes/default/shell.html or wire the default shell decision from T008.",
+        "Create themes/default/styles.css with the current visual quality bar in mind.",
+        "Add block templates for hero, metrics, card-grid, table, pricing, form, comparison, settings, directory, detail, timeline, and callout.",
+        "Make sure every block can render useful fallback or empty-state content where appropriate."
+      ],
+      "acceptance_criteria": [
+        "Each default block renders from page JSON props without requiring custom code.",
+        "The default theme is not a generic grayscale wireframe and does not look like raw Pico.",
+        "The blocks include primary action markers where appropriate.",
+        "The blocks are easy to edit as ordinary HTML files."
+      ],
+      "validation": [
+        "pnpm draftpine generate fixtures/good/lite-basic --json",
+        "pnpm draftpine eval fixtures/good/lite-basic --strict --json",
+        "pnpm test"
+      ],
+      "risks": [
+        "Too many blocks can make the theme feel like a new component library.",
+        "Too few blocks can make Lite demos look repetitive."
+      ],
+      "files": [
+        "themes/default/theme.json",
+        "themes/default/shell.html",
+        "themes/default/styles.css",
+        "themes/default/blocks/hero.html",
+        "themes/default/blocks/metrics.html",
+        "themes/default/blocks/card-grid.html",
+        "themes/default/blocks/table.html",
+        "themes/default/blocks/pricing.html",
+        "themes/default/blocks/form.html"
+      ],
+      "depends_on": [
+        "T008",
+        "T009"
+      ],
+      "tags": [
+        "theme",
+        "blocks",
+        "default"
+      ],
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18"
+    },
+    {
+      "id": "T011",
+      "title": "Create block-level marker and interaction rules",
+      "priority": 2,
+      "status": "done",
+      "phase": "theme-system",
+      "type": "implementation",
+      "details": "Define how theme metadata declares expected markers and named interactions such as primary action, theme toggle, tabs, filter, modal, empty state, error state, and success state. Keep interactions as known Draftpine capabilities, not arbitrary block scripts.",
+      "rationale": "Eval relies on markers. Editable blocks must remain flexible while still allowing Draftpine to assert that important product behaviors exist and change visible UI state.",
+      "steps": [
+        "Add optional markers, interactions, and states arrays to block metadata.",
+        "Map named interactions to runtime helpers in assets/draftpine.js.",
+        "Validate that blocks declaring a primary action marker actually render data-draftpine-action=\"primary\" in at least one default fixture.",
+        "Document supported marker names and interaction names.",
+        "Add tests for a missing required marker in a Lite block."
+      ],
+      "acceptance_criteria": [
+        "Theme blocks can declare required markers without embedding checker-specific code outside normal HTML attributes.",
+        "Unknown interaction names produce source findings.",
+        "Known interactions are backed by static runtime helpers.",
+        "Eval can still detect no-op controls."
+      ],
+      "validation": [
+        "pnpm typecheck",
+        "pnpm test",
+        "pnpm draftpine eval fixtures/good/lite-browsable --strict --json"
+      ],
+      "risks": [
+        "If metadata and rendered HTML drift, checks may become noisy.",
+        "Supporting too many interactions early can distract from the core authoring simplification."
+      ],
+      "files": [
+        "src/runtime/runtime.ts",
+        "src/eval/check.ts",
+        "src/eval/browserEval.ts",
+        "themes/default/theme.json",
+        "docs/lite.md"
+      ],
+      "depends_on": [
+        "T010"
+      ],
+      "tags": [
+        "markers",
+        "interactions",
+        "eval"
+      ],
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18"
+    },
+    {
+      "id": "T012",
+      "title": "Add a local custom block authoring flow",
+      "priority": 2,
+      "status": "done",
+      "phase": "theme-system",
+      "type": "implementation",
+      "details": "Make it easy to add a local block with one command or a documented manual flow: create blocks/timeline.html, register it in theme.json, use it from page JSON, and run eval.",
+      "rationale": "The proposed final shape depends on external HTML themes being easy to extend. If creating one block still feels like extension authoring, the simplification has failed.",
+      "steps": [
+        "Decide whether to add draftpine new block <name> or document the manual three-file flow first.",
+        "If adding a command, generate a minimal HTML partial and theme.json entry.",
+        "Add validation that points to the exact theme file when a block is missing or malformed.",
+        "Add a fixture that uses one project-local custom block.",
+        "Document when to graduate a local block into a stricter distributable theme block."
+      ],
+      "acceptance_criteria": [
+        "A user can add and use a custom local block without creating a primitive manifest, layout manifest, demo fixture, eval fixture, and README.",
+        "Missing block registration gives a clear error.",
+        "The docs show a complete custom block example.",
+        "The generated or documented block is static and eval-safe."
+      ],
+      "validation": [
+        "pnpm draftpine new block timeline",
+        "pnpm draftpine generate --json",
+        "pnpm draftpine eval --strict --json",
+        "pnpm test"
+      ],
+      "risks": [
+        "A generator command may need more CLI design than the manual flow warrants initially.",
+        "Local custom blocks without fixtures can reduce quality unless eval catches rendered issues."
+      ],
+      "files": [
+        "src/cli/index.ts",
+        "src/cli/scaffold.ts",
+        "docs/lite.md",
+        "fixtures/good/lite-custom-block"
+      ],
+      "depends_on": [
+        "T010"
+      ],
+      "tags": [
+        "custom-blocks",
+        "cli",
+        "theme"
+      ],
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18"
+    },
+    {
+      "id": "T013",
+      "title": "Render Lite pages through the static compiler",
+      "priority": 1,
+      "status": "done",
+      "phase": "compiler",
+      "type": "implementation",
+      "details": "Teach draftpine generate to render Lite pages by resolving a theme, rendering each section block with props, wrapping the result in a shell, and writing static HTML/CSS/JS assets to prototype/.",
+      "rationale": "This is the main implementation point where the simpler source model becomes real output.",
+      "steps": [
+        "Add a Lite render path in src/compiler/compiler.ts or delegate to a dedicated src/compiler/lite.ts.",
+        "Resolve theme assets relative to the workspace.",
+        "Render sections in page order.",
+        "Wrap sections with the theme shell or default shell.",
+        "Write generated HTML to route-safe output paths."
+      ],
+      "acceptance_criteria": [
+        "draftpine generate works for a single Lite page.",
+        "draftpine generate works for a multi-page Lite project.",
+        "Generated HTML includes doctype, title, description, Inter font, Pico CSS if still desired, theme CSS, Draftpine runtime JS, and Alpine only when needed.",
+        "Generated output remains static and deployable from prototype/."
+      ],
+      "validation": [
+        "pnpm draftpine generate fixtures/good/lite-basic --json",
+        "pnpm draftpine generate fixtures/good/lite-browsable --json",
+        "pnpm typecheck",
+        "pnpm test"
+      ],
+      "risks": [
+        "Rendering Lite beside current v2 may create duplicate asset bundling logic.",
+        "The shell contract must not make relative asset paths brittle."
+      ],
+      "files": [
+        "src/compiler/compiler.ts",
+        "src/compiler/html.ts",
+        "src/compiler/lite.ts",
+        "src/io/fs.ts",
+        "tests/unit/compiler.test.ts"
+      ],
+      "depends_on": [
+        "T006",
+        "T010"
+      ],
+      "tags": [
+        "compiler",
+        "rendering",
+        "lite"
+      ],
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18"
+    },
+    {
+      "id": "T014",
+      "title": "Bundle theme CSS and runtime assets for Lite output",
+      "priority": 1,
+      "status": "done",
+      "phase": "compiler",
+      "type": "implementation",
+      "details": "Make Lite output copy or bundle theme CSS and Draftpine runtime helpers into prototype/assets while preserving stable cache-busting, deterministic output, and relative paths.",
+      "rationale": "Editable themes need their styles to land in generated output without requiring users to understand the current core token bundling path.",
+      "steps": [
+        "Decide whether theme CSS is copied verbatim, bundled with base tokens, or split into multiple files.",
+        "Ensure generated pages link CSS and JS with relative paths for nested routes.",
+        "Keep theme toggle initialization and runtime helpers working.",
+        "Add manifest entries for theme CSS, runtime JS, theme name, and blocks used.",
+        "Add determinism tests for repeated generation."
+      ],
+      "acceptance_criteria": [
+        "Nested Lite routes link to assets without root-absolute paths.",
+        "Generated CSS is byte-stable across repeated generation.",
+        "The manifest identifies the active theme and blocks used.",
+        "Theme toggle works in generated Lite pages when enabled."
+      ],
+      "validation": [
+        "pnpm test -- tests/unit/compiler.test.ts",
+        "pnpm draftpine check fixtures/good/lite-browsable --json",
+        "pnpm draftpine eval fixtures/good/lite-browsable --strict --json"
+      ],
+      "risks": [
+        "Copying CSS verbatim is simple but may duplicate base styles.",
+        "Bundling CSS is cleaner but can blur the line between user-editable theme files and generated assets."
+      ],
+      "files": [
+        "src/compiler/compiler.ts",
+        "src/runtime/runtime.ts",
+        "src/io/fs.ts",
+        "themes/default/styles.css"
+      ],
+      "depends_on": [
+        "T013"
+      ],
+      "tags": [
+        "assets",
+        "css",
+        "runtime"
+      ],
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18"
+    },
+    {
+      "id": "T015",
+      "title": "Generate shared navigation and literal route links for Lite pages",
+      "priority": 2,
+      "status": "done",
+      "phase": "compiler",
+      "type": "implementation",
+      "details": "Make Lite generated pages include shared site navigation and literal anchor links for every configured public route so pages are browsable with or without JavaScript.",
+      "rationale": "The current v2 instructions and checker care about browsable routes and GitHub Pages-safe relative links. Lite should preserve this behavior centrally instead of making every theme author solve it.",
+      "steps": [
+        "Build nav data from discovered or explicit Lite pages.",
+        "Expose nav and footer data to shell.html templates.",
+        "Render literal href attributes in generated HTML.",
+        "Keep routeHref runtime helper available for interactive templates if needed.",
+        "Add broken local link tests for nested routes."
+      ],
+      "acceptance_criteria": [
+        "Every public Lite route is reachable from generated navigation or footer links.",
+        "Nested route links resolve locally and under project-path GitHub Pages deploys.",
+        "Hidden or deprecated pages do not appear in public nav.",
+        "The checker detects broken local links in Lite output."
+      ],
+      "validation": [
+        "pnpm draftpine check fixtures/good/lite-browsable --json",
+        "pnpm draftpine eval fixtures/good/lite-browsable --strict --json",
+        "pnpm test"
+      ],
+      "risks": [
+        "Letting themes fully control navigation can produce inconsistent route sets.",
+        "Central nav rendering may limit theme flexibility if the shell slot design is too rigid."
+      ],
+      "files": [
+        "src/compiler/html.ts",
+        "src/compiler/lite.ts",
+        "src/runtime/runtime.ts",
+        "themes/default/shell.html"
+      ],
+      "depends_on": [
+        "T013"
+      ],
+      "tags": [
+        "routes",
+        "navigation",
+        "github-pages"
+      ],
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18"
+    },
+    {
+      "id": "T016",
+      "title": "Update draftpine init to create Lite projects by default",
+      "priority": 2,
+      "status": "done",
+      "phase": "compiler",
+      "type": "implementation",
+      "details": "Change the starter generated by draftpine init so new projects start with pages, a default theme, and the simplified commands. Preserve current starters behind explicit flags if needed.",
+      "rationale": "A simpler final shape only matters if first run lands users in that shape. Keeping the old multi-file source model as the default would hide the improvement.",
+      "steps": [
+        "Update initProject in src/cli/scaffold.ts.",
+        "Create a single-screen Lite starter.",
+        "Create a browsable Lite starter with at least home and pricing or dashboard pages.",
+        "Copy or reference the default theme according to the chosen theme packaging strategy.",
+        "Add tests that init a temp project and run generate/check/eval."
+      ],
+      "acceptance_criteria": [
+        "pnpm draftpine init demo creates a Lite project.",
+        "The generated demo can run draftpine generate and draftpine eval --strict.",
+        "Existing starter flags either still work or fail with clear migration guidance.",
+        "The starter files are concise and teach the page/theme/block model by example."
+      ],
+      "validation": [
+        "pnpm test -- tests/integration/cli.test.ts",
+        "pnpm draftpine init /tmp/draftpine-lite-demo --force",
+        "pnpm --dir /home/agent/Draftpine draftpine /tmp/draftpine-lite-demo generate --json",
+        "pnpm --dir /home/agent/Draftpine draftpine /tmp/draftpine-lite-demo eval --strict --json"
+      ],
+      "risks": [
+        "Changing init defaults can break tests and docs that expect current v2 starter files.",
+        "Copying theme files into every project may make theme updates harder."
+      ],
+      "files": [
+        "src/cli/scaffold.ts",
+        "tests/integration/cli.test.ts",
+        "README.md",
+        "docs/lite.md"
+      ],
+      "depends_on": [
+        "T013",
+        "T014"
+      ],
+      "tags": [
+        "init",
+        "starter",
+        "cli"
+      ],
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18"
+    },
+    {
+      "id": "T017",
+      "title": "Point source and generated findings back to Lite files",
+      "priority": 1,
+      "status": "done",
+      "phase": "evaluation",
+      "type": "implementation",
+      "details": "Update check and eval findings so Lite failures identify the relevant page JSON, theme block HTML, theme CSS, or shell file. Repair actions should tell agents which source file to edit rather than pointing at generated prototype output.",
+      "rationale": "The evaluator is only useful for agents if findings map back to editable source. With external blocks, failures may come from page data, block markup, shell markup, or CSS.",
+      "steps": [
+        "Carry source provenance through Lite normalization and rendering.",
+        "Map unknown block, missing prop, unresolved marker, and missing primary action findings to page or block files.",
+        "Map CSS restriction findings to theme CSS files.",
+        "Map broken route links to page files and shell/block files where possible.",
+        "Add tests that assert finding.file for representative Lite failures."
+      ],
+      "acceptance_criteria": [
+        "Unknown block findings point to the page JSON file.",
+        "Missing block file findings point to theme.json and the expected block path.",
+        "Rendered unresolved marker findings include enough evidence to identify the section or block.",
+        "Repair actions use source file paths, not prototype paths, wherever possible."
+      ],
+      "validation": [
+        "pnpm draftpine eval fixtures/bad/lite-unknown-block --strict --json",
+        "pnpm test:corpus",
+        "pnpm test"
+      ],
+      "risks": [
+        "Perfect source mapping from rendered DOM back to template lines may be too expensive initially.",
+        "Weak provenance would make Lite feel simpler to author but harder to debug."
+      ],
+      "files": [
+        "src/domain/findings.ts",
+        "src/eval/check.ts",
+        "src/eval/browserEval.ts",
+        "src/compiler/lite.ts",
+        "tests/integration/fixtures.test.ts"
+      ],
+      "depends_on": [
+        "T013"
+      ],
+      "tags": [
+        "eval",
+        "findings",
+        "repair"
+      ],
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18"
+    },
+    {
+      "id": "T018",
+      "title": "Extend static checks for theme safety",
+      "priority": 2,
+      "status": "done",
+      "phase": "evaluation",
+      "type": "implementation",
+      "details": "Add static checks for theme block and theme CSS hazards: root-absolute local paths, script tags in blocks, inline event handlers, unresolved template syntax, width: 100vw, negative margins, large fixed widths, unlabeled controls where detectable, and disallowed remote fetches.",
+      "rationale": "Editable HTML themes are powerful and approachable, but they create new failure modes. Static checks should catch common hazards before browser eval.",
+      "steps": [
+        "Scan shell.html and block HTML files during check.",
+        "Disallow or warn on script tags and inline on* handlers in theme blocks.",
+        "Apply existing CSS restrictions to theme CSS.",
+        "Check for root-absolute href/src in theme files.",
+        "Add bad fixtures for unsafe block HTML and unsafe theme CSS."
+      ],
+      "acceptance_criteria": [
+        "Theme CSS restrictions run against themes/default/styles.css and project themes.",
+        "Block files with script tags fail unless an explicit exception mechanism is designed.",
+        "Root-absolute local paths in shell or blocks fail.",
+        "Checks remain deterministic and fast."
+      ],
+      "validation": [
+        "pnpm draftpine check fixtures/bad/lite-unsafe-theme --json",
+        "pnpm test:corpus",
+        "pnpm test"
+      ],
+      "risks": [
+        "Overly broad regex checks can block harmless HTML.",
+        "Overly permissive checks can let themes introduce runtime failures."
+      ],
+      "files": [
+        "src/eval/check.ts",
+        "fixtures/bad/lite-unsafe-theme",
+        "tests/integration/fixtures.test.ts"
+      ],
+      "depends_on": [
+        "T008",
+        "T013"
+      ],
+      "tags": [
+        "theme",
+        "safety",
+        "check"
+      ],
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18"
+    },
+    {
+      "id": "T019",
+      "title": "Adapt browser eval to Lite screenshots and interactions",
+      "priority": 2,
+      "status": "done",
+      "phase": "evaluation",
+      "type": "implementation",
+      "details": "Make strict eval exercise Lite-generated pages across configured viewports and confirm theme toggle, primary actions, tabs, filters, modals, and other supported interactions behave visibly.",
+      "rationale": "Lite blocks should stay editable, but the generated output must still pass the same hard gates that make Draftpine valuable.",
+      "steps": [
+        "Confirm current browser eval can run unmodified on Lite output.",
+        "Add Lite fixtures with theme toggle and at least one named interaction.",
+        "Add or adapt interaction checks for tabs, filters, and modals if declared in page or block metadata.",
+        "Ensure screenshots are named by Lite page id and viewport.",
+        "Review mobile screenshots for header/nav density and first-viewport composition."
+      ],
+      "acceptance_criteria": [
+        "Strict eval passes for good Lite fixtures.",
+        "Strict eval fails for a Lite fixture with a no-op declared interaction.",
+        "Screenshots are written to reports/screenshots.",
+        "The report summary counts Lite routes and screenshots correctly."
+      ],
+      "validation": [
+        "pnpm draftpine eval fixtures/good/lite-browsable --strict --json",
+        "pnpm draftpine eval fixtures/bad/lite-noop-interaction --strict --json",
+        "pnpm test"
+      ],
+      "risks": [
+        "Interaction checks can become brittle if they assume too much about theme markup.",
+        "Not checking interactions would let decorative controls pass."
+      ],
+      "files": [
+        "src/eval/browserEval.ts",
+        "src/runtime/runtime.ts",
+        "fixtures/good/lite-browsable",
+        "fixtures/bad/lite-noop-interaction"
+      ],
+      "depends_on": [
+        "T011",
+        "T013"
+      ],
+      "tags": [
+        "browser-eval",
+        "interactions",
+        "screenshots"
+      ],
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18"
+    },
+    {
+      "id": "T020",
+      "title": "Update report output for Lite source context",
+      "priority": 3,
+      "status": "done",
+      "phase": "evaluation",
+      "type": "implementation",
+      "details": "Enhance reports/latest.json and reports/latest.html so Lite runs show pages, theme name, blocks used, source files, screenshots, and repair actions in a way that matches the simpler mental model.",
+      "rationale": "Reports are agent-facing. If they continue to frame everything as primitives and layouts, they will undercut the simplification.",
+      "steps": [
+        "Add Lite-specific artifact metadata to the compile manifest.",
+        "Update report HTML labels from primitives/layouts to pages/blocks where appropriate.",
+        "Include the theme name and source files in the report summary.",
+        "Keep current report compatibility for existing v2 projects.",
+        "Add snapshot or structural tests for report output if existing patterns allow."
+      ],
+      "acceptance_criteria": [
+        "Lite report JSON includes route count, theme, blocks used, screenshots, and findings.",
+        "Lite report HTML uses page/block language.",
+        "Current v2 report output does not regress.",
+        "Manual screenshot review remains easy from reports/latest.html."
+      ],
+      "validation": [
+        "pnpm draftpine eval fixtures/good/lite-browsable --strict --json",
+        "pnpm test"
+      ],
+      "risks": [
+        "Adding report branches can make output harder to maintain.",
+        "Over-customizing reports for Lite may duplicate too much current report code."
+      ],
+      "files": [
+        "src/report/format.ts",
+        "src/report/html.ts",
+        "src/compiler/compiler.ts",
+        "src/domain/types.ts"
+      ],
+      "depends_on": [
+        "T017",
+        "T019"
+      ],
+      "tags": [
+        "reports",
+        "agent-feedback",
+        "lite"
+      ],
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18"
+    },
+    {
+      "id": "T021",
+      "title": "Build a v2 recipe/content to Lite page migration command",
+      "priority": 3,
+      "status": "done",
+      "phase": "migration",
+      "type": "migration",
+      "details": "Add a migration path that converts simple current v2 routes, recipes, and content into Lite page JSON files where possible. The command should preserve generated behavior enough for users to continue iterating, while flagging routes that need manual cleanup.\n\nImplementation note: Closed as not implemented by design: the v3-only rewrite removes migration commands and documents manual re-authoring instead.",
+      "rationale": "The current repository and fixtures use recipes and content. A migration command lowers the cost of adopting the simpler model and proves that Lite can represent real existing examples.",
+      "steps": [
+        "Design draftpine migrate lite or extend migrate v1 with a v2-to-lite mode.",
+        "Map each route to a page file.",
+        "Map recipe sections to block names where there is a clear equivalent.",
+        "Inline content references into section props.",
+        "Emit warnings for custom primitives, layouts, or slots that cannot be mapped automatically."
+      ],
+      "acceptance_criteria": [
+        "A simple home/pricing/dashboard v2 project migrates to Lite pages.",
+        "The migrated project can generate and pass strict eval or produce clear manual follow-up findings.",
+        "The migration command does not mutate the original project unless explicitly requested.",
+        "Migration output includes a summary of automatic mappings and manual gaps."
+      ],
+      "validation": [
+        "pnpm draftpine migrate lite fixtures/good/basic --out /tmp/draftpine-lite-migrated",
+        "pnpm --dir /home/agent/Draftpine draftpine /tmp/draftpine-lite-migrated eval --strict --json",
+        "pnpm test"
+      ],
+      "risks": [
+        "Automatic migration may imply stronger compatibility than actually exists.",
+        "Mapping old primitives to new blocks can become a long tail."
+      ],
+      "files": [
+        "src/cli/index.ts",
+        "src/cli/migrate.ts",
+        "tests/integration/cli.test.ts",
+        "docs/lite.md"
+      ],
+      "depends_on": [
+        "T013",
+        "T016"
+      ],
+      "tags": [
+        "migration",
+        "compatibility",
+        "cli"
+      ],
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18"
+    },
+    {
+      "id": "T022",
+      "title": "Refresh README quick start around Lite",
+      "priority": 2,
+      "status": "done",
+      "phase": "docs",
+      "type": "documentation",
+      "details": "Rewrite the README quick start so it introduces Draftpine as a themeable static prototype compiler with eval. Show the simplest Lite init/generate/eval loop and point advanced users to current v2 extension concepts only after the default path is clear.",
+      "rationale": "README.md is currently accurate for v2 but not optimized for the simpler final shape. It should teach the product through the new default file model.",
+      "steps": [
+        "Update the opening sentence.",
+        "Replace or augment the quick start with Lite commands.",
+        "Show the files created by init.",
+        "Explain that generated prototypes remain static in prototype/.",
+        "Link to docs/lite.md, docs/authoring.md, and SPECIFICATION.md."
+      ],
+      "acceptance_criteria": [
+        "A new user can follow README.md without learning recipes or primitives first.",
+        "The README states what files to edit.",
+        "The README states which checks to run before sharing output.",
+        "Advanced extension docs remain discoverable but secondary."
+      ],
+      "validation": [
+        "pnpm typecheck",
+        "pnpm test"
+      ],
+      "risks": [
+        "Docs can get ahead of implementation if this lands too early.",
+        "Removing v2 details entirely could confuse current users."
+      ],
+      "files": [
+        "README.md",
+        "docs/lite.md",
+        "docs/authoring.md"
+      ],
+      "depends_on": [
+        "T016"
+      ],
+      "tags": [
+        "readme",
+        "docs",
+        "onboarding"
+      ],
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18"
+    },
+    {
+      "id": "T023",
+      "title": "Update architecture and specification documents",
+      "priority": 3,
+      "status": "done",
+      "phase": "docs",
+      "type": "documentation",
+      "details": "Revise docs/architecture.md and SPECIFICATION.md so the bounded contexts include Lite pages and editable themes. Keep the deeper primitive/layout model documented as advanced or legacy depending on the compatibility decision.",
+      "rationale": "The spec currently describes the v2 compiler/evaluator model. The simpler final shape should be reflected in the durable product contract, not only in README examples.",
+      "steps": [
+        "Add a Lite source authoring section.",
+        "Add a theme/block contract section.",
+        "Clarify compiler-owned output for Lite.",
+        "Clarify extension levels: local block, theme pack, advanced primitive/layout.",
+        "Update migration notes that mention scripts/check.py and scripts/visual_qa.py if needed."
+      ],
+      "acceptance_criteria": [
+        "Architecture docs mention pages, themes, blocks, compiler, runtime, eval, and reports.",
+        "Specification docs do not imply recipes/content are the only source model.",
+        "The advanced model is clearly separated from the default model.",
+        "Stale Python references are either removed from active docs or explicitly marked as migration history."
+      ],
+      "validation": [
+        "rg -n \"scripts/check.py|scripts/visual_qa.py\" SPECIFICATION.md docs README.md AGENTS.md",
+        "pnpm typecheck"
+      ],
+      "risks": [
+        "The spec is long; partial edits can create contradictions.",
+        "Over-documenting implementation details can make future simplification harder."
+      ],
+      "files": [
+        "docs/architecture.md",
+        "SPECIFICATION.md",
+        "docs/authoring.md"
+      ],
+      "depends_on": [
+        "T003",
+        "T016"
+      ],
+      "tags": [
+        "spec",
+        "architecture",
+        "docs"
+      ],
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18"
+    },
+    {
+      "id": "T024",
+      "title": "Add end-to-end release gate for Lite",
+      "priority": 2,
+      "status": "done",
+      "phase": "release",
+      "type": "test",
+      "details": "Create a single command or documented checklist that proves Lite is ready: typecheck, tests, corpus, generate/eval for good Lite fixtures, expected failures for bad Lite fixtures, and screenshot generation.",
+      "rationale": "Lite changes span schema, compiler, theme files, runtime, eval, and docs. A dedicated release gate prevents a passing unit test suite from hiding broken prototype output.",
+      "steps": [
+        "Add a package script such as test:lite or check:lite.",
+        "Run good Lite fixtures through generate, check, and strict eval.",
+        "Run bad Lite fixtures and assert expected finding ids.",
+        "Ensure reports/screenshots are produced for at least one Lite browsable fixture.",
+        "Document the release gate in README.md or docs/lite.md."
+      ],
+      "acceptance_criteria": [
+        "pnpm test:lite or equivalent exits 0 when Lite is healthy.",
+        "The release gate covers both source validation and rendered browser eval.",
+        "The release gate can run locally without external services.",
+        "Failures are actionable from console output and reports/latest.html."
+      ],
+      "validation": [
+        "pnpm test:lite",
+        "pnpm typecheck",
+        "pnpm test"
+      ],
+      "risks": [
+        "A heavy release gate can slow iteration if it runs too many browser tests.",
+        "A light gate can miss the visual/layout failures Lite is meant to catch."
+      ],
+      "files": [
+        "package.json",
+        "tests/integration/fixtures.test.ts",
+        "docs/lite.md"
+      ],
+      "depends_on": [
+        "T017",
+        "T018",
+        "T019"
+      ],
+      "tags": [
+        "ci",
+        "release",
+        "tests"
+      ],
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18"
+    },
+    {
+      "id": "T025",
+      "title": "Decide whether to hide, deprecate, or keep primitives and layouts in docs",
+      "priority": 4,
+      "status": "done",
+      "phase": "release",
+      "type": "design",
+      "details": "After Lite works end to end, make a deliberate documentation and product decision about the current primitive/layout system. Options are to keep it as advanced internals, keep it as a public extension API, deprecate it in favor of themes, or split it into a separate advanced guide.\n\nImplementation note: Resolved by removing primitive/layout commands and docs from the public v3 workflow.",
+      "rationale": "The simpler final shape can be undermined if docs continue to present every internal mechanism as a default concept. But existing code and tests may still benefit from the stricter primitive/layout machinery.",
+      "steps": [
+        "Review current primitive/layout usage after Lite fixtures are passing.",
+        "Identify which concepts are still necessary in the public API.",
+        "Choose a docs hierarchy that makes Lite the default and advanced authoring optional.",
+        "Update generated catalog docs if needed.",
+        "Open follow-up tasks for any actual deprecations."
+      ],
+      "acceptance_criteria": [
+        "Docs clearly distinguish default Lite authoring from advanced extension authoring.",
+        "No first-run guide requires users to understand primitive or layout manifests.",
+        "Existing public commands are either documented, hidden, or intentionally deprecated.",
+        "The decision is recorded in the decision log or specification."
+      ],
+      "validation": [
+        "pnpm draftpine docs",
+        "pnpm typecheck",
+        "pnpm test"
+      ],
+      "risks": [
+        "Keeping everything public may preserve flexibility but weaken positioning.",
+        "Deprecating too aggressively may discard useful work from v2."
+      ],
+      "files": [
+        "docs/generated/catalog.md",
+        "docs/authoring.md",
+        "docs/lite.md",
+        "SPECIFICATION.md"
+      ],
+      "depends_on": [
+        "T024"
+      ],
+      "tags": [
+        "advanced-api",
+        "docs",
+        "deprecation"
+      ],
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18"
+    }
+  ]
+}

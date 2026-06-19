@@ -1,1 +1,0 @@
-{"schemaVersion":"2.0","name":"siteShell","namespace":"core","type":"primitive","description":"Compiler-owned site shell marker.","slots":{},"variants":["default"],"layouts":["core.stack"],"interactions":["theme"],"states":["default"],"accessibility":{},"responsive":{"mobile":"stack"}}

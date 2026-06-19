@@ -1,0 +1,352 @@
+{
+  "schemaVersion": "3.0",
+  "name": "Default",
+  "description": "Default Draftpine v3 theme.",
+  "shell": "shell.html",
+  "styles": "styles.css",
+  "supportsDarkMode": true,
+  "requiredRuntime": [
+    "theme",
+    "filter",
+    "modal",
+    "tabs"
+  ],
+  "blocks": {
+    "hero": {
+      "file": "blocks/hero.html",
+      "description": "Page hero with proof and primary action.",
+      "requires": [
+        "headline"
+      ],
+      "markers": [
+        "primaryAction"
+      ]
+    },
+    "proof": {
+      "file": "blocks/proof.html",
+      "description": "Product proof panel.",
+      "requires": [
+        "title"
+      ]
+    },
+    "metrics": {
+      "file": "blocks/metrics.html",
+      "description": "Metric strip.",
+      "requires": [
+        "items"
+      ]
+    },
+    "card-grid": {
+      "file": "blocks/card-grid.html",
+      "description": "Repeated cards.",
+      "requires": [
+        "items"
+      ]
+    },
+    "section-header": {
+      "file": "blocks/section-header.html",
+      "description": "Standalone section heading with optional action.",
+      "requires": [
+        "title"
+      ]
+    },
+    "banner": {
+      "file": "blocks/banner.html",
+      "description": "Slim announcement banner.",
+      "requires": [
+        "body"
+      ]
+    },
+    "logo-cloud": {
+      "file": "blocks/logo-cloud.html",
+      "description": "Compact customer or integration logo row.",
+      "requires": [
+        "logos"
+      ]
+    },
+    "social-proof": {
+      "file": "blocks/social-proof.html",
+      "description": "Public proof section with compact stats.",
+      "requires": [
+        "title",
+        "stats"
+      ]
+    },
+    "feature-icons": {
+      "file": "blocks/feature-icons.html",
+      "description": "Icon-led feature cards.",
+      "requires": [
+        "items"
+      ]
+    },
+    "feature-tabs": {
+      "file": "blocks/feature-tabs.html",
+      "description": "Tabbed feature narrative for public pages.",
+      "requires": [
+        "tabs"
+      ],
+      "interactions": [
+        "tabs"
+      ]
+    },
+    "feature-showcase": {
+      "file": "blocks/feature-showcase.html",
+      "description": "Two-column feature narrative with product artifact.",
+      "requires": [
+        "title",
+        "rows"
+      ]
+    },
+    "testimonial": {
+      "file": "blocks/testimonial.html",
+      "description": "Customer quote or reviewer proof.",
+      "requires": [
+        "quote",
+        "author"
+      ]
+    },
+    "testimonial-grid": {
+      "file": "blocks/testimonial-grid.html",
+      "description": "Multiple public-facing customer quotes.",
+      "requires": [
+        "items"
+      ]
+    },
+    "faq": {
+      "file": "blocks/faq.html",
+      "description": "Accordion FAQ section.",
+      "requires": [
+        "items"
+      ]
+    },
+    "newsletter": {
+      "file": "blocks/newsletter.html",
+      "description": "Email capture or update signup CTA.",
+      "requires": [
+        "title"
+      ],
+      "markers": [
+        "primaryAction"
+      ]
+    },
+    "contact": {
+      "file": "blocks/contact.html",
+      "description": "Public contact section with form and contact details.",
+      "requires": [
+        "fields"
+      ],
+      "markers": [
+        "primaryAction"
+      ],
+      "accessibility": {
+        "requiresLabels": true
+      }
+    },
+    "team": {
+      "file": "blocks/team.html",
+      "description": "People grid for about or company pages.",
+      "requires": [
+        "people"
+      ]
+    },
+    "values": {
+      "file": "blocks/values.html",
+      "description": "Values or principles grid.",
+      "requires": [
+        "items"
+      ]
+    },
+    "resource-list": {
+      "file": "blocks/resource-list.html",
+      "description": "Public article, guide, or resource cards.",
+      "requires": [
+        "items"
+      ]
+    },
+    "blog-list": {
+      "file": "blocks/blog-list.html",
+      "description": "Public blog or editorial card list.",
+      "requires": [
+        "posts"
+      ]
+    },
+    "article": {
+      "file": "blocks/article.html",
+      "description": "Long-form public article content.",
+      "requires": [
+        "title"
+      ]
+    },
+    "author-bio": {
+      "file": "blocks/author-bio.html",
+      "description": "Author or contributor biography strip.",
+      "requires": [
+        "name"
+      ]
+    },
+    "steps": {
+      "file": "blocks/steps.html",
+      "description": "Process or onboarding steps.",
+      "requires": [
+        "items"
+      ]
+    },
+    "case-study": {
+      "file": "blocks/case-study.html",
+      "description": "Featured public case study with result metrics.",
+      "requires": [
+        "title"
+      ]
+    },
+    "case-study-grid": {
+      "file": "blocks/case-study-grid.html",
+      "description": "Grid of public customer story summaries.",
+      "requires": [
+        "items"
+      ]
+    },
+    "press-logos": {
+      "file": "blocks/press-logos.html",
+      "description": "Press mentions or short external proof quotes.",
+      "requires": [
+        "items"
+      ]
+    },
+    "cta-split": {
+      "file": "blocks/cta-split.html",
+      "description": "Split call-to-action band with primary and secondary actions.",
+      "requires": [
+        "title"
+      ],
+      "markers": [
+        "primaryAction"
+      ]
+    },
+    "careers": {
+      "file": "blocks/careers.html",
+      "description": "Careers intro with company perks.",
+      "requires": [
+        "perks"
+      ]
+    },
+    "job-list": {
+      "file": "blocks/job-list.html",
+      "description": "Public job listing rows.",
+      "requires": [
+        "jobs"
+      ]
+    },
+    "changelog": {
+      "file": "blocks/changelog.html",
+      "description": "Public changelog or release notes list.",
+      "requires": [
+        "items"
+      ]
+    },
+    "locations": {
+      "file": "blocks/locations.html",
+      "description": "Office, event, or service area cards.",
+      "requires": [
+        "locations"
+      ]
+    },
+    "integrations-grid": {
+      "file": "blocks/integrations-grid.html",
+      "description": "Public integrations or ecosystem grid.",
+      "requires": [
+        "items"
+      ]
+    },
+    "rich-text": {
+      "file": "blocks/rich-text.html",
+      "description": "Public legal, terms, or simple content body.",
+      "requires": [
+        "title"
+      ]
+    },
+    "not-found": {
+      "file": "blocks/not-found.html",
+      "description": "Public 404 or empty route page.",
+      "requires": [
+        "title"
+      ],
+      "markers": [
+        "primaryAction"
+      ]
+    },
+    "table": {
+      "file": "blocks/table.html",
+      "description": "Static data table.",
+      "requires": [
+        "columns",
+        "rows"
+      ]
+    },
+    "pricing": {
+      "file": "blocks/pricing.html",
+      "description": "Pricing cards.",
+      "requires": [
+        "plans"
+      ]
+    },
+    "comparison": {
+      "file": "blocks/comparison.html",
+      "description": "Comparison table.",
+      "requires": [
+        "columns",
+        "rows"
+      ]
+    },
+    "form": {
+      "file": "blocks/form.html",
+      "description": "Static form mockup.",
+      "requires": [
+        "fields"
+      ],
+      "markers": [
+        "primaryAction"
+      ]
+    },
+    "settings": {
+      "file": "blocks/settings.html",
+      "description": "Settings groups.",
+      "requires": [
+        "groups"
+      ]
+    },
+    "directory": {
+      "file": "blocks/directory.html",
+      "description": "Filterable directory.",
+      "requires": [
+        "items"
+      ],
+      "states": [
+        "empty"
+      ],
+      "interactions": [
+        "filter"
+      ]
+    },
+    "detail": {
+      "file": "blocks/detail.html",
+      "description": "Detail summary.",
+      "requires": [
+        "items"
+      ]
+    },
+    "timeline": {
+      "file": "blocks/timeline.html",
+      "description": "Timeline feed.",
+      "requires": [
+        "items"
+      ]
+    },
+    "callout": {
+      "file": "blocks/callout.html",
+      "description": "Callout or CTA.",
+      "requires": [
+        "title"
+      ]
+    }
+  }
+}

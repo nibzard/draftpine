@@ -1,0 +1,86 @@
+{
+  "schemaVersion": "3.0",
+  "id": "resources",
+  "path": "/resources/",
+  "title": "Resources",
+  "type": "resources",
+  "description": "Public resources page for Draftpine.",
+  "primaryAction": {
+    "label": "Join updates",
+    "href": "#"
+  },
+  "priority": 5,
+  "status": "ready",
+  "sections": [
+    {
+      "id": "hero",
+      "block": "hero",
+      "props": {
+        "eyebrow": "Resources",
+        "headline": "Content blocks for public website systems.",
+        "body": "Use resource, article, changelog, and author blocks to model blogs, guides, announcements, and editorial pages.",
+        "primaryAction": "Join updates",
+        "primaryHref": "#",
+        "secondaryAction": "Back home",
+        "secondaryHref": "../"
+      }
+    },
+    {
+      "id": "blog-list",
+      "block": "blog-list",
+      "props": {
+        "title": "Latest resources",
+        "body": "Blog cards help teams review content hubs and editorial navigation before final copy is ready.",
+        "posts": [
+          { "category": "Guide", "title": "Reviewing a landing page wireframe", "excerpt": "Check first-viewport promise, proof, conversion path, and FAQ coverage.", "action": "Read post", "href": "#" },
+          { "category": "Playbook", "title": "Pricing page questions", "excerpt": "Use plans, comparison rows, social proof, and contact handoff to remove friction.", "action": "Read post", "href": "#" },
+          { "category": "Template", "title": "About page content model", "excerpt": "Structure values, team, careers, rich text, and resources as reusable sections.", "action": "Read post", "href": "#" }
+        ]
+      }
+    },
+    {
+      "id": "article",
+      "block": "article",
+      "props": {
+        "eyebrow": "Featured article",
+        "title": "A public prototype is a content decision tool",
+        "dek": "The goal is not to simulate production. The goal is to make the website story visible enough to critique.",
+        "paragraphs": [
+          "Public websites depend on hierarchy, proof, and trust. Draftpine blocks make those parts explicit as static sections.",
+          "Because the output is plain HTML, every route can be reviewed locally, captured in screenshots, and revised without framework setup."
+        ]
+      }
+    },
+    {
+      "id": "author",
+      "block": "author-bio",
+      "props": {
+        "initials": "DP",
+        "name": "Draftpine editorial",
+        "bio": "Notes and examples for building compact public website prototypes with static blocks."
+      }
+    },
+    {
+      "id": "changelog",
+      "block": "changelog",
+      "props": {
+        "title": "Changelog",
+        "body": "Use changelog blocks for release notes, product updates, or public roadmap summaries.",
+        "items": [
+          { "date": "2026-06-18", "title": "Website block catalog", "body": "Added public blocks for proof, content, careers, case studies, and resources." },
+          { "date": "2026-06-17", "title": "Compact theme pass", "body": "Aligned controls, borders, typography, and navigation with the public-site direction." }
+        ]
+      }
+    },
+    {
+      "id": "newsletter",
+      "block": "newsletter",
+      "props": {
+        "title": "Get public-site prototyping notes",
+        "body": "Model newsletter capture without wiring a backend.",
+        "placeholder": "editor@example.com",
+        "action": "Join updates"
+      }
+    }
+  ]
+}

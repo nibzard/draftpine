@@ -1,7 +1,0 @@
-[data-primitive="core.finalCta"] .dp-panel {
-  max-width: var(--dp-container-md);
-  background: var(--dp-surface-card);
-  border-color: var(--dp-line);
-  border-radius: var(--dp-radius-xl);
-  padding: var(--dp-space-5);
-}

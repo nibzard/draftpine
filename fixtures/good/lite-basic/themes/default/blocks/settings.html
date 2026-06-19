@@ -1,0 +1,9 @@
+<section class="dp-section" data-block="settings">
+  <div class="dp-container dp-stack">
+    <h2>{{title}}</h2>
+    {{#groups}}<article class="dp-panel">
+      <h3>{{title}}</h3>
+      <ul class="dp-settings-list">{{#items}}<li><span>{{label}}</span><strong>{{value}}</strong></li>{{/items}}</ul>
+    </article>{{/groups}}
+  </div>
+</section>

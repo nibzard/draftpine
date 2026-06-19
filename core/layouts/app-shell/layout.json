@@ -1,9 +1,0 @@
-{
-  "schemaVersion": "2.0",
-  "name": "appShell",
-  "namespace": "core",
-  "description": "Operational app shell layout for dashboard-like pages.",
-  "parameters": {},
-  "responsive": { "mobile": "stack" },
-  "overflow": "forbidden"
-}

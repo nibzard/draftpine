@@ -1,1 +1,0 @@
-{"schemaVersion":"2.0","name":"themeToggle","namespace":"core","type":"primitive","description":"Theme toggle primitive used by the shell.","slots":{},"variants":["default"],"layouts":["core.cluster"],"interactions":["theme"],"states":["default"],"accessibility":{},"responsive":{"mobile":"wrap"}}

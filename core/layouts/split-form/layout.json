@@ -1,9 +1,0 @@
-{
-  "schemaVersion": "2.0",
-  "name": "splitForm",
-  "namespace": "core",
-  "description": "Form or intake layout with a summary rail.",
-  "parameters": {},
-  "responsive": { "mobile": "stack" },
-  "overflow": "forbidden"
-}

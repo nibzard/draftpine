@@ -1,0 +1,69 @@
+{
+  "schemaVersion": "3.0",
+  "id": "pricing",
+  "path": "/",
+  "title": "Pricing",
+  "type": "pricing",
+  "primaryAction": {
+    "label": "Start with Pro",
+    "href": "#"
+  },
+  "priority": 2,
+  "status": "ready",
+  "sections": [
+    {
+      "id": "hero",
+      "block": "hero",
+      "props": {
+        "eyebrow": "Duplicate Route",
+        "headline": "Choose a focused prototype path.",
+        "body": "Pricing content is fake but shaped like a real decision screen.",
+        "primaryAction": "Start with Pro",
+        "primaryHref": "#"
+      }
+    },
+    {
+      "id": "plans",
+      "block": "pricing",
+      "props": {
+        "plans": [
+          {
+            "name": "Explore",
+            "price": "$0",
+            "description": "One disposable screen.",
+            "action": "Start",
+            "href": "#",
+            "features": [
+              "Single page",
+              "Default theme"
+            ]
+          },
+          {
+            "name": "Pro",
+            "price": "$29",
+            "description": "Linked prototype flows.",
+            "action": "Start with Pro",
+            "href": "#",
+            "features": [
+              "Multiple pages",
+              "Strict eval",
+              "Reports"
+            ]
+          },
+          {
+            "name": "Team",
+            "price": "$99",
+            "description": "Shared theme iteration.",
+            "action": "Contact",
+            "href": "#",
+            "features": [
+              "Custom blocks",
+              "Theme CSS",
+              "Review reports"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

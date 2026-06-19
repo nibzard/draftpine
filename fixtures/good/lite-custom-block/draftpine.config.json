@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "3.0",
+  "project": {
+    "name": "Lite Custom Block",
+    "description": "Static Draftpine v3 prototype."
+  },
+  "source": {
+    "mode": "pages",
+    "pagesDir": "pages",
+    "theme": "default",
+    "themesDir": "themes"
+  },
+  "output": {
+    "dir": "prototype",
+    "clean": true,
+    "assetsDir": "assets"
+  },
+  "theme": {
+    "defaultMode": "light",
+    "allowThemeToggle": true
+  },
+  "eval": {
+    "required": true,
+    "strict": true,
+    "viewports": [
+      "mobile",
+      "desktop"
+    ],
+    "aiReview": "off"
+  }
+}

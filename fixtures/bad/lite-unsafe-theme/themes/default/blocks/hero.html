@@ -1,0 +1,37 @@
+<section class="dp-section dp-hero" data-block="hero">
+  <script>window.__draftpineUnsafe = true;</script>
+  <div class="dp-container dp-hero-grid">
+    <div class="dp-hero-copy">
+      {{#eyebrow}}<p class="dp-eyebrow">{{eyebrow}}</p>{{/eyebrow}}
+      <h1>{{headline}}</h1>
+      {{#body}}<p>{{body}}</p>{{/body}}
+      <div class="dp-actions">
+        {{#primaryAction}}<a href="{{primaryHref}}" role="button" data-draftpine-action="primary">{{primaryAction}}</a>{{/primaryAction}}
+        {{#secondaryAction}}<a href="{{secondaryHref}}" role="button" class="secondary">{{secondaryAction}}</a>{{/secondaryAction}}
+      </div>
+    </div>
+    <aside class="dp-artifact" aria-label="Prototype artifact">
+      <div class="dp-artifact-header">
+        <span>Preview</span>
+        <span class="dp-window-dots" aria-hidden="true"><span></span><span></span><span></span></span>
+      </div>
+      <div class="dp-artifact-body">
+        <div class="dp-artifact-row">
+          <span class="dp-badge dp-badge-live">Ready</span>
+          <strong>{{headline}}</strong>
+          <span class="dp-badge">v3</span>
+        </div>
+        {{#body}}<div class="dp-artifact-row">
+          <span>Intent</span>
+          <code>{{body}}</code>
+          <span class="dp-badge">source</span>
+        </div>{{/body}}
+        {{#primaryAction}}<div class="dp-artifact-row">
+          <span>Action</span>
+          <code>{{primaryAction}}</code>
+          <span class="dp-badge">primary</span>
+        </div>{{/primaryAction}}
+      </div>
+    </aside>
+  </div>
+</section>

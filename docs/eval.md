@@ -8,7 +8,8 @@
 - mobile and desktop screenshots
 - horizontal overflow checks
 - H1, primary action, and control label checks
-- route type composition checks
+- theme toggle behavior checks
+- unresolved template marker checks
 
 ## Status Semantics
 
@@ -22,6 +23,8 @@ Every JSON report also includes:
 
 - `deterministicStatus`: `pass` or `fail`
 - `manualReviewRequired`: boolean
+- `sourceMode`: `pages`
+- `activeTheme`: the selected theme id
 
 Use `deterministicStatus` when automation needs to know whether hard gates passed.
 
