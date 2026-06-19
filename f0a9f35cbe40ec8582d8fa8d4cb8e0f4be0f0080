@@ -1,0 +1,7 @@
+# Context
+
+## Background
+The v3 rewrite kept generic agent workflow instructions but dropped the explicit copy-paste happy path for creating a prototype from one brief.
+
+## Why This Way
+README now exposes the one-prompt path for users and AGENTS.md gives coding agents the matching execution instructions: edit source files, generate, check, run strict eval, inspect screenshots, and fix errors.
